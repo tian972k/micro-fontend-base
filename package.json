@@ -1,0 +1,26 @@
+{
+    "name": "app-base",
+    "private": true,
+    "scripts": {
+        "build": "turbo run build",
+        "start": "turbo run start",
+        "dev": "turbo run dev",
+        "dev:shell": "turbo run dev --filter=shell",
+        "dev:a": "turbo run dev --filter=app-a",
+        "dev:b": "turbo run dev --filter=app-b",
+        "lint": "turbo run lint",
+        "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+        "clean": "turbo run clean && rm -rf node_modules",
+        "create-app": "node scripts/create-app.js"
+    },
+    "devDependencies": {
+        "turbo": "latest",
+        "prettier": "^3.0.0",
+        "eslint": "^8.0.0",
+        "typescript": "^5.0.0"
+    },
+    "packageManager": "pnpm@8.15.0",
+    "engines": {
+        "node": ">=18"
+    }
+}
