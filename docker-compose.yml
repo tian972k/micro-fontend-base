@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  shell:
+    build:
+      context: .
+      dockerfile: apps/shell/Dockerfile
+    ports:
+      - "8000:3000"
+    environment:
+      - NODE_ENV=development
+      - MFE_APP_A_URL=http://localhost:8001
+      - MFE_APP_B_URL=http://localhost:8002
+    depends_on:
+      - app-a
+      - app-b
+
+  app-a:
+    build:
+      context: .
+      dockerfile: Dockerfile.mfe
+      args:
+        APP_NAME: app-a
+    ports:
+      - "8001:80"
+
+  app-b:
+    build:
+      context: .
+      dockerfile: Dockerfile.mfe
+      args:
+        APP_NAME: app-b
+    ports:
+      - "8002:80"

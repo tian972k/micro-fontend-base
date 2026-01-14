@@ -10,14 +10,26 @@
         "dev:b": "turbo run dev --filter=app-b",
         "lint": "turbo run lint",
         "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+        "prepare": "husky install",
         "clean": "turbo run clean && rm -rf node_modules",
         "create-app": "node scripts/create-app.js"
+    },
+    "lint-staged": {
+        "*.{js,jsx,ts,tsx}": [
+            "eslint --fix",
+            "prettier --write"
+        ],
+        "*.{md,json,css}": [
+            "prettier --write"
+        ]
     },
     "devDependencies": {
         "turbo": "latest",
         "prettier": "^3.0.0",
         "eslint": "^8.0.0",
-        "typescript": "^5.0.0"
+        "typescript": "^5.0.0",
+        "husky": "^8.0.0",
+        "lint-staged": "^13.0.0"
     },
     "packageManager": "pnpm@8.15.0",
     "engines": {

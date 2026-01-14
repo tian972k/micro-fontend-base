@@ -1,20 +1,35 @@
 import type { MicroApp } from "./types";
 
-export interface MicroAppEntry {
-    name: string;
-    url: string;
-}
-
+/**
+ * Central registry for managing Micro-App instances.
+ * Acts as a wrapper around the global `window.MFE` object.
+ */
 export class AppRegistry {
-    private static apps: Record<string, string> = {
-        // Default fallback or read from initial injection
-    };
-
-    static register(name: string, app: MicroApp) {
+    /**
+     * Registers a Micro-App instance globally.
+     */
+    static register(name: string, app: MicroApp): void {
         if (typeof window !== "undefined") {
             window.MFE = window.MFE || {};
             window.MFE[name] = app;
-            console.log(`[AppRegistry] MicroApp "${name}" registered successfully.`);
+            console.debug(`[AppRegistry] MicroApp "${name}" registered.`);
         }
+    }
+
+    /**
+     * Retrieves a registered Micro-App instance.
+     */
+    static get(name: string): MicroApp | undefined {
+        if (typeof window !== "undefined") {
+            return window.MFE?.[name];
+        }
+        return undefined;
+    }
+
+    /**
+     * Checks if a Micro-App is already registered.
+     */
+    static isRegistered(name: string): boolean {
+        return !!this.get(name);
     }
 }

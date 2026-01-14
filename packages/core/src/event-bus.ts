@@ -1,5 +1,9 @@
 export type EventCallback<T = any> = (data: T) => void;
 
+/**
+ * Singleton EventBus for cross-application communication.
+ * Ensures only one instance exists in a browser environment.
+ */
 export class EventBus {
     private static instance: EventBus;
     private listeners: Record<string, EventCallback[]> = {};
@@ -8,12 +12,9 @@ export class EventBus {
 
     public static getInstance(): EventBus {
         if (typeof window !== "undefined") {
-            // @ts-ignore
             if (!window.__MFE_EVENT_BUS__) {
-                // @ts-ignore
                 window.__MFE_EVENT_BUS__ = new EventBus();
             }
-            // @ts-ignore
             return window.__MFE_EVENT_BUS__;
         }
 
@@ -23,22 +24,40 @@ export class EventBus {
         return EventBus.instance;
     }
 
-    public on<T>(event: string, callback: EventCallback<T>): void {
+    /**
+     * Subscribe to an event.
+     */
+    public on<T = any>(event: string, callback: EventCallback<T>): void {
         if (!this.listeners[event]) {
             this.listeners[event] = [];
         }
         this.listeners[event].push(callback);
     }
 
-    public off<T>(event: string, callback: EventCallback<T>): void {
+    /**
+     * Unsubscribe from an event.
+     */
+    public off<T = any>(event: string, callback: EventCallback<T>): void {
         if (!this.listeners[event]) return;
         this.listeners[event] = this.listeners[event].filter((cb) => cb !== callback);
     }
 
-    public emit<T>(event: string, data: T): void {
+    /**
+     * Emit an event to all subscribers.
+     */
+    public emit<T = any>(event: string, data: T): void {
         if (!this.listeners[event]) return;
-        this.listeners[event].forEach((callback) => callback(data));
+        this.listeners[event].forEach((callback) => {
+            try {
+                callback(data);
+            } catch (error) {
+                console.error(`[EventBus] Error in callback for event "${event}":`, error);
+            }
+        });
     }
 }
 
+/**
+ * Pre-instantiated global EventBus.
+ */
 export const globalEventBus = EventBus.getInstance();
