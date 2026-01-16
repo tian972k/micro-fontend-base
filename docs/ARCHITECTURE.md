@@ -84,35 +84,35 @@ AppRegistry.register("app-a", {
 ### Shared Packages Overview
 
 ```mermaid
-classDiagram
-    class Shell {
-        +Loaders
-        +Actions
-        +Layout
-    }
-    class Core {
-        +MfeHost Component
-        +UserStore (Zustand)
-        +EventBus
-        +AppRegistry
-    }
-    class UI {
-        +Button
-        +Card
-        +Theme
-    }
-    class Utils {
-        +Formatters
-        +Lodash
-    }
+graph TD
+    subgraph Apps
+        Shell[Remix Shell]:::app
+        MFE[Micro Apps]:::app
+    end
+
+    subgraph Packages
+        Core{{@repo/core}}:::core
+        UI[//@repo/ui]:::ui
+        Utils([@repo/utils]):::utils
+    end
 
     Shell --> Core
     Shell --> UI
     Shell --> Utils
 
-    MicroApp --> Core
-    MicroApp --> UI
-    MicroApp --> Utils
+    MFE --> Core
+    MFE --> UI
+    MFE --> Utils
+
+    Core -.- Store[(User Store)]:::store
+    Core -.- EventBus((Event Bus)):::event
+
+    classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef core fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
+    classDef ui fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+    classDef utils fill:#e0f2f1,stroke:#00695c,stroke-width:2px;
+    classDef store fill:#ffe0b2,stroke:#f57c00,stroke-width:2px;
+    classDef event fill:#ffebee,stroke:#c62828,stroke-width:2px;
 ```
 
 ---
