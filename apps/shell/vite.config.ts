@@ -1,16 +1,25 @@
 import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import path from "path";
+import { routeExtensions } from "remix-custom-routes";
 
 export default defineConfig({
-    plugins: [
-        remix({
-            future: {
-                v3_fetcherPersist: true,
-                v3_relativeSplatPath: true,
-                v3_throwAbortReason: true,
-            },
-        }),
-        tsconfigPaths(),
-    ],
+  plugins: [
+    remix({
+      future: {
+        v3_fetcherPersist: true,
+        v3_relativeSplatPath: true,
+        v3_throwAbortReason: true,
+        v3_lazyRouteDiscovery: true,
+        v3_singleFetch: true,
+      },
+      ignoredRouteFiles: ["routes/**/*"],
+      async routes() {
+        const appDirectory = path.join(process.cwd(), "app");
+        return routeExtensions(appDirectory);
+      },
+    }),
+    tsconfigPaths(),
+  ],
 });

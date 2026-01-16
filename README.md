@@ -8,8 +8,55 @@ A production-ready Micro-Frontend foundation using **Turborepo**, **Remix** (App
 - **🏗️ App Shell**: Built with [Remix](https://remix.run/), handling SSR, routing, and shared layout.
 - **🏝️ Micro Apps**: Autonomous [Vite](https://vitejs.dev/) React SPAs loaded as client-side islands.
 - **🎨 Shared UI**: [shadcn/ui](https://ui.shadcn.com/) + Tailwind CSS as the unified design system.
-- **🛰️ Communication**: Event-based bus for decoupled cross-app coordination.
+- **🧠 Global State**: Centralized **Zustand** store for seamless User/Session sharing.
+- **🛠️ Utilities**: Shared logic via `@repo/utils` (including Lodash) and `@repo/core`.
 - **🛡️ Resilience**: Built-in health checks and graceful fallbacks.
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    User((User)) --> Shell[App Shell (Remix)]
+
+    subgraph "Host Environment"
+        Shell -->|Mounts| MFE_A[App A (Vite)]
+        Shell -->|Mounts| MFE_B[App B (Vite)]
+    end
+
+    subgraph "Shared Packages"
+        Core["@repo/core"]
+        UI["@repo/ui"]
+        Utils["@repo/utils"]
+    end
+
+    Shell --> Core
+    Shell --> UI
+    Shell --> Utils
+
+    MFE_A --> Core
+    MFE_A --> UI
+    MFE_A --> Utils
+
+    Core -->|Exposes| Store[Global User Store (Zustand)]
+    Core -->|Exposes| EventBus[Event Bus]
+
+    MFE_A -.->|Reads/Writes| Store
+    Shell -.->|Reads/Writes| Store
+```
+
+### State Management
+
+We use **Zustand** for global state shared across the Shell and Micro-Frontends.
+
+- **Store Location**: `@repo/core/user-store`
+- **Mechanism**: A singleton store instance attached to `window` (securely via Symbol) to ensure all independent bundles share the same state in memory.
+- **Usage**:
+
+  ```tsx
+  import { useUserStore } from "@repo/core";
+
+  const user = useUserStore((state) => state.user);
+  ```
 
 ## 📖 Essential Documentation
 
@@ -18,6 +65,22 @@ A production-ready Micro-Frontend foundation using **Turborepo**, **Remix** (App
 - [Architecture Deep Dive](./docs/ARCHITECTURE.md)
 - [Deployment Strategy](./docs/DEPLOYMENT.md)
 - [Conventions & Standards](./docs/CONVENTIONS.md)
+
+### 🚨 Routing Convention (Start Here)
+
+We use `remix-custom-routes` for flexible routing.
+
+- **Convention**: Any file ending in `*.route.tsx` inside `apps/shell/app/` (even deeply nested) is a route.
+- **URL Mapping**: URLs are determined by the filename, with dots `.` replacing slashes `/`.
+  - `dashboard.route.tsx` -> `/dashboard`
+  - `dashboard.app-a.route.tsx` -> `/dashboard/app-a`
+  - `users.profile.route.tsx` -> `/users/profile`
+
+### 🚨 Coding Rules
+
+1. **File Naming**: All filenames MUST be **kebab-case** (e.g. `app-sidebar.tsx`, `user-store.ts`).
+2. **Components**: PascalCase.
+3. **Aliases**: Use `@Repo/*` for workspaces and `@/*` for internal src imports.
 
 ## 🛠️ Quick Start
 
@@ -34,43 +97,9 @@ A production-ready Micro-Frontend foundation using **Turborepo**, **Remix** (App
    ```
 
 3. **Run Development**
-
    ```bash
    pnpm dev
    ```
 
    - Shell: <http://localhost:8000>
    - App A: <http://localhost:8001>
-   - App B: <http://localhost:8002>
-
-   > [!IMPORTANT]
-   > **Note on Micro-Frontends in Development**:
-   > The App Shell loads MFEs via `manifest.json` and static entry files.
-   > Standard dev servers (like `vite dev` or `next dev`) often do not output these static assets to the expected URL paths by default.
-   >
-   > To ensure MFEs load correctly in the Shell during development:
-   > 1. **Ensure the MFE is built**: Run `pnpm build:mfe` (or `pnpm build` for App A) so the static assets exist.
-   > 2. **Or configure your dev server**: Ensure it mimics the production asset paths (e.g. `server.origin` in Vite).
-
-### 4. Create New App
-
-```bash
-pnpm create-app
-```
-
-Follow the prompts to generate a new Micro-Frontend based on the template.
-
-## 🏗️ Architecture
-
-- **Routing**: The Shell owns all routes.
-- **Mounting**: Micro-apps are mounted into specific DOM nodes via `entry-mfe.tsx` which exposes `mount` and `unmount`.
-- **Discovery**: The Shell checks `health.json` and loads `manifest.json` from the Micro-App's host URL to dynamically inject scripts.
-
-## 📝 Documentation
-
-- [Architecture Overview](./docs/ARCHITECTURE.md)
-- [Project Structure](./docs/PROJECT_STRUCTURE.md)
-- [Deployment Strategy](./docs/DEPLOYMENT.md)
-- [Conventions & Standards](./docs/CONVENTIONS.md)
-- [Guardrails & Anti-Patterns](./docs/GUARDRAILS.md)
-- [Onboarding Guide](./docs/ONBOARDING.md)

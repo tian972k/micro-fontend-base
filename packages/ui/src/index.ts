@@ -1,3 +1,11 @@
 export * from "./button";
 export * from "./card";
-// Export other components as added
+export * from "./sheet";
+export * from "./separator";
+export * from "./tooltip";
+export * from "./avatar";
+export * from "./collapsible";
+export * from "./input";
+export * from "./skeleton";
+export * from "./dropdown-menu";
+export * from "./sidebar";
