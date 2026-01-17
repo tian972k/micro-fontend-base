@@ -1,5 +1,6 @@
-import React, { type ReactNode, useState } from "react";
+import React, { type ReactNode } from "react";
 import { globalEventBus } from "@repo/core";
+import { useShellStore } from "@/store/shell-store";
 import { Outlet, Link, useLocation } from "@remix-run/react";
 import { Button, cn } from "@repo/ui";
 
@@ -8,19 +9,21 @@ interface MainLayoutProps {
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
-  const [globalCount, setGlobalCount] = useState(0);
+  const { globalCount, increment } = useShellStore();
   const location = useLocation();
 
   const handleBroadcast = () => {
-    const newCount = globalCount + 1;
-    setGlobalCount(newCount);
-    globalEventBus.emit("SHELL_COUNTER_UPDATE", newCount);
+    increment();
+    // Also keep legacy event bus signal for backward compatibility or different logic
+    globalEventBus.emit("SHELL_COUNTER_UPDATE", globalCount + 1);
   };
 
   const navItems = [
     { label: "Home", href: "/" },
     { label: "Application A", href: "/app-a" },
     { label: "Application B", href: "/app-b" },
+    { label: "Application C", href: "/app-c" },
+    { label: "Application D", href: "/app-d" },
   ];
 
   return (

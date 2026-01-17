@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "application": "Application"
+  },
+  "user_menu": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "upgrade": "Upgrade to Pro",
+    "upgrade_desc": "Unlock all features",
+    "logout": "Log out",
+    "theme": "Theme",
+    "language": "Language"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "common": {
+    "guest": "Guest",
+    "no_email": "No email"
+  }
+}

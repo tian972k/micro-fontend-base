@@ -1,9 +1,13 @@
+import { PORTS } from "@repo/config";
+
 // This file is strictly for server-side usage in Remix loaders
 export function getAppConfig() {
-    return {
-        apps: {
-            "app-a": process.env.MFE_APP_A_URL || "http://localhost:8001",
-            "app-b": process.env.MFE_APP_B_URL || "http://localhost:8002",
-        },
-    };
+  return {
+    apps: {
+      "app-a": `http://localhost:${PORTS.APP_A}`,
+      "app-b": `http://localhost:${PORTS.APP_B}`,
+      "app-c": `http://localhost:${PORTS.APP_C}`,
+      "app-d": `http://localhost:${PORTS.APP_D}`,
+    },
+  };
 }
