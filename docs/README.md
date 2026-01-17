@@ -85,13 +85,13 @@ Each remote exposes `./entry-mfe` module:
 ```typescript
 // vite.config.ts
 federation({
-  name: 'app-name',
-  filename: 'remoteEntry.js',
+  name: "app-name",
+  filename: "remoteEntry.js",
   exposes: {
-    './App': './src/entry-mfe.tsx'
+    "./App": "./src/entry-mfe.tsx",
   },
-  shared: ['react', 'react-dom', '@repo/core']
-})
+  shared: ["react", "react-dom", "@repo/core"],
+});
 ```
 
 ## 🚀 Deployment
@@ -121,21 +121,21 @@ VITE_APP_B_URL=http://localhost:8002/assets/remoteEntry.js
 **Shared State** (`@repo/core/shared`):
 
 ```typescript
-import { userStore } from '@repo/core/shared';
+import { userStore } from "@repo/core/shared";
 
 // Subscribe
-userStore.subscribe(state => console.log(state.user));
+userStore.subscribe((state) => console.log(state.user));
 
 // Update
-userStore.getState().setUser({ name: 'John' });
+userStore.getState().setUser({ name: "John" });
 ```
 
 **React Hook** (`@repo/core/store/react`):
 
 ```typescript
-import { useUserStore } from '@repo/core/store/react';
+import { useUserStore } from "@repo/core/store/react";
 
-const user = useUserStore(state => state.user);
+const user = useUserStore((state) => state.user);
 ```
 
 ## 📦 Packages
@@ -155,7 +155,17 @@ const user = useUserStore(state => state.user);
 
 **Build fails**: Clear `.turbo` cache: `pnpm clean`
 
-## 🔗 Resources
+## 🔗 Internal Documentation
+
+- [🚀 Onboarding Guide](./ONBOARDING.md)
+- [🧠 Technical Overview](./TECHNICAL_OVERVIEW.md)
+- [🛠️ Tooling & Scripts](./TOOLING.md)
+- [🏗️ Architecture Deep Dive](./ARCHITECTURE.md)
+- [📝 Coding Standards](./STANDARDS.md)
+- [🤝 Conventions](./CONVENTIONS.md)
+- [🚀 Deployment Guide](./DEPLOYMENT.md)
+
+## 🔧 Resources
 
 - [Turborepo](https://turbo.build/repo/docs)
 - [Module Federation](https://module-federation.io/)

@@ -6,6 +6,8 @@ The platform uses a **Micro-Front-End (MFE)** architecture based on **Module Fed
 
 **Deep Dive Documentation:**
 
+- [Onboarding Guide](./ONBOARDING.md) - For new members
+- [Technical Overview](./TECHNICAL_OVERVIEW.md) - System design & diagrams
 - [Micro-Front-End Lifecycle & Integration Flow](./MFE_LIFECYCLE.md)
 - [Internationalization (i18n) Strategy](./I18N_STRATEGY.md)
 
@@ -13,7 +15,7 @@ The platform uses a **Micro-Front-End (MFE)** architecture based on **Module Fed
 graph TD
     User((User)) --> Shell["Shell (Host)"]
 
-    subgraph "Micro-Apps"
+    subgraph "Micro-Apps (Remotes)"
         AppA["App A (React)"]
         AppB["App B (Nextjs)"]
         AppC["App C (Vue)"]
@@ -22,24 +24,30 @@ graph TD
 
     subgraph "Shared Platform Layer"
         Core["@repo/core"]
+        Config["@repo/config"]
         UI["@repo/ui"]
         Utils["@repo/utils"]
     end
 
-    Shell --> AppA
-    Shell --> AppB
-    Shell --> AppC
-    Shell --> AppD
+    Shell -->|Orchestrates| AppA
+    Shell -->|Orchestrates| AppB
+    Shell -->|Orchestrates| AppC
+    Shell -->|Orchestrates| AppD
 
-    Shell -.-> Core
-    Shell -.-> UI
-    AppA -.-> Core
-    AppA -.-> UI
-    AppB -.-> Core
-    AppB -.-> UI
-    AppC -.-> Core
-    AppD -.-> Core
+    Shell -.->|Uses| Core
+    Shell -.->|Uses| UI
+    Shell -.->|Uses| Config
+
+    AppA -.->|Uses| Core
+    AppA -.->|Uses| UI
+    AppB -.->|Uses| Core
+    AppB -.->|Uses| UI
+    AppC -.->|Uses| Core
+    AppD -.->|Uses| Core
 ```
+
+> [!NOTE]
+> For a detailed sequence diagram of the loading process, see the [Technical Overview](./TECHNICAL_OVERVIEW.md).
 
 ## Module Federation Strategy
 
