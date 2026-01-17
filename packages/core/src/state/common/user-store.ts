@@ -1,5 +1,4 @@
 import { createStore } from "zustand/vanilla";
-import { useStore } from "zustand";
 
 // --- Types ---
 
@@ -43,7 +42,9 @@ const createUserStore = () =>
 let store$: ReturnType<typeof createUserStore>;
 
 if (typeof window !== "undefined") {
-  const win = window as any;
+  const win = window as unknown as Window & {
+    [GLOBAL_STORE_SYMBOL]?: ReturnType<typeof createUserStore>;
+  };
   if (!win[GLOBAL_STORE_SYMBOL]) {
     const newStore = createUserStore();
     // Use Object.defineProperty to hide it from iteration but keep it accessible via Symbol
@@ -54,7 +55,7 @@ if (typeof window !== "undefined") {
       configurable: false,
     });
   }
-  store$ = win[GLOBAL_STORE_SYMBOL];
+  store$ = win[GLOBAL_STORE_SYMBOL]!;
 } else {
   // Server-side: Create a fresh store per request context (conceptually)
   store$ = createUserStore();
@@ -67,14 +68,6 @@ if (typeof window !== "undefined") {
  * Useful for usage outside of React components or in other vanilla JS contexts.
  */
 export const userStore = store$;
-
-/**
- * React hook to consume the user store.
- * Usage: const user = useUserStore((state) => state.user);
- */
-export function useUserStore<T>(selector: (state: UserState) => T): T {
-  return useStore(userStore, selector);
-}
 
 // Re-export actions for backward compatibility if needed,
 // OR prefer using the store's methods directly.

@@ -1,18 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
-import type { HealthCheckResponse, MicroApp, MfeManifest } from "../types";
+import type { HealthCheckResponse, MicroApp, MfeManifest } from "../../types";
+import { type MicroAppProps } from "../../types";
 import { MfeError } from "./mfe-host-states/mfe-error";
 import { MfeMaintenance } from "./mfe-host-states/mfe-maintenance";
 import { MfeLoading } from "./mfe-host-states/mfe-loading";
 
 const manifestCache: Record<string, string> = {};
 
-interface MfeHostProps {
+export interface MfeHostProps {
   name: string;
   host: string;
-  props?: Record<string, any>;
+  props?: MicroAppProps;
   fallback?: React.ReactNode;
   loadingComponent?: React.ReactNode;
   maintenanceComponent?: React.ReactNode;
+  onMount?: () => void;
+  onUnmount?: () => void;
+  onError?: (error: string) => void;
+  remoteLoader?: () => Promise<any>;
+  className?: string;
 }
 
 type LoadStatus =
@@ -30,6 +36,7 @@ export function MfeHost({
   fallback,
   loadingComponent,
   maintenanceComponent,
+  remoteLoader,
 }: MfeHostProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<LoadStatus>("idle");
@@ -68,11 +75,19 @@ export function MfeHost({
       if (!mounted) return;
       setStatus("checking");
       try {
+        // 0. Federation / Direct Import Mode
+        if (remoteLoader) {
+          if (mounted) setStatus("loading");
+          await remoteLoader();
+          if (mounted) await mountMicroApp();
+          return;
+        }
+
         // 1. Health Check
         let healthRes;
         try {
           healthRes = await fetch(`${host}/health.json?t=${Date.now()}`);
-        } catch (e) {
+        } catch {
           throw new Error("CORE_CONNECTION_REFUSED");
         }
 
@@ -131,11 +146,11 @@ export function MfeHost({
         }
 
         if (mounted) await mountMicroApp();
-      } catch (err: any) {
-        console.error(`[MfeHost] Error loading ${name}:`, err);
+      } catch (err: unknown) {
+        console.error("Failed to execute MFE entry script:", err);
         if (mounted) {
           setStatus("error");
-          setErrorDetails(err.message);
+          setErrorDetails(err instanceof Error ? err.message : String(err));
         }
       }
     };
