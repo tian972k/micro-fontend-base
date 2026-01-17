@@ -1,6 +1,7 @@
+import { json, type MetaFunction } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import { APP_IDS } from "@repo/config";
 import { MfeHost } from "@repo/core";
-import { PORTS } from "@repo/config";
-import { type MetaFunction } from "@remix-run/node";
 import {
   Card,
   CardHeader,
@@ -8,19 +9,24 @@ import {
   CardDescription,
   CardContent,
 } from "@repo/ui";
-
+import { getAppConfig } from "../../../server/config";
 export const meta: MetaFunction = () => {
-  return [{ title: "App D (Svelte) | MFE Platform" }];
+  return [{ title: "Svelte App | MFE Platform" }];
 };
 
-export default function AppDRoute() {
-  const appHost = `http://localhost:${PORTS.APP_D}`;
+export const loader = async () => {
+  const config = getAppConfig();
+  return json({ appHost: (config.apps as any)[APP_IDS.SVELTE] });
+};
+
+export default function AppSvelteRoute() {
+  const { appHost } = useLoaderData<typeof loader>();
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-orange-600">
-          Application D
+          Svelte Application
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
           Svelte 4 Integration from:{" "}
@@ -37,7 +43,7 @@ export default function AppDRoute() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="min-h-[500px]">
-            <MfeHost name="app-d" host={appHost} />
+            <MfeHost name={APP_IDS.SVELTE} host={appHost} />
           </div>
         </CardContent>
       </Card>

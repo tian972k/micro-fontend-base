@@ -1,6 +1,7 @@
+import { json, type MetaFunction } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import { APP_IDS } from "@repo/config";
 import { MfeHost } from "@repo/core";
-import { PORTS } from "@repo/config";
-import { type MetaFunction } from "@remix-run/node";
 import {
   Card,
   CardHeader,
@@ -8,19 +9,23 @@ import {
   CardDescription,
   CardContent,
 } from "@repo/ui";
-
+import { getAppConfig } from "../../../server/config";
 export const meta: MetaFunction = () => {
-  return [{ title: "App A | MFE Platform" }];
+  return [{ title: "React App | MFE Platform" }];
 };
 
-export default function AppARoute() {
-  // Dynamic host from config
-  const appHost = `http://localhost:${PORTS.APP_A}`;
+export const loader = async () => {
+  const config = getAppConfig();
+  return json({ appHost: (config.apps as any)[APP_IDS.REACT] });
+};
+
+export default function AppReactRoute() {
+  const { appHost } = useLoaderData<typeof loader>();
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Application A</h1>
+        <h1 className="text-3xl font-bold tracking-tight">React Application</h1>
         <p className="text-muted-foreground mt-1 text-sm">
           Real-time integration from:{" "}
           <span className="font-mono text-primary">{appHost}</span>
@@ -29,14 +34,14 @@ export default function AppARoute() {
 
       <Card className="overflow-hidden border-primary/10 shadow-lg">
         <CardHeader className="bg-primary/[0.02]">
-          <CardTitle>MFE Container</CardTitle>
+          <CardTitle>React Application (Remote)</CardTitle>
           <CardDescription>
             This area is orchestrated by @repo/core
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="min-h-[500px]">
-            <MfeHost name="app-a" host={appHost} />
+            <MfeHost name={APP_IDS.REACT} host={appHost} />
           </div>
         </CardContent>
       </Card>
