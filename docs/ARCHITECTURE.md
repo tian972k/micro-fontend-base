@@ -1,196 +1,95 @@
-# Architecture Documentation
+# Project Architecture & Standards
 
-## 1. High-Level Architecture
+This document defines the architectural standards for the Micro-Frontend Monorepo. All contributors must adhere to these guidelines to maintain a scalable, "Senior"-level codebase.
 
-The platform follows a **Composition-based Micro-Frontend** approach.
+## 1. Core Principles
 
-- **App Shell (Host)**: Built with **Remix SSR**. It handles:
-  - Authentication (Checking User Session)
-  - Global Routing (URL State)
-  - Layout (Sidebar, Header)
-  - Mounting Micro-Apps into DOM slots.
+- **Feature-Based Architecture**: Code is organized by **Feature** (domain) rather than just by technical type (components vs hooks).
+- **Encapsulation**: Features should be self-contained. Avoid deep imports between features. Use shared `core` or `lib` for cross-feature communication.
+- **Thin Routes**: Route files (pages) should only handle data loading and routing logic. The UI implementation should live in `features/` or `components/`.
+- **Strict Typing**: All code must be strongly typed (TypeScript).
 
-- **Micro Apps (Remotes)**: Built with **Vite (React)**. They are:
-  - Deployed independently as static assets.
-  - Runtime-loaded by the Shell.
-  - Isolated (own styles, own bundles).
+## 2. Shell Application (Remix)
 
-- **Shared Core**:
-  - **State**: shared User Store via **Zustand**.
-  - **Communication**: Event Bus for cross-app messaging.
-  - **Styles**: Shared Design System (`@repo/ui`).
+Path: `apps/shell`
 
-### System Context Diagram
+The Shell application orchestrates the micro-frontends. It follows a modified feature-based structure compatible with Remix's file-system routing.
 
-```mermaid
-graph TD
-    User((User)) -->|HTPP Request| Shell["App Shell (Remix SSR)"]
-
-    subgraph "Browser / Client"
-        ShellClient[Shell Client Bundle]
-        MFE_A["Micro-App A (Vite)"]
-        MFE_B["Micro-App B (Vite)"]
-
-        Store["Global User Store (Zustand)"]
-        EventBus[Event Bus]
-    end
-
-    Shell -->|Hydrates| ShellClient
-    ShellClient -->|Mounts| MFE_A
-    ShellClient -->|Mounts| MFE_B
-
-    ShellClient -->|Reads/Writes| Store
-    MFE_A -->|Reads| Store
-    MFE_A -->|Emits/Listens| EventBus
-    MFE_B -->|Emits/Listens| EventBus
+```text
+apps/shell/app/
+├── components/          # Shared, generic UI components
+│   ├── layout/          # Layout-specific components (Sidebar, Navbar, Footer)
+│   └── ui/              # Primitive UI components (Buttons, Inputs)
+├── features/            # Feature-Specific Dependencies
+│   ├── auth/            # Authentication logic, forms, and contexts
+│   └── dashboard/       # Dashboard widgets and specific logic
+├── hooks/               # Global, shared hooks (e.g., useTheme)
+├── lib/                 # Pure utility functions, constants, formatting
+├── routes/              # Remix Routes (Keep these files minimal!)
+├── services/            # API/Backend integration services
+├── store/               # Global state managers (Zustand, etc.)
+└── types/               # Shared type definitions for the app
 ```
 
----
+### Rules for Shell
 
-## 2. Container & Component Architecture
+- **Do not** write complex UI logic inside `routes/*.tsx`. Import a view component from `features/` or `components/`.
+- **Do not** put feature-specific components in `components/`. Put them in `features/<feature-name>/components/`.
 
-### App Shell (Remix)
+## 3. Micro-Frontends (MFE) Structure
 
-The Shell is the entry point. It decides _which_ MFE to load based on the Route.
+All micro-frontends (`apps/app-*`) must follow a consistent internal structure, regardless of the framework (React, Vue, Svelte).
 
-**Key Components**:
+### React / Generic Structure (`apps/app-a`, `apps/app-b`)
 
-- **`root.tsx`**: Sets up the Global Context Providers.
-- **`MfeHost.tsx`**: A generic React component that handles the lifecycle of an MFE.
-  - **Mounting**: Fetches manifest, loads scripts, mounts to a `div`.
-  - **Unmounting**: Cleans up DOM listeners.
-  - **Error Handling**: Displays fallback UI if MFE is offline.
-
-### Micro-App (Vite)
-
-A lightweight React application that exposes a `mount` and `unmount` function globally.
-
-**Lifecycle Definition**:
-
-```ts
-// entry-mfe.tsx
-import { AppRegistry } from "@repo/core";
-
-AppRegistry.register("app-a", {
-  mount: (container, props) => {
-    // Render React App into container
-  },
-  unmount: (container) => {
-    // Cleanup
-  },
-});
+```text
+src/
+├── components/          # Shared components used across multiple pages/features
+├── features/            # Domain-specific modules
+│   └── [feature-name]/
+│       ├── components/  # Components specific to this feature
+│       ├── hooks/       # Hooks specific to this feature
+│       └── [Feature].tsx
+├── layouts/             # Page layouts (if MFE has its own routing/layout)
+├── lib/                 # Utilities and helper functions
+├── services/            # API calls
+├── types/               # Shared types
+└── App.tsx              # Entry point
 ```
 
-### Shared Packages Overview
+### Vue Structure (`apps/app-c`)
 
-```mermaid
-graph TD
-    subgraph Apps
-        Shell[Remix Shell]:::app
-        MFE[Micro Apps]:::app
-    end
-
-    subgraph Packages
-        Core{{@repo/core}}:::core
-        UI[//@repo/ui]:::ui
-        Utils([@repo/utils]):::utils
-    end
-
-    Shell --> Core
-    Shell --> UI
-    Shell --> Utils
-
-    MFE --> Core
-    MFE --> UI
-    MFE --> Utils
-
-    Core -.- Store[(User Store)]:::store
-    Core -.- EventBus((Event Bus)):::event
-
-    classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef core fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
-    classDef ui fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
-    classDef utils fill:#e0f2f1,stroke:#00695c,stroke-width:2px;
-    classDef store fill:#ffe0b2,stroke:#f57c00,stroke-width:2px;
-    classDef event fill:#ffebee,stroke:#c62828,stroke-width:2px;
+```text
+src/
+├── components/          # Global Vue components
+├── composables/         # Shared composables (hooks)
+├── features/            # Domain features
+├── layouts/             # Layout components
+├── views/             # Page views
+└── App.vue              # Entry point
 ```
 
----
+### Svelte Structure (`apps/app-d`)
 
-## 3. Communication & State Management
-
-### Global State (Zustand)
-
-We use a **Singleton Pattern** for Zustand to ensure data consistency across multiple bundles (Shell + MFEs).
-
-- **Location**: `packages/core/src/user-store.ts`
-- **Mechanism**: The store instance is attached to `window[Symbol.for('MFE_USER_STORE')]`.
-- **Flow**:
-  1. **Shell** fetches User Profile on SSR/Client hydration.
-  2. **Shell** updates `UserStore`.
-  3. **App A** calls `useUserStore()` and immediately sees the user data.
-
-### Event Bus
-
-For imperative actions or notifications between apps.
-
-```mermaid
-sequenceDiagram
-    participant Shell
-    participant AppA as Micro-App A
-    participant AppB as Micro-App B
-
-    AppA->>Shell: Emit "TOAST_SHOW" { message: "Saved!" }
-    Shell->>Shell: Show Toast Notification
-
-    AppA->>AppB: Emit "DATA_UPDATED"
-    AppB->>AppB: Refetch Data
+```text
+src/
+├── lib/                 # Svelte standard for shared code
+│   ├── components/
+│   ├── stores/
+│   └── utils/
+├── routes/              # If using SvelteKit-like routing or just Views
+└── App.svelte
 ```
 
----
+## 4. Coding Standards
 
-## 4. Routing Strategy
+- **File Naming**:
+  - React Components: `PascalCase.tsx` (e.g., `AppSidebar.tsx`)
+  - Functions/Hooks/Utils: `kebab-case.ts` (e.g., `use-auth.ts`, `format-date.ts`)
+  - Remix Routes: `kebab-case.route.tsx`
+- **Exports**: Use Named Exports (`export const ...`) over Default Exports, except for Remix Route pages and Lazy loaded components which require default exports.
+- **Imports**: Use absolute imports `@/` where configured.
 
-We use `remix-custom-routes` to support a flat file structure that maps to nested URLs.
+## 5. Adding a New MFE
 
-**Convention**: `[route-path].route.tsx`
-
-| Filename                       | URL Path              | Description           |
-| ------------------------------ | --------------------- | --------------------- |
-| `_index.route.tsx`             | `/`                   | Home Page             |
-| `login.route.tsx`              | `/login`              | Login Page            |
-| `dashboard.route.tsx`          | `/dashboard`          | Dashboard MFE Wrapper |
-| `dashboard.settings.route.tsx` | `/dashboard/settings` | Nested Route          |
-
-### Routing Flow
-
-1. Browser requests `/dashboard`.
-2. Remix matches `dashboard.route.tsx`.
-3. `loader` runs (checks auth).
-4. Component renders `<MfeHost name="dashboard" />`.
-5. `MfeHost` fetches config, loads JS, and mounts the Dashboard MFE.
-
----
-
-## 5. Deployment & CI/CD
-
-Each application is built and deployed independently.
-
-- **Apps (`apps/app-a`)**:
-  - Build -> `dist/` (Static files)
-  - Upload to S3 / CND / Nginx Host
-  - Must expose `health.json` and `manifest.json`.
-
-- **Shell (`apps/shell`)**:
-  - Build -> `build/` (Node.js Server) + `public/`
-  - Deploy to Node.js Host (Docker/K8s).
-  - Env vars define MFE URLs (`MFE_APP_A_URL=https://cdn.example.com/app-a`).
-
----
-
-## 6. How to Add a New MFE
-
-1. **Create**: Use `pnpm create-app <name>`.
-2. **Register**: Ensure `src/entry-mfe.tsx` registers the app name.
-3. **Host**: Add a route in `apps/shell/app/routes/<name>.route.tsx`.
-4. **Env**: Add `MFE_<NAME_UPPER>_URL` to `.env`.
+When running `pnpm create-app`, the generated app _must_ be refactored to match this directory structure immediately.

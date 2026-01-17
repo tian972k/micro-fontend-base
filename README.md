@@ -1,106 +1,186 @@
 # Micro-Frontend Base Platform
 
-A production-ready Micro-Frontend foundation using **Turborepo**, **Remix** (App Shell), and **Vite** (Micro Apps).
+A production-ready, Enterprise-grade Micro-Frontend foundation powered by **Turborepo**, **Vite 5**, and **Module Federation**.
 
 ## 🚀 Key Features
 
-- **⚡ Monorepo**: High-performance pipeline powered by [Turborepo](https://turbo.build/) & pnpm.
-- **🏗️ App Shell**: Built with [Remix](https://remix.run/), handling SSR, routing, and shared layout.
-- **🏝️ Micro Apps**: Autonomous [Vite](https://vitejs.dev/) React SPAs loaded as client-side islands.
-- **🎨 Shared UI**: [shadcn/ui](https://ui.shadcn.com/) + Tailwind CSS as the unified design system.
-- **🧠 Global State**: Centralized **Zustand** store for seamless User/Session sharing.
-- **🛠️ Utilities**: Shared logic via `@repo/utils` (including Lodash) and `@repo/core`.
-- **🛡️ Resilience**: Built-in health checks and graceful fallbacks.
+- **⚡ Monorepo Architecture**: High-performance pipeline powered by [Turborepo](https://turbo.build/) & pnpm workspaces.
+- **🌐 Module Federation**: **Runtime dependency sharing** for `react`, `react-dom`, and `@repo/core`—drastically reducing bundle sizes.
+- **🧩 Framework Agnostic**: Support for **React**, **Vue** (App C), and **Svelte** (App D) co-existing seamlessly.
+- **🏗️ App Shell**: Robust Host built with [Remix](https://remix.run/) (SSR) and client-side Federation.
+- **🎨 Design System**: [shadcn/ui](https://ui.shadcn.com/) ported to `@repo/ui` with framework-segregated exports.
+- **🧠 Hybrid State Management**:
+  - **Shared**: Framework-agnostic **Zustand** store (Vanilla JS).
+  - **Reactive**: Custom Hooks/Adapters for React (`useUserStore`).
+- **🛡️ Resilience**: Built-in health checks, retry mechanisms, and graceful maintenance modes.
 
-## 🏗️ Architecture
+---
+
+## 🏛️ System Architecture
+
+Our architecture follows a layered approach, strictly separating the **Platform** (Shared) from the **Domain** (Micro-Apps), bridged by **Module Federation**.
 
 ```mermaid
 graph TD
-    User((User)) --> Shell["App Shell (Remix)"]
+    %% Definitions
+    classDef host fill:#1e293b,stroke:#3b82f6,stroke-width:4px,color:#fff,rx:8,ry:8,shadow:10px
+    classDef react fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px,color:#0369a1,rx:5,ry:5
+    classDef next  fill:#000000,stroke:#333333,stroke-width:2px,color:#fff,rx:5,ry:5
+    classDef vue   fill:#dcfce7,stroke:#22c55e,stroke-width:2px,color:#15803d,rx:5,ry:5
+    classDef svelte fill:#ffedd5,stroke:#f97316,stroke-width:2px,color:#c2410c,rx:5,ry:5
+    classDef shared fill:#f8fafc,stroke:#94a3b8,stroke-width:2px,color:#475569,stroke-dasharray: 5 5,rx:5,ry:5
+    classDef state fill:#f1f5f9,stroke:#64748b,stroke-width:2px,color:#0f172a,shape:cylinder
 
-    subgraph "Host Environment"
-        Shell -->|Mounts| MFE_A["App A (Vite)"]
-        Shell -->|Mounts| MFE_B["App B (Vite)"]
+    %% Nodes
+    User((User)) --> Shell["APP SHELL (Remix)"]:::host
+
+    subgraph "Micro-Apps layer"
+        direction LR
+        AppA["App A (React)"]:::react
+        AppB["App B (Next.js)"]:::next
+        AppC["App C (Vue)"]:::vue
+        AppD["App D (Svelte)"]:::svelte
     end
 
-    subgraph "Shared Packages"
-        Core["@repo/core"]
-        UI["@repo/ui"]
-        Utils["@repo/utils"]
+    subgraph "Module Federation (Shared Runtime)"
+        direction LR
+        React["React Shared"]:::shared
+        CoreLib["@repo/core"]:::shared
+        UILib["@repo/ui"]:::shared
     end
 
-    Shell --> Core
-    Shell --> UI
-    Shell --> Utils
+    Store[("Global Store")]:::state
 
-    MFE_A --> Core
-    MFE_A --> UI
-    MFE_A --> Utils
+    %% Layout / Connections
+    Shell --> AppA
+    Shell --> AppB
+    Shell --> AppC
+    Shell --> AppD
 
-    Core -->|Exposes| Store["Global User Store (Zustand)"]
-    Core -->|Exposes| EventBus[Event Bus]
+    %% Apps depend on Shared Libs
+    AppA --> CoreLib
+    AppA --> UILib
+    AppB --> CoreLib
+    AppC --> CoreLib
+    AppD --> CoreLib
 
-    MFE_A -.->|Reads/Writes| Store
-    Shell -.->|Reads/Writes| Store
+    %% Shell provides React, Apps consume it
+    Shell -. "Provides" .-> React
+    AppA -. "Consumes" .-> React
+    AppB -. "Consumes" .-> React
+
+    %% Store Connection
+    CoreLib --> Store
+    Store <--> AppA
+    Store <--> AppB
+    Store <--> AppC
+    Store <--> AppD
 ```
 
-### State Management
+---
 
-We use **Zustand** for global state shared across the Shell and Micro-Frontends.
+## 🏗️ Project Structure
 
-- **Store Location**: `@repo/core/user-store`
-- **Mechanism**: A singleton store instance attached to `window` (securely via Symbol) to ensure all independent bundles share the same state in memory.
-- **Usage**:
+We enforce a strict separation of concerns:
 
-  ```tsx
-  import { useUserStore } from "@repo/core";
+```
+├── apps
+│   ├── shell         # (Host) Remix 2 + Vite (SSR)
+│   ├── app-a         # (Remote) React 18 + Vite
+│   ├── app-b         # (Remote) Next.js 14 + Vite (Hybrid MFE)
+│   ├── app-c         # (Remote) Vue 3 + Vite
+│   └── app-d         # (Remote) Svelte 4 + Vite
+└── packages
+    ├── core          # State, MFE Host, Event Bus
+    │   ├── src/mfe/react    # React Host Component
+    │   └── src/state/common # Vanilla State Logic
+    ├── ui            # Design System (React)
+    ├── config        # TypeScript, Tailwind, Ports
+    └── utils         # Shared Helpers
+```
 
-  const user = useUserStore((state) => state.user);
-  ```
+---
 
-## 📖 Essential Documentation
+## 🔌 Module Federation
 
-- **[Onboarding Guide](./docs/ONBOARDING.md) 👈 Start Here**
-- [Project Structure & File Guide](./docs/PROJECT_STRUCTURE.md)
-- [Architecture Deep Dive](./docs/ARCHITECTURE.md)
-- [Deployment Strategy](./docs/DEPLOYMENT.md)
-- [Conventions & Standards](./docs/CONVENTIONS.md)
+We use `@originjs/vite-plugin-federation` to share dependencies at runtime.
 
-### 🚨 Routing Convention (Start Here)
+| Application | Role   | Port | Exposed Entry     | Shared Deps  |
+| :---------- | :----- | :--- | :---------------- | :----------- |
+| **Shell**   | Host   | 8000 | N/A               | All          |
+| **App A**   | Remote | 8001 | `./src/entry-mfe` | React, Core  |
+| **App B**   | Remote | 8002 | `./src/entry-mfe` | React, Core  |
+| **App C**   | Remote | 8003 | `./src/entry-mfe` | Vue, Core    |
+| **App D**   | Remote | 8004 | `./src/entry-mfe` | Svelte, Core |
 
-We use `remix-custom-routes` for flexible routing.
+**Why?**
 
-- **Convention**: Any file ending in `*.route.tsx` inside `apps/shell/app/` (even deeply nested) is a route.
-- **URL Mapping**: URLs are determined by the filename, with dots `.` replacing slashes `/`.
-  - `dashboard.route.tsx` -> `/dashboard`
-  - `dashboard.app-a.route.tsx` -> `/dashboard/app-a`
-  - `users.profile.route.tsx` -> `/users/profile`
+- **Performance**: Browser downloads `react` **once** (via Shell), not 5 times.
+- **Consistency**: Ensures singleton instance of State Manager.
 
-### 🚨 Coding Rules
-
-1. **File Naming**: All filenames MUST be **kebab-case** (e.g. `app-sidebar.tsx`, `user-store.ts`).
-2. **Components**: PascalCase.
-3. **Aliases**: Use `@Repo/*` for workspaces and `@/*` for internal src imports.
+---
 
 ## 🛠️ Quick Start
 
-1. **Install Dependencies**
+### 1. Install & Bootstrap
 
-   ```bash
-   pnpm install
-   ```
+```bash
+pnpm install
+```
 
-2. **Configure Environment**
+### 2. Configure Environment
 
-   ```bash
-   cp apps/shell/.env.example apps/shell/.env
-   ```
+```bash
+cp apps/shell/.env.example apps/shell/.env
+```
 
-3. **Run Development**
+### 3. Run Development
 
-   ```bash
-   pnpm dev
-   ```
+Starts the Shell and all Micro-Apps in parallel.
 
-   - Shell: <http://localhost:8000>
-   - App A: <http://localhost:8001>
+```bash
+pnpm dev
+```
+
+- **Shell**: <http://localhost:8000>
+- **App A**: <http://localhost:8001>
+- **App B**: <http://localhost:8002>
+- **App C**: <http://localhost:8003>
+- **App D**: <http://localhost:8004>
+
+### 4. Build for Production
+
+Compiles all apps, validating types and Federation config.
+
+```bash
+pnpm turbo run build
+```
+
+---
+
+## 🧠 State Management
+
+We use a **Hybrid Approach**:
+
+1.  **Common Source of Truth**: `src/state/common/user-store.ts` (Vanilla JS).
+2.  **Framework Adapters**:
+    - **React**: `src/state/react/use-user-store.ts`
+    - **Vue/Svelte**: Direct subscription to the Vanilla store (TODO).
+
+```typescript
+// React Usage
+import { useUserStore } from "@repo/core/store/react";
+const user = useUserStore((s) => s.user);
+
+// Vanilla / Non-React Usage
+import { userStore } from "@repo/core/shared";
+userStore.subscribe((state) => console.log(state.user));
+```
+
+---
+
+## 📖 Essential Documentation
+
+- [Onboarding Guide](./docs/ONBOARDING.md)
+- [Project Structure](./docs/PROJECT_STRUCTURE.md)
+- [Deployment Strategy](./docs/DEPLOYMENT.md)

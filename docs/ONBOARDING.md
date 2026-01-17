@@ -1,73 +1,89 @@
-# 🏄 Onboarding Guide
+# Onboarding Guide - Micro-Frontend Platform
 
-Welcome to the **Micro-Frontend Base Platform**! This guide will help you get your environment set up and understand how to work within our monorepo.
+Welcome to the **Micro-Frontend Base** project! This guide will help you set up your environment, understand the architecture, and start contributing.
 
-## 🛠️ Prerequisites
+## 1. Prerequisites
 
-Before you begin, ensure you have the following installed:
-- **Node.js**: v18 or later (latest LTS recommended).
-- **pnpm**: `npm install -g pnpm`.
-- **Git**: For version control.
+- **Node.js**: v18+ is required.
+- **pnpm**: We use pnpm for package management. Install it via `npm install -g pnpm`.
+- **Docker** (Optional but recommended): For running the full stack in containers.
 
-## 🚀 Getting Started
+## 2. Setup
 
-1.  **Clone the Repository**:
+1.  **Clone the repository**:
     ```bash
-    git clone [repository-url]
+    git clone <repo-url>
     cd micro-fontend-base
     ```
-
-2.  **Install Dependencies**:
+2.  **Install dependencies**:
     ```bash
     pnpm install
     ```
-
-3.  **Setup Environment Variables**:
-    For the initial setup, copy the example environment file for the shell:
-    ```bash
-    cp apps/shell/.env.example apps/shell/.env
-    ```
-
-4.  **Run Development Environment**:
+3.  **Start Development Server**:
     ```bash
     pnpm dev
     ```
-    This will start the Shell and all Micro-Apps in development mode.
+    This command starts the **Shell** (host) app and all configured micro-frontends in parallel.
+    - Shell: http://localhost:3000
+    - App A: http://localhost:3001
+    - App B: http://localhost:3002
+    - ...
 
-## 🧩 Key Concepts
+## 3. Project Structure
 
-### Monorepo Strategy
-We use **Turborepo** to manage our build pipeline. It caches successful builds to save time.
-- `pnpm build`: Build all applications and packages.
-- `pnpm lint`: Run linting across the entire workspace.
+We follow a **Feature-Based Architecture**. Please read [docs/ARCHITECTURE.md](./ARCHITECTURE.md) for detailed rules.
 
-### The App Shell (Remix)
-The Shell is the entry point for users. It handles authentication, layout, and mounting micro-apps.
+- **apps/shell**: The main container application (Remix).
+- **apps/app-\***: Micro-frontend applications (React, Vue, Svelte).
+- **packages/core**: Shared state management (Zustand), events, and types.
+- **packages/ui**: Shared UI component library (shadcn/ui setup).
+- **packages/config**: Shared configuration constants.
 
-### Micro-Apps (Vite)
-Individual features are built as standalone Micro-Apps. They are mounted into the Shell at runtime.
+## 4. Workflows
 
-### Shared Packages
-- `@repo/ui`: Shared design system.
-- `@repo/core`: Communication (Event Bus) and shared types.
+### Creating a New Micro-Frontend
 
-## 🛠️ Common Workflows
+We have an automated script to scaffold new apps.
 
-### Creating a New Micro-App
-Use our scaffolding tool to quickly generate a new app:
 ```bash
 pnpm create-app
 ```
 
-### Developing a Feature
-1.  Always start by creating a branch: `git checkout -b feature/your-feature-name`.
-2.  Run `pnpm dev` and focus on the app you are modifying.
-3.  Ensure your app exposes the required `mount` and `unmount` functions in its `entry-mfe.tsx`.
+Follow the interactive prompts to choose a name and framework.
+**After creation**:
 
-## 🆘 Troubleshooting & Support
+1.  Go to `apps/<new-app>/src`.
+2.  Refactor the structure to match `ARCHITECTURE.md` (create `features/`, `components/`, etc.).
+3.  Restart `pnpm dev`.
 
-- **MFE Not Loading**: Ensure the MFE server is running and the URL in the Shell's `.env` matches.
-- **Build Errors**: Try clearing the Turborepo cache: `pnpm clean`.
-- **Linting Issues**: Run `pnpm lint --fix`.
+### Adding a New Feature
 
-For more details, refer to the [Architecture Overview](./ARCHITECTURE.md) and [Conventions](./CONVENTIONS.md).
+1.  **Identify the domain**: e.g., "User Profile", "Billing".
+2.  **Create a Feature Directory**:
+    - Shell: `apps/shell/app/features/<feature-name>`
+    - MFE: `apps/<app-name>/src/features/<feature-name>`
+3.  **Implement**:
+    - Build dumb components in `components/`.
+    - Build logic in hooks or feature components.
+    - Expose the main view component.
+4.  **Integrate**:
+    - Import the feature view into the Route/Page component.
+
+## 5. Coding Standards
+
+- **Strict Types**: No `any`. Define interfaces in `types.ts` or within the feature.
+- **Linting**: Run `pnpm lint` before committing.
+- **Commits**: Use conventional commits (feat:, fix:, docs:, chore:).
+
+## 6. Troubleshooting
+
+- **"UserStore is not defined"**: Ensure you are importing from `@repo/core`.
+- **"Hydration Mismatch"**: Common in Remix. Ensure your server and client render the same initial HTML.
+
+## 7. Useful Commands
+
+- `pnpm build`: Build all apps and packages.
+- `pnpm clean`: Clean node_modules and dist folders.
+- `pnpm test`: Run tests (if configured).
+
+Welcome to the team! 🚀
