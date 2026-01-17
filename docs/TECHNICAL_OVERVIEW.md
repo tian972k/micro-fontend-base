@@ -8,8 +8,8 @@ The platform follows a **Hub-and-Spoke** architecture where the Remix Shell acts
 
 ```mermaid
 graph TD
-    User[End User] -->|1. Request| CDN[CDN / Edge]
-    CDN -->|2. Serve Shell| Shell[Shell App (Remix SSR)]
+    User[End User] -->|1. Request| CDN["CDN / Edge"]
+    CDN -->|2. Serve Shell| Shell["Shell App (Remix SSR)"]
 
     subgraph "Browser Runtime (Module Federation)"
         Shell -->|3. Mount| React[App React]:::react
