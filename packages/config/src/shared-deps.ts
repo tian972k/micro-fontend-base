@@ -1,12 +1,14 @@
 // Framework-agnostic shared libraries
-export const baseShared = [
-  "lodash",
-  "dayjs",
-  "@repo/utils", // Ensure non-React apps install this if they use it
-];
+export const baseShared = ["dayjs", "@repo/utils"];
 
-// React-specific shared libraries (includes UI and Core which may depend on React)
+// React-specific shared libraries
 export const reactShared = ["react", "react-dom", "@repo/core", "@repo/ui"];
 
-// Combined list for React apps
+// Combined list for React apps (Shell, React MFE, Next.js)
 export const federationShared = [...baseShared, ...reactShared];
+
+// Non-React apps (SolidJS, Vue, Svelte) - only share base libs
+export const nonReactShared = [
+  ...baseShared,
+  "@repo/core", // Core has some framework-agnostic utilities
+];
