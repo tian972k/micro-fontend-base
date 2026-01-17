@@ -24,10 +24,11 @@ Welcome to the **Micro-Frontend Base** project! This guide will help you set up 
     pnpm dev
     ```
     This command starts the **Shell** (host) app and all configured micro-frontends in parallel.
-    - Shell: http://localhost:3000
-    - App A: http://localhost:3001
-    - App B: http://localhost:3002
-    - ...
+    - Shell: http://localhost:8000
+    - App A: http://localhost:8001
+    - App B: http://localhost:8002
+    - App C: http://localhost:8003
+    - App D: http://localhost:8004
 
 ## 3. Project Structure
 

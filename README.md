@@ -13,12 +13,16 @@ A production-ready, Enterprise-grade Micro-Frontend foundation powered by **Turb
   - **Shared**: Framework-agnostic **Zustand** store (Vanilla JS).
   - **Reactive**: Custom Hooks/Adapters for React (`useUserStore`).
 - **🛡️ Resilience**: Built-in health checks, retry mechanisms, and graceful maintenance modes.
+- **✨ Developer Experience**:
+  - **Beautiful Logging**: Custom standardized logger with dev/prod modes.
+  - **Automated Scaffolding**: `pnpm create-app` to generate new MFEs in seconds.
+  - **Unified Theme**: Shared Tailwind tokens across all apps.
 
 ---
 
 ## 🏛️ System Architecture
 
-Our architecture follows a layered approach, strictly separating the **Platform** (Shared) from the **Domain** (Micro-Apps), bridged by **Module Federation**.
+Our architecture follows a layered approach, strictly separating the **Platform** (Shared) from the **Domain** (Micro-Apps), bridged by **Module Federation**. For detailed architectural decisions, see [ARCHITECTURE.md](./docs/ARCHITECTURE.md).
 
 ```mermaid
 graph TD

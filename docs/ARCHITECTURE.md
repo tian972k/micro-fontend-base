@@ -1,95 +1,89 @@
-# Project Architecture & Standards
+# System Architecture
 
-This document defines the architectural standards for the Micro-Frontend Monorepo. All contributors must adhere to these guidelines to maintain a scalable, "Senior"-level codebase.
+## Overview
 
-## 1. Core Principles
+The platform uses a **Micro-Frontend (MFE)** architecture based on **Module Federation**. It separates the application into a **Host** (Shell) and multiple **Remotes** (Micro-Apps), allowing independent development, testing, and deployment of features.
 
-- **Feature-Based Architecture**: Code is organized by **Feature** (domain) rather than just by technical type (components vs hooks).
-- **Encapsulation**: Features should be self-contained. Avoid deep imports between features. Use shared `core` or `lib` for cross-feature communication.
-- **Thin Routes**: Route files (pages) should only handle data loading and routing logic. The UI implementation should live in `features/` or `components/`.
-- **Strict Typing**: All code must be strongly typed (TypeScript).
+```mermaid
+graph TD
+    User((User)) --> Shell["Shell (Host)"]
 
-## 2. Shell Application (Remix)
+    subgraph "Micro-Apps"
+        AppA["App A (React)"]
+        AppB["App B (React)"]
+        AppC["App C (Vue)"]
+        AppD["App D (Svelte)"]
+    end
 
-Path: `apps/shell`
+    subgraph "Shared Platform Layer"
+        Core["@repo/core"]
+        UI["@repo/ui"]
+        Utils["@repo/utils"]
+    end
 
-The Shell application orchestrates the micro-frontends. It follows a modified feature-based structure compatible with Remix's file-system routing.
+    Shell --> AppA
+    Shell --> AppB
+    Shell --> AppC
+    Shell --> AppD
 
-```text
-apps/shell/app/
-├── components/          # Shared, generic UI components
-│   ├── layout/          # Layout-specific components (Sidebar, Navbar, Footer)
-│   └── ui/              # Primitive UI components (Buttons, Inputs)
-├── features/            # Feature-Specific Dependencies
-│   ├── auth/            # Authentication logic, forms, and contexts
-│   └── dashboard/       # Dashboard widgets and specific logic
-├── hooks/               # Global, shared hooks (e.g., useTheme)
-├── lib/                 # Pure utility functions, constants, formatting
-├── routes/              # Remix Routes (Keep these files minimal!)
-├── services/            # API/Backend integration services
-├── store/               # Global state managers (Zustand, etc.)
-└── types/               # Shared type definitions for the app
+    Shell -.-> Core
+    Shell -.-> UI
+    AppA -.-> Core
+    AppA -.-> UI
+    AppB -.-> Core
+    AppB -.-> UI
+    AppC -.-> Core
+    AppD -.-> Core
 ```
 
-### Rules for Shell
+## Module Federation Strategy
 
-- **Do not** write complex UI logic inside `routes/*.tsx`. Import a view component from `features/` or `components/`.
-- **Do not** put feature-specific components in `components/`. Put them in `features/<feature-name>/components/`.
+We utilize runtime dependency sharing to optimize performance and ensure consistency.
 
-## 3. Micro-Frontends (MFE) Structure
+### Shared Dependencies
 
-All micro-frontends (`apps/app-*`) must follow a consistent internal structure, regardless of the framework (React, Vue, Svelte).
+To prevent duplicate downloads of common libraries (like React, Lodash), we define a **Centralized Shared Configuration** in `@repo/config`.
 
-### React / Generic Structure (`apps/app-a`, `apps/app-b`)
+**Source of Truth:** `packages/config/src/shared-deps.ts`
 
-```text
-src/
-├── components/          # Shared components used across multiple pages/features
-├── features/            # Domain-specific modules
-│   └── [feature-name]/
-│       ├── components/  # Components specific to this feature
-│       ├── hooks/       # Hooks specific to this feature
-│       └── [Feature].tsx
-├── layouts/             # Page layouts (if MFE has its own routing/layout)
-├── lib/                 # Utilities and helper functions
-├── services/            # API calls
-├── types/               # Shared types
-└── App.tsx              # Entry point
-```
+The following libraries are shared as singletons:
 
-### Vue Structure (`apps/app-c`)
+- `react`, `react-dom`
+- `lodash`, `dayjs`
+- `@repo/core`
+- `@repo/ui`
+- `@repo/utils`
 
-```text
-src/
-├── components/          # Global Vue components
-├── composables/         # Shared composables (hooks)
-├── features/            # Domain features
-├── layouts/             # Layout components
-├── views/             # Page views
-└── App.vue              # Entry point
-```
+### Framework Handling
 
-### Svelte Structure (`apps/app-d`)
+While the Shell is React-based, the platform supports polyglot micro-frontends:
 
-```text
-src/
-├── lib/                 # Svelte standard for shared code
-│   ├── components/
-│   ├── stores/
-│   └── utils/
-├── routes/              # If using SvelteKit-like routing or just Views
-└── App.svelte
-```
+- **React Apps**: Consume the shared React instance from the Shell.
+- **Vue/Svelte Apps**: Bundle their own framework runtime but still share framework-agnostic libs (Lodash, Core, Utils).
 
-## 4. Coding Standards
+## Core Packages
 
-- **File Naming**:
-  - React Components: `PascalCase.tsx` (e.g., `AppSidebar.tsx`)
-  - Functions/Hooks/Utils: `kebab-case.ts` (e.g., `use-auth.ts`, `format-date.ts`)
-  - Remix Routes: `kebab-case.route.tsx`
-- **Exports**: Use Named Exports (`export const ...`) over Default Exports, except for Remix Route pages and Lazy loaded components which require default exports.
-- **Imports**: Use absolute imports `@/` where configured.
+### 1. `@repo/core`
 
-## 5. Adding a New MFE
+The nervous system of the platform.
 
-When running `pnpm create-app`, the generated app _must_ be refactored to match this directory structure immediately.
+- **Logger**: Premium, standardized logging utility.
+- **State**: Global state management (Zustand).
+- **Events**: Cross-MFE communication.
+
+### 2. `@repo/ui`
+
+The design system.
+
+- Built on **Radix UI** and **Tailwind CSS**.
+- Theme-aware (Dark/Light mode).
+- exported as ESM for tree-shaking.
+
+### 3. `@repo/config`
+
+Shared static configuration.
+
+- Tailwind Config.
+- ESLint Presets.
+- Shared Dependency Lists.
+- Port Constants.
