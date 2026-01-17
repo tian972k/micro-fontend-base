@@ -1,30 +1,36 @@
 import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
+import vue from "@vitejs/plugin-vue";
 import federation from "@originjs/vite-plugin-federation";
 import path from "path";
 
-// This Vite config is SPECIFICALLY for building the MFE bundle
-// It ignores Next.js routing and bundles a specific entry point
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, path.resolve(__dirname, "../../.."), "");
-  const port = parseInt(env.APP_B_PORT || "8002", 10);
+  const port = parseInt(env.APP_C_PORT || "8003", 10);
   const url = `http://localhost:${port}`;
 
   return {
     plugins: [
-      react(),
+      vue(),
       federation({
-        name: "app_b",
+        name: "app_c",
         filename: "remoteEntry.js",
         exposes: {
-          "./Mfe": "./src/entry-mfe.tsx",
+          "./Mfe": "./src/entry-mfe.ts",
         },
-        shared: ["react", "react-dom", "@repo/core", "@repo/ui"],
+        shared: ["vue", "@repo/core", "@repo/ui"],
       }),
+      {
+        name: "serve-mfe-entry-in-dev",
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            if (req.url === "/assets/entry-mfe.js") {
+              req.url = "/src/entry-mfe.ts";
+            }
+            next();
+          });
+        },
+      },
     ],
-    define: {
-      "process.env": {}, // Polyfill process.env for Next.js compat
-    },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
@@ -37,11 +43,10 @@ export default defineConfig(({ mode }) => {
       target: "esnext",
       minify: false,
       cssCodeSplit: false,
-      outDir: "public", // Output to public for Next.js to serve
-      emptyOutDir: false, // Don't delete other public assets
       rollupOptions: {
         input: {
-          "entry-mfe": "./src/entry-mfe.tsx",
+          "entry-mfe": "./src/entry-mfe.ts",
+          main: "./src/main.ts",
         },
         output: {
           entryFileNames: "assets/[name].js",
@@ -49,6 +54,11 @@ export default defineConfig(({ mode }) => {
           assetFileNames: "assets/[name].[ext]",
         },
       },
+    },
+    server: {
+      port: port,
+      cors: true,
+      origin: url,
     },
     base: url,
   };

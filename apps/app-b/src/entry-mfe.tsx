@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { MfeComponent } from "./mfe-component";
+import MfeComponent from "./mfe-component";
 import "@repo/ui/globals.css";
 import { AppRegistry, type MicroApp, type MicroAppProps } from "@repo/core";
 

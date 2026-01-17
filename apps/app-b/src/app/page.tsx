@@ -1,6 +1,6 @@
 "use client";
 
-import { MfeComponent } from "../mfe-component";
+import MfeComponent from "../mfe-component";
 
 export default function Home() {
   return (
