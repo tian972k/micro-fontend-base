@@ -16,11 +16,11 @@ A production-ready Micro-Frontend foundation using **Turborepo**, **Remix** (App
 
 ```mermaid
 graph TD
-    User((User)) --> Shell[App Shell (Remix)]
+    User((User)) --> Shell["App Shell (Remix)"]
 
     subgraph "Host Environment"
-        Shell -->|Mounts| MFE_A[App A (Vite)]
-        Shell -->|Mounts| MFE_B[App B (Vite)]
+        Shell -->|Mounts| MFE_A["App A (Vite)"]
+        Shell -->|Mounts| MFE_B["App B (Vite)"]
     end
 
     subgraph "Shared Packages"
@@ -37,7 +37,7 @@ graph TD
     MFE_A --> UI
     MFE_A --> Utils
 
-    Core -->|Exposes| Store[Global User Store (Zustand)]
+    Core -->|Exposes| Store["Global User Store (Zustand)"]
     Core -->|Exposes| EventBus[Event Bus]
 
     MFE_A -.->|Reads/Writes| Store
@@ -97,6 +97,7 @@ We use `remix-custom-routes` for flexible routing.
    ```
 
 3. **Run Development**
+
    ```bash
    pnpm dev
    ```

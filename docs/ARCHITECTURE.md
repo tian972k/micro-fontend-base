@@ -24,14 +24,14 @@ The platform follows a **Composition-based Micro-Frontend** approach.
 
 ```mermaid
 graph TD
-    User((User)) -->|HTPP Request| Shell[App Shell (Remix SSR)]
+    User((User)) -->|HTPP Request| Shell["App Shell (Remix SSR)"]
 
     subgraph "Browser / Client"
         ShellClient[Shell Client Bundle]
-        MFE_A[Micro-App A (Vite)]
-        MFE_B[Micro-App B (Vite)]
+        MFE_A["Micro-App A (Vite)"]
+        MFE_B["Micro-App B (Vite)"]
 
-        Store[Global User Store (Zustand)]
+        Store["Global User Store (Zustand)"]
         EventBus[Event Bus]
     end
 
