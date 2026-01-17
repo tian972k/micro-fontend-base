@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import federation from "@originjs/vite-plugin-federation";
 import path from "path";
+import { federationShared } from "../../packages/config/src";
 
 // This Vite config is SPECIFICALLY for building the MFE bundle
 // It ignores Next.js routing and bundles a specific entry point
@@ -19,7 +20,7 @@ export default defineConfig(({ mode }) => {
         exposes: {
           "./Mfe": "./src/entry-mfe.tsx",
         },
-        shared: ["react", "react-dom", "@repo/core", "@repo/ui"],
+        shared: federationShared,
       }),
     ],
     define: {

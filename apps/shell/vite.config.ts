@@ -5,6 +5,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
 import { routeExtensions } from "remix-custom-routes";
 
+import { federationShared } from "../../packages/config/src";
+
 export default defineConfig(({ mode, isSsrBuild }) => {
   const env = loadEnv(mode, path.resolve(__dirname, "../.."), "");
   const port = parseInt(env.SHELL_PORT || "8000", 10);
@@ -34,7 +36,7 @@ export default defineConfig(({ mode, isSsrBuild }) => {
             app_c: "http://localhost:8003/assets/remoteEntry.js",
             app_d: "http://localhost:8004/assets/remoteEntry.js",
           },
-          shared: ["react", "react-dom", "@repo/core", "@repo/ui"],
+          shared: federationShared,
         }),
       tsconfigPaths(),
     ],

@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import federation from "@originjs/vite-plugin-federation";
 import path from "path";
 
+import { federationShared } from "../../packages/config/src";
+
 // Main MFE Entry
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, path.resolve(__dirname, "../../.."), "");
@@ -18,7 +20,7 @@ export default defineConfig(({ mode }) => {
         exposes: {
           "./Mfe": "./src/entry-mfe.tsx",
         },
-        shared: ["react", "react-dom", "@repo/core", "@repo/ui"],
+        shared: federationShared,
       }),
       {
         name: "serve-mfe-entry-in-dev",
