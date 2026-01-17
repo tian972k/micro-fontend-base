@@ -12,6 +12,9 @@
   "dependencies": {
     "@repo/core": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:^",
+    "dayjs": "^1.11.19",
+    "lodash": "^4.17.21",
     "svelte": "^4.2.12"
   },
   "devDependencies": {

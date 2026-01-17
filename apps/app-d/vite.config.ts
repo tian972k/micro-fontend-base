@@ -1,8 +1,8 @@
 import { defineConfig, loadEnv } from "vite";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { svelte, vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import federation from "@originjs/vite-plugin-federation";
 import path from "path";
-import { federationShared } from "../../packages/config/src";
+import { baseShared } from "../../packages/config/src";
 
 // Main MFE Entry
 export default defineConfig(({ mode }) => {
@@ -12,14 +12,16 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
-      svelte(),
+      svelte({
+        preprocess: vitePreprocess(),
+      }),
       federation({
         name: "app_d",
         filename: "remoteEntry.js",
         exposes: {
           "./Mfe": "./src/entry-mfe.ts",
         },
-        shared: ["svelte", ...federationShared],
+        shared: ["svelte", ...baseShared],
       }),
       {
         name: "serve-mfe-entry-in-dev",

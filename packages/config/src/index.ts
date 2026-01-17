@@ -1,3 +1,3 @@
 export * from "./env/ports";
 export * from "./constants/keys";
-export * from "./shared-deps";
+export { baseShared, reactShared, federationShared } from "./shared-deps";

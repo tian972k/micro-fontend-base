@@ -11,6 +11,9 @@
   "dependencies": {
     "@repo/core": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:^",
+    "dayjs": "^1.11.19",
+    "lodash": "^4.17.21",
     "vue": "^3.4.21"
   },
   "devDependencies": {

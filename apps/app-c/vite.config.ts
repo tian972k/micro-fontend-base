@@ -2,7 +2,7 @@ import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import federation from "@originjs/vite-plugin-federation";
 import path from "path";
-import { federationShared } from "../../packages/config/src";
+import { baseShared } from "../../packages/config/src";
 
 // Main MFE Entry
 export default defineConfig(({ mode }) => {
@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
         exposes: {
           "./Mfe": "./src/entry-mfe.ts",
         },
-        shared: ["vue", ...federationShared],
+        shared: ["vue", ...baseShared],
       }),
       {
         name: "serve-mfe-entry-in-dev",
