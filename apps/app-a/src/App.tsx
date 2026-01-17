@@ -1,6 +1,9 @@
 import { UserProfileFeature } from "./features/user-profile";
 
-function App() {
+import { type MicroAppProps } from "@repo/core";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function App(_props: MicroAppProps) {
   return <UserProfileFeature />;
 }
 

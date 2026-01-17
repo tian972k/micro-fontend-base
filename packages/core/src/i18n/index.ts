@@ -1,4 +1,4 @@
-import i18next from "i18next";
+import i18next, { type Resource, type i18n as I18nInstance } from "i18next";
 
 // Shared i18n configuration for all frameworks
 export const i18nConfig = {
@@ -11,7 +11,7 @@ export const i18nConfig = {
 };
 
 // Shared translations - can be extended by each MFE
-export const sharedTranslations = {
+export const sharedTranslations: Resource = {
   en: {
     common: {
       increment: "Increment",
@@ -35,13 +35,13 @@ export const sharedTranslations = {
 };
 
 // Create a shared i18next instance (for non-React usage or direct access)
-export const i18n = i18next.createInstance();
+export const i18n: I18nInstance = i18next.createInstance();
 
 // Initialize function - call this from each framework's entry
 export async function initI18n(
-  resources?: Record<string, Record<string, unknown>>,
+  resources?: Resource,
   lng?: string,
-) {
+): Promise<I18nInstance> {
   if (i18n.isInitialized) return i18n;
 
   await i18n.init({

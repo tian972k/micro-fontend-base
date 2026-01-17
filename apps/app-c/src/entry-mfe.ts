@@ -3,8 +3,8 @@ import App from "./App.vue";
 import { AppRegistry, type MicroApp, type MicroAppProps } from "@repo/core";
 import "@repo/ui/globals.css";
 
-const mount = (container: HTMLElement, _props: MicroAppProps) => {
-  const app = createApp(App);
+const mount = (container: HTMLElement, props: MicroAppProps) => {
+  const app = createApp(App, props);
   app.mount(container);
   (container as HTMLElement & { _vueApp?: typeof app })._vueApp = app;
 };
