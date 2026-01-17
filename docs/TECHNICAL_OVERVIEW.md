@@ -12,21 +12,28 @@ graph TD
     CDN -->|2. Serve Shell| Shell[Shell App (Remix SSR)]
 
     subgraph "Browser Runtime (Module Federation)"
-        Shell -->|3. Mount| React[App React]
-        Shell -->|3. Mount| Vue[App Vue]
-        Shell -->|3. Mount| Svelte[App Svelte]
-        Shell -->|3. Mount| Solid[App SolidJS]
+        Shell -->|3. Mount| React[App React]:::react
+        Shell -->|3. Mount| Vue[App Vue]:::vue
+        Shell -->|3. Mount| Svelte[App Svelte]:::svelte
+        Shell -->|3. Mount| Solid[App SolidJS]:::solid
     end
 
     subgraph "Shared Layer"
-        Core[@repo/core]
-        UI[@repo/ui]
-        Utils[@repo/utils]
+        Core[@repo/core]:::shared
+        UI[@repo/ui]:::shared
+        Utils[@repo/utils]:::shared
     end
 
     React --> Core & UI
     Vue --> Core & UI
     Svelte --> Core & UI
+    Solid --> Core & UI
+
+    classDef react fill:#61dafb,color:#000,stroke:#2da6cc
+    classDef vue fill:#42b883,color:#fff,stroke:#35495e
+    classDef svelte fill:#ff3e00,color:#fff,stroke:#cc3200
+    classDef solid fill:#2c4f7c,color:#fff,stroke:#1e3552
+    classDef shared fill:#f5f5f5,color:#333,stroke:#aeaeae,stroke-dasharray: 5 5
 ```
 
 ---
@@ -145,19 +152,25 @@ Our CI/CD pipeline uses `smart-docker-build.js` to minimize build times and cost
 
 ```mermaid
 graph TD
-    Start([Git Push]) --> Turbo{Turbo Change Analysis}
+    Start([Git Push]) --> Turbo{Turbo Change Analysis}:::turbo
 
-    Turbo -->|Changed| React[Build App React]
-    Turbo -->|Unchanged| Vue[Skip App Vue]
-    Turbo -->|Changed| Shell[Build Shell]
+    Turbo -->|Changed| React[Build App React]:::build
+    Turbo -->|Unchanged| Vue[Skip App Vue]:::skip
+    Turbo -->|Changed| Shell[Build Shell]:::build
 
-    React --> DockerReact[Docker Build]
-    Shell --> DockerShell[Docker Build]
+    React --> DockerReact[Docker Build]:::docker
+    Shell --> DockerShell[Docker Build]:::docker
 
-    DockerReact --> Registry[(Container Registry)]
+    DockerReact --> Registry[(Container Registry)]:::registry
     DockerShell --> Registry
 
     Vue -.->|Use Cached| Registry
+
+    classDef turbo fill:#ef4444,color:#fff,stroke:#b91c1c
+    classDef build fill:#3b82f6,color:#fff,stroke:#2563eb
+    classDef skip fill:#9ca3af,color:#fff,stroke:#4b5563,stroke-dasharray: 5 5
+    classDef docker fill:#0ea5e9,color:#fff,stroke:#0284c7
+    classDef registry fill:#10b981,color:#fff,stroke:#059669
 ```
 
 ---

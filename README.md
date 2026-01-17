@@ -55,28 +55,48 @@ Build with **React, Vue, Svelte, SolidJS, or Next.js** - all in one platform! Ea
 
 ## 📊 Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                   Shell (Remix + SSR)                    │
-│                    Port 8000 - Host App                  │
-└─────────┬───────────────────────────────────────────────┘
-          │  Module Federation (Runtime Integration)
-          │
-    ┌─────┴──────┬─────────┬──────────┬──────────┬────────┐
-    │            │         │          │          │        │
-┌───▼───┐  ┌────▼────┐ ┌──▼────┐ ┌───▼────┐ ┌───▼───┐ ┌─▼────┐
-│React  │  │Next.js  │ │ Vue   │ │Svelte  │ │SolidJS│ │...   │
-│:8001  │  │ :8002   │ │ :8003 │ │ :8004  │ │ :8005 │ │      │
-└───┬───┘  └────┬────┘ └──┬────┘ └───┬────┘ └───┬───┘ └──────┘
-    │           │         │          │          │
-    └───────────┴─────────┴──────────┴──────────┘
-                      │
-            Shared Packages (@repo/*)
-         ┌────────────┼────────────┐
-         │            │            │
-      ┌──▼──┐    ┌───▼───┐   ┌───▼────┐
-      │ UI  │    │ Core  │   │ Utils  │
-      └─────┘    └───────┘   └────────┘
+```mermaid
+graph TD
+    subgraph "Host Application (Remix SSR)"
+        Shell[Shell App]:::host
+    end
+
+    subgraph "Micro-Frontends (Runtime Integration)"
+        React[App React]:::react
+        Next[App Next.js]:::next
+        Vue[App Vue]:::vue
+        Svelte[App Svelte]:::svelte
+        Solid[App SolidJS]:::solid
+        Others[...]:::others
+    end
+
+    subgraph "Shared Infrastructure"
+        Core[@repo/core]:::shared
+        UI[@repo/ui]:::shared
+        Utils[@repo/utils]:::shared
+    end
+
+    Shell --> React
+    Shell --> Next
+    Shell --> Vue
+    Shell --> Svelte
+    Shell --> Solid
+    Shell --> Others
+
+    React --> Core & UI
+    Next --> Core & UI
+    Vue --> Core & UI
+    Svelte --> Core & UI
+    Solid --> Core & UI & Utils
+
+    classDef host fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:2px
+    classDef react fill:#61dafb,color:#000,stroke:#2da6cc,stroke-width:2px
+    classDef next fill:#000000,color:#fff,stroke:#333,stroke-width:2px
+    classDef vue fill:#42b883,color:#fff,stroke:#35495e,stroke-width:2px
+    classDef svelte fill:#ff3e00,color:#fff,stroke:#cc3200,stroke-width:2px
+    classDef solid fill:#2c4f7c,color:#fff,stroke:#1e3552,stroke-width:2px
+    classDef others fill:#eee,color:#333,stroke:#bbb,stroke-width:2px,stroke-dasharray: 5 5
+    classDef shared fill:#f9f9f9,color:#333,stroke:#ddd,stroke-width:2px
 ```
 
 ---
