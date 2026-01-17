@@ -1,6 +1,6 @@
 # Coding Standards & Guidelines
 
-This document outlines the standards required to maintain a high-quality, consistent codebase across all micro-frontends.
+This document outlines the standards required to maintain a high-quality, consistent codebase across all micro-front-ends.
 
 ## 1. Naming Conventions
 
@@ -16,7 +16,7 @@ This document outlines the standards required to maintain a high-quality, consis
 
 We follow a **Feature-Based** architecture. Don't group by file type (e.g., all components in one folder). Group by feature.
 
-```
+```text
 src/
   features/
     auth/

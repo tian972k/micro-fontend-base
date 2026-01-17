@@ -1,6 +1,6 @@
 # Deployment & CI/CD Guide
 
-This guide details the High-Performance CI/CD strategy for our Micro-Frontend Monorepo, focusing on **Docker** and **Smart Change Detection**.
+This guide details the High-Performance CI/CD strategy for our Micro-Front-End Monorepo, focusing on **Docker** and **Smart Change Detection**.
 
 ## 🏗️ Architecture
 
@@ -24,10 +24,10 @@ We have provided a utility script at `scripts/smart-docker-build.js`.
 
 **How it works:**
 
-1.  It accepts a `COMMIT_RANGE` environment variable (e.g., `HEAD^...HEAD`).
-2.  It runs `turbo run build --filter="...[$COMMIT_RANGE]" --dry-run=json` to analyze the graph.
-3.  It gets a list of **affected packages**.
-4.  It triggers `docker build` **ONLY** for the affected applications.
+1. It accepts a `COMMIT_RANGE` environment variable (e.g., `HEAD^...HEAD`).
+2. It runs `turbo run build --filter="...[$COMMIT_RANGE]" --dry-run=json` to analyze the graph.
+3. It gets a list of **affected packages**.
+4. It triggers `docker build` **ONLY** for the affected applications.
 
 ### Usage
 
@@ -66,11 +66,11 @@ This ensures that the build system is **fully decentralized**. You can add new a
 
 ## 📋 Common Workflows
 
-### 1. Adding a New Micro-Frontend
+### 1. Adding a New Micro-Front-End
 
-1.  Create a new folder in `apps/` (e.g., `apps/marketing`).
-2.  Add a `package.json` with the name `marketing`.
-3.  **That's it!** The script will automatically find it.
+1. Create a new folder in `apps/` (e.g., `apps/marketing`).
+2. Add a `package.json` with the name `marketing`.
+3. **That's it!** The script will automatically find it.
     - If you are using Vite, it will default to `dist/` and `Dockerfile.mfe`.
     - If you need custom settings (like Next.js), add the `mfe` config block to `package.json` as shown above.
 

@@ -2,7 +2,12 @@
 
 ## Overview
 
-The platform uses a **Micro-Frontend (MFE)** architecture based on **Module Federation**. It separates the application into a **Host** (Shell) and multiple **Remotes** (Micro-Apps), allowing independent development, testing, and deployment of features.
+The platform uses a **Micro-Front-End (MFE)** architecture based on **Module Federation**. It separates the application into a **Host** (Shell) and multiple **Remotes** (Micro-Apps), allowing independent development, testing, and deployment of features.
+
+**Deep Dive Documentation:**
+
+- [Micro-Front-End Lifecycle & Integration Flow](./MFE_LIFECYCLE.md)
+- [Internationalization (i18n) Strategy](./I18N_STRATEGY.md)
 
 ```mermaid
 graph TD
@@ -10,7 +15,7 @@ graph TD
 
     subgraph "Micro-Apps"
         AppA["App A (React)"]
-        AppB["App B (React)"]
+        AppB["App B (Nextjs)"]
         AppC["App C (Vue)"]
         AppD["App D (Svelte)"]
     end
@@ -56,7 +61,7 @@ The following libraries are shared as singletons:
 
 ### Framework Handling
 
-While the Shell is React-based, the platform supports polyglot micro-frontends:
+While the Shell is React-based, the platform supports polyglot micro-front-ends:
 
 - **React Apps**: Consume the shared React instance from the Shell.
 - **Vue/Svelte Apps**: Bundle their own framework runtime but still share framework-agnostic libs (Lodash, Core, Utils).
