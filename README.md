@@ -71,9 +71,9 @@ graph TD
     end
 
     subgraph "Shared Infrastructure"
-        Core[@repo/core]:::shared
-        UI[@repo/ui]:::shared
-        Utils[@repo/utils]:::shared
+        Core["@repo/core"]:::shared
+        UI["@repo/ui"]:::shared
+        Utils["@repo/utils"]:::shared
     end
 
     Shell --> React

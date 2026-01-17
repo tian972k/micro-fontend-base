@@ -19,9 +19,9 @@ graph TD
     end
 
     subgraph "Shared Layer"
-        Core[@repo/core]:::shared
-        UI[@repo/ui]:::shared
-        Utils[@repo/utils]:::shared
+        Core["@repo/core"]:::shared
+        UI["@repo/ui"]:::shared
+        Utils["@repo/utils"]:::shared
     end
 
     React --> Core & UI
