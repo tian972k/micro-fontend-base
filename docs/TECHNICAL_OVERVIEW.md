@@ -1,95 +1,168 @@
 # 🧠 Technical Overview & System Design
 
-As a Senior Architect, this document outlines the core technical decisions and patterns that make this platform scalable and framework-agnostic.
+As a Senior Architect, this document outlines the core technical decisions, patterns, and visual architectures that make this platform scalable and framework-agnostic.
 
-## 1. MFE Orchestration Lifecycle
+## 1. High-Level Architecture
 
-The `MfeHost` component manages the lifecycle of a remote application. It doesn't just "load" a script; it follows a robust orchestration pattern:
+The platform follows a **Hub-and-Spoke** architecture where the Remix Shell acts as the orchestrator for various micro-frontends.
+
+```mermaid
+graph TD
+    User[End User] -->|1. Request| CDN[CDN / Edge]
+    CDN -->|2. Serve Shell| Shell[Shell App (Remix SSR)]
+
+    subgraph "Browser Runtime (Module Federation)"
+        Shell -->|3. Mount| React[App React]
+        Shell -->|3. Mount| Vue[App Vue]
+        Shell -->|3. Mount| Svelte[App Svelte]
+        Shell -->|3. Mount| Solid[App SolidJS]
+    end
+
+    subgraph "Shared Layer"
+        Core[@repo/core]
+        UI[@repo/ui]
+        Utils[@repo/utils]
+    end
+
+    React --> Core & UI
+    Vue --> Core & UI
+    Svelte --> Core & UI
+```
+
+---
+
+## 2. MFE Orchestration Lifecycle
+
+The `MfeHost` component manages the lifecycle of a remote application. It handles loading, mounting, error boundaries, and maintenance modes.
 
 ```mermaid
 sequenceDiagram
-    participant S as Shell (MfeHost)
-    participant R as Remote App
-    participant H as Health Check
+    autonumber
+    participant Browser
+    participant Shell as Shell (MfeHost)
+    participant Remote as Remote App
+    participant Health as Health Check
 
-    S->>H: GET /health.json
-    alt Healthy
-        H-->>S: 200 OK (Status: up)
-        S->>R: GET /manifest.json
-        R-->>S: 200 OK (entry, css, assets)
-        S->>S: Inject CSS & JS Assets
-        S->>R: Wait for window.MFE[name]
-        R-->>S: Registered
-        S->>R: mount(container, props)
-    else Maintenance
-        H-->>S: 200 OK (Status: maintenance)
-        S->>S: Show MfeMaintenance UI
-    else Error
-        H-->>S: Connection Refused / 500
-        S->>S: Show MfeError UI (Retry)
+    Browser->>Shell: Visit /dashboard/vue
+    Shell->>Health: GET /health.json (Pre-flight)
+
+    alt is Healthy
+        Health-->>Shell: 200 OK (status: "up")
+        Shell->>Remote: Fetch remoteEntry.js
+        Remote-->>Shell: JS Bundle
+        Shell->>Remote: Fetch specific module (./entry)
+        Shell->>Shell: Link Shared Dependencies (React, Core)
+        Shell->>Remote: Call mount(container_id)
+        Remote-->>Browser: UI Renders
+    else is Maintenance
+        Health-->>Shell: 200 OK (status: "maintenance")
+        Shell->>Browser: Render Maintenance Banner
+    else is Down
+        Health-->>Shell: 500 / Timeout
+        Shell->>Browser: Render Error Boundary (Retry)
     end
 ```
 
-## 2. Cross-Framework State Syncing
+---
 
-We use **Zustand** as our state management library because of its minimalist "vanilla" nature, which allows it to run in any JS environment (React, Vue, Svelte, or pure JS).
+## 3. Cross-Framework State Syncing (EventBus)
 
-### State Synchronization Flow
-
-The `syncStore` utility ensures that when state changes in App React, it is reflected in App Vue via the `EventBus`.
+We use a **Distributed State Pattern**. Each app has its own local Zustand store, kept in sync via a global `EventBus` in `@repo/core`.
 
 ```mermaid
-graph LR
-    subgraph AppReact ["Micro-App React (`apps/app-react`)"]
-        StoreA[Zustand Store]
-        SyncA[syncStore Adapter]
+flowchart LR
+    subgraph "App React"
+        ReactStore[("Zustand Source")]
+        ReactComp[React Component]
+        ReactComp -->|Action| ReactStore
     end
 
-    subgraph AppVue ["Micro-App Vue (`apps/app-vue`)"]
-        StoreB[Zustand Store]
-        SyncB[syncStore Adapter]
+    subgraph "App Vue"
+        VueStore[("Zustand Replica")]
+        VueComp[Vue Component]
+        VueStore -->|Reactivity| VueComp
     end
 
-    Bus((Global EventBus))
+    Bus{{"Global EventBus (@repo/core)"}}
 
-    StoreA -->|Local Change| SyncA
-    SyncA -->|Emit event| Bus
-    Bus -->|Broadcast| SyncB
-    SyncB -->|Set State| StoreB
+    ReactStore -->|1. On Change| Bus
+    Bus -->|2. Broadcast| VueStore
+    VueStore -->|3. Update| VueComp
 
-    StoreB -->|Local Change| SyncB
-    SyncB -->|Emit event| Bus
-    Bus -->|Broadcast| SyncA
-    SyncA -->|Set State| StoreA
+    style Bus fill:#f96,stroke:#333
+    style ReactStore fill:#61dafb,stroke:#333
+    style VueStore fill:#42b883,stroke:#333
 ```
 
-## 3. Deployment Strategy (Smart Builds)
+---
 
-In a large monorepo, we avoid building everything on every commit. Our `smart-docker-build.js` script analyzes changed files using Turborepo's hashing and only builds the affected Docker images.
+## 4. Federated Dependency Sharing
 
-## 4. Design System Architecture
+We optimize bundle sizes by selectively sharing dependencies based on the consumer's framework.
 
-The `@repo/ui` package is the single source of truth for design.
+```mermaid
+classDiagram
+    class BaseShared {
+        @repo/core
+        @repo/utils
+        dayjs
+    }
 
-- **Styling**: Tailwind CSS with shared configuration in `@repo/config`.
-- **Components**: Framer Motion for animations, Radix UI for primitives.
-- **Versioning**: Consumers use the workspace version during development and can be pinned in production.
+    class ReactShared {
+        react
+        react-dom
+        @repo/ui (React)
+    }
 
-## Architecture Overview
+    class NonReactShared {
+        @repo/ui (WebComponents/Native)
+    }
 
-### 1. Routing Convention (Shell)
+    BaseShared <|-- ReactApps
+    ReactShared <|-- ReactApps
 
-The Shell application uses a **Next.js-style folder-based routing** system:
+    BaseShared <|-- NonReactApps
+    NonReactShared <|-- NonReactApps
 
-- `app/routes/folder/page.tsx` -> `/folder`
-- `app/routes/folder/layout.tsx` -> Layout for `/folder` path.
-  This is implemented via a custom Vite plugin configuration bridging to Remix.
+    class ReactApps {
+        Shell
+        App-React
+        App-NextJS
+    }
 
-### 2. Module Federation
+    class NonReactApps {
+        App-Vue
+        App-Svelte
+        App-SolidJS
+    }
+```
 
-Lightning-fast builds and great Module Federation support via plugins.
+---
 
-## 5. Decision Log (ADR)
+## 5. Deployment Strategy (Smart Builds)
+
+Our CI/CD pipeline uses `smart-docker-build.js` to minimize build times and costs.
+
+```mermaid
+graph TD
+    Start([Git Push]) --> Turbo{Turbo Change Analysis}
+
+    Turbo -->|Changed| React[Build App React]
+    Turbo -->|Unchanged| Vue[Skip App Vue]
+    Turbo -->|Changed| Shell[Build Shell]
+
+    React --> DockerReact[Docker Build]
+    Shell --> DockerShell[Docker Build]
+
+    DockerReact --> Registry[(Container Registry)]
+    DockerShell --> Registry
+
+    Vue -.->|Use Cached| Registry
+```
+
+---
+
+## 6. Decision Log (ADR)
 
 | Decision            | Logic                                                                  |
 | :------------------ | :--------------------------------------------------------------------- |

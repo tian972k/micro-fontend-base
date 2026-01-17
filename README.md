@@ -98,6 +98,9 @@ cd micro-frontend-base
 # Install dependencies
 pnpm install
 
+# Setup Environment
+cp .env.example .env
+
 # Start all apps in development mode
 pnpm dev
 

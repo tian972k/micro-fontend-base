@@ -2,7 +2,7 @@
 
 Welcome to the **Micro-Front-End Base Platform**! This guide will help you get up and running, understand our architecture, and make your first contribution.
 
-- **Polyglot Remotes**: React, Vue, Svelte, and SolidJS supported via Vite + Federation.
+> **Visual Guide**: See [Technical Overview](./TECHNICAL_OVERVIEW.md) for architectural diagrams.
 
 ## 🏁 Day 1: Environment Setup
 
@@ -24,7 +24,10 @@ cd micro-fontend-base
 # Install dependencies
 pnpm install
 
-# Setup environment variables
+# Setup environment variables (Root config)
+cp .env.example .env
+
+# Setup Shell environment (optional, inherits from root if not present)
 cp apps/shell/.env.example apps/shell/.env
 ```
 
@@ -41,12 +44,16 @@ Open [http://localhost:8000](http://localhost:8000) to see the platform in actio
 
 ## 🏗️ Architecture Overview
 
-The platform is built on a **Hub-and-Spoke** model using **Module Federation**:
+The platform uses a **Hub-and-Spoke** model.
 
-1.  **Shell (Host)**: The primary Remix application. It handles routing, authentication, and the global layout.
-2.  **Micro-Apps (Remotes)**: Independent applications (React, Next.js, Vue, Svelte) that are loaded into the Shell at runtime.
-3.  **Core Package (`@repo/core`)**: The shared "brain" containing state management, logging, and MFE orchestration.
-4.  **UI Package (`@repo/ui`)**: The shared design system built with shadcn/ui and Tailwind.
+```mermaid
+graph LR
+    User --> Shell[Shell (Remix)]
+    Shell --> React[App React]
+    Shell --> Vue[App Vue]
+    Shell --> Svelte[App Svelte]
+    Shell --> Solid[App Solid]
+```
 
 ### Key Concepts
 
@@ -68,13 +75,11 @@ pnpm create-app
 
 Follow the prompts to select your framework and name your app.
 
-- Pick your framework (React, Vue, Svelte, or SolidJS).
-
 ### Registering a New App in the Shell
 
-1.  Add the new app's port in `packages/config/src/ports.ts`.
-2.  Update `apps/shell/vite.config.ts` (if using static federation) or dynamic registration in the Shell's routing.
-3.  Create a route in `apps/shell/app/routes/` to host the new app.
+1.  Add the new app's port in `.env` and `packages/config/src/env/ports.ts`.
+2.  Update `apps/shell/vite.config.ts` (if using static federation).
+3.  Create a route in `apps/shell/app/routes/`.
 
 ### Shared UI Components
 
@@ -103,16 +108,8 @@ This scaffolds the component, styles, and Storybook stories.
 
 ---
 
-## 🆘 Troubleshooting
-
-- **"Module not found" error**: Usually caused by a missing dependency in the `shared` config of Module Federation. Check `packages/config/src/shared-deps.ts`.
-- **HMR not working**: Ensure ports are correctly configured and no conflicts exist.
-- **State not syncing**: Verify both apps are using the same `syncStore` key and the same version of `@repo/core`.
-
----
-
 ## 🔗 Internal Documentation
 
-- [Architecture Deep Dive](./ARCHITECTURE.md)
+- [Architecture Deep Dive (Diagrams included)](./TECHNICAL_OVERVIEW.md)
 - [Deployment Guide](./DEPLOYMENT.md)
 - [Coding Standards](./STANDARDS.md)
