@@ -1,45 +1,57 @@
 import {
-  LayoutDashboard,
-  AppWindow,
-  Settings,
-  type LucideIcon,
-} from "lucide-react";
-
+  Atom,
+  Globe,
+  SquaresFour,
+  CircleNotch,
+  Lightning,
+  House,
+  Gear,
+  type IconProps,
+} from "@phosphor-icons/react";
+import React from "react";
+import { APP_IDS } from "@repo/config";
 export interface NavItem {
   title: string;
   url: string;
-  icon: LucideIcon;
+  icon: React.ForwardRefExoticComponent<
+    IconProps & React.RefAttributes<SVGSVGElement>
+  >;
 }
 
 export const NAV_ITEMS: NavItem[] = [
   {
     title: "Dashboard",
     url: "/dashboard",
-    icon: LayoutDashboard,
+    icon: House,
   },
   {
-    title: "Application A (React)",
-    url: "/dashboard/app-a",
-    icon: AppWindow,
+    title: "React App",
+    url: `/dashboard/${APP_IDS.REACT}`,
+    icon: Atom,
   },
   {
-    title: "Application B (Next.js)",
-    url: "/dashboard/app-b",
-    icon: AppWindow,
+    title: "Next.js App",
+    url: `/dashboard/${APP_IDS.NEXTJS}`,
+    icon: SquaresFour,
   },
   {
-    title: "Application C (Vue)",
-    url: "/dashboard/app-c",
-    icon: AppWindow,
+    title: "Vue App",
+    url: `/dashboard/${APP_IDS.VUE}`,
+    icon: Globe,
   },
   {
-    title: "Application D (Svelte)",
-    url: "/dashboard/app-d",
-    icon: AppWindow,
+    title: "Svelte App",
+    url: `/dashboard/${APP_IDS.SVELTE}`,
+    icon: CircleNotch,
+  },
+  {
+    title: "SolidJS App",
+    url: `/dashboard/${APP_IDS.SOLIDJS}`,
+    icon: Lightning,
   },
   {
     title: "Settings",
     url: "/dashboard/settings",
-    icon: Settings,
+    icon: Gear,
   },
 ];

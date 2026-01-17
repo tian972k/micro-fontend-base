@@ -15,6 +15,7 @@
     "prepare": "husky install",
     "clean": "turbo run clean && rm -rf node_modules",
     "storybook": "pnpm --filter @repo/ui storybook",
+    "cli": "node scripts/cli.mjs",
     "create-app": "node scripts/create-app.mjs",
     "generate-ui": "node scripts/generate-ui.mjs"
   },

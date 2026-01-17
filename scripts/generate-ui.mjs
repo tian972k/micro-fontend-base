@@ -6,8 +6,7 @@ import readline from "readline";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -100,6 +99,28 @@ export const Default: Story = {
   );
   console.log(`Updated exports in ${UI_INDEX_PATH}`);
 };
+
+const showHelp = () => {
+  console.log(`
+🎨 UI Component Generator
+=========================
+Usage: pnpm generate-ui [options]
+
+Options:
+  -h, --help    Show this help message
+
+Description:
+  Generates a new React component in '@repo/ui'.
+  - Creates the component file (.tsx)
+  - Creates a Storybook story (.stories.tsx)
+  - Exports the component from the main UI package index.
+  `);
+  process.exit(0);
+};
+
+if (process.argv.includes("--help") || process.argv.includes("-h")) {
+  showHelp();
+}
 
 rl.question(
   "Enter component name (kebab-case, e.g., my-component): ",

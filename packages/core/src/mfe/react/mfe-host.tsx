@@ -161,11 +161,13 @@ export function MfeHost({
         const microApp = await waitForMfe(name);
         microApp.mount(containerRef.current, { theme: "light", ...props });
         if (mounted) setStatus("mounted");
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(`[MfeHost] Error mounting ${name}:`, err);
         if (mounted) {
           setStatus("error");
-          setErrorDetails(err.message || "Failed to mount application");
+          setErrorDetails(
+            err instanceof Error ? err.message : "Failed to mount application",
+          );
         }
       }
     };

@@ -16,6 +16,7 @@
     "clean": "rm -rf node_modules build public/build .cache .turbo"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@remix-run/node": "^2.8.0",
     "@remix-run/react": "^2.8.0",
     "@remix-run/serve": "^2.8.0",

@@ -1,0 +1,1 @@
+import{j as t}from"./bundle-mjs-BnpRZrpY.js";import{c as a}from"./index-ScUhNWld.js";function o({className:e,...r}){return t.jsx("div",{className:a("animate-pulse rounded-md bg-muted",e),...r})}try{o.displayName="Skeleton",o.__docgenInfo={description:"",displayName:"Skeleton",props:{}}}catch{}export{o as S};
