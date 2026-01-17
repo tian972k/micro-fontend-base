@@ -5,7 +5,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import styles from "@repo/ui/globals.css?url";
 import localStyles from "./tailwind.css?url";
 import { ThemeProvider } from "./components/providers/theme-provider";
@@ -14,6 +14,17 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
   { rel: "stylesheet", href: localStyles },
 ];
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Orbit | Micro-Frontend Platform" },
+    {
+      name: "description",
+      content:
+        "Enterprise-grade Micro-Frontend Platform powered by Remix and Vite",
+    },
+  ];
+};
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (

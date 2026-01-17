@@ -1,5 +1,6 @@
 {
-  "name": "app-base",
+  "name": "orbit",
+  "author": "Tuan Pham <phamtuandev0907@gmail.com>",
   "private": true,
   "scripts": {
     "build": "turbo run build",

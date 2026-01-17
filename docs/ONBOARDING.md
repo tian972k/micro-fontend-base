@@ -1,6 +1,6 @@
 # 🚀 Developer Onboarding Guide
 
-Welcome to the **Micro-Front-End Base Platform**! This guide will help you get up and running, understand our architecture, and make your first contribution.
+Welcome to **Orbit**! This guide will help you get up and running, understand our architecture, and make your first contribution.
 
 > **Visual Guide**: See [Technical Overview](./TECHNICAL_OVERVIEW.md) for architectural diagrams.
 

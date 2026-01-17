@@ -1,6 +1,8 @@
-# 🚀 Enterprise Micro-Frontend Platform
+# 🪐 Orbit: Enterprise Micro-Frontend Platform
 
 > **Production-ready, multi-framework micro-frontend architecture** optimized for scalability, performance, and developer experience.
+
+> **Hub-and-Spoke Architecture:** Like planets orbiting a sun, your micro-frontends (React, Vue, Svelte) revolve around a central Remix Shell, working in perfect harmony while maintaining independence.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 [![Turborepo](https://img.shields.io/badge/Turborepo-Monorepo-red.svg)](https://turbo.build/)
@@ -450,8 +452,6 @@ pnpm create-app
 
 ---
 
-## 💡 Why This Architecture?
-
 ### For Engineering Teams
 
 - ✅ **Independent deployments** - Deploy apps without coordinating
@@ -476,7 +476,7 @@ pnpm create-app
 
 - 📖 Read the [Documentation](./docs/)
 - 🐛 Report issues on GitHub
-- 💬 Contact the platform team
+- 💬 Contact: [phamtuandev0907@gmail.com](mailto:phamtuandev0907@gmail.com)
 
 ### FAQ
 
