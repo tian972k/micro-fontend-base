@@ -168,17 +168,29 @@ function createLogger(defaultOptions: LoggerOptions = {}) {
     },
 
     /** Display server ready message with URLs */
-    server(port: number, host = "localhost") {
+    server(port: number, host = "localhost", mode: "dev" | "prod" = "dev") {
       const localUrl = `http://${host}:${port}`;
       console.log("");
-      console.log(`  ${c.green}${c.bold}⚡ Server Ready${c.reset}`);
-      console.log("");
-      console.log(
-        `  ${c.gray}┃${c.reset}  ${c.bold}Local${c.reset}    ${c.cyan}${c.underline}${localUrl}${c.reset}`,
-      );
-      console.log(
-        `  ${c.gray}┃${c.reset}  ${c.bold}Network${c.reset}  ${c.gray}use --host to expose${c.reset}`,
-      );
+
+      if (mode === "dev") {
+        console.log(
+          `  ${c.green}${c.bold}⚡ Server Ready${c.reset} ${c.gray}(Development)${c.reset}`,
+        );
+        console.log("");
+        console.log(
+          `  ${c.gray}┃${c.reset}  ${c.bold}Local${c.reset}    ${c.cyan}${c.underline}${localUrl}${c.reset}`,
+        );
+        console.log(
+          `  ${c.gray}┃${c.reset}  ${c.bold}Network${c.reset}  ${c.gray}use --host to expose${c.reset}`,
+        );
+      } else {
+        console.log(
+          `  ${c.green}${c.bold}🚀 Application Started${c.reset} ${c.gray}(Production)${c.reset}`,
+        );
+        console.log(
+          `  ${c.gray}Listening on:${c.reset} ${c.cyan}${localUrl}${c.reset}`,
+        );
+      }
       console.log("");
     },
 
