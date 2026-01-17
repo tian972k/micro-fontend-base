@@ -9,17 +9,25 @@
     "dev:a": "turbo run dev --filter=app-a",
     "dev:b": "turbo run dev --filter=app-b",
     "lint": "turbo run lint",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"!node_modules\" \"!**/node_modules\"",
+    "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"!node_modules\" \"!**/node_modules\"",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prepare": "husky install",
     "clean": "turbo run clean && rm -rf node_modules",
-    "create-app": "node scripts/create-app.js"
+    "storybook": "pnpm --filter @repo/ui storybook",
+    "create-app": "node scripts/create-app.mjs",
+    "generate-ui": "node scripts/generate-ui.mjs"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{md,json,css}": [
+    "*.md": [
+      "markdownlint-cli2 --fix",
+      "prettier --write"
+    ],
+    "*.{json,css}": [
       "prettier --write"
     ]
   },
@@ -29,6 +37,7 @@
     "eslint": "^8.0.0",
     "husky": "^8.0.0",
     "lint-staged": "^13.0.0",
+    "markdownlint-cli2": "^0.20.0",
     "prettier": "^3.0.0",
     "turbo": "latest",
     "typescript": "^5.0.0"
