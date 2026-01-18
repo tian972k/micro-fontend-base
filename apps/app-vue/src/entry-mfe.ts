@@ -23,3 +23,4 @@ const microApp: MicroApp = { mount, unmount };
 AppRegistry.register(APP_IDS.VUE, microApp);
 
 export { mount, unmount };
+export default microApp;

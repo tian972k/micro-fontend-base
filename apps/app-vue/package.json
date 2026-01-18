@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "build": "vue-tsc && vite build && node ../../scripts/generate-manifest.mjs $PWD",
+    "build:mfe": "vite build && node ../../scripts/generate-manifest.mjs $PWD",
+    "preview": "vite preview",
+    "start": "vite preview"
   },
   "dependencies": {
     "@repo/core": "workspace:*",

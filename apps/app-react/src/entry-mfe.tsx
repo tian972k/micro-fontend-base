@@ -29,3 +29,4 @@ const microApp: MicroApp = { mount, unmount };
 AppRegistry.register(APP_IDS.REACT, microApp);
 
 export { mount, unmount };
+export default microApp;

@@ -7,7 +7,7 @@
 </script>
 
 <div
-  class="p-6 border rounded-lg bg-orange-50 text-orange-900 border-orange-200"
+  class="p-6 border rounded-lg bg-orange-50 dark:bg-orange-950/30 text-orange-900 dark:text-orange-100 border-orange-200 dark:border-orange-800"
 >
   <h2 class="text-2xl font-bold mb-4">Micro App D (Svelte 4)</h2>
   <p class="mb-4 opacity-80">
@@ -24,7 +24,7 @@
       </button>
     </div>
 
-    <div class="p-4 bg-white/50 rounded-md border border-orange-100 text-sm">
+    <div class="p-4 bg-white/50 dark:bg-black/20 rounded-md border border-orange-100 dark:border-orange-900 text-sm">
       <strong>SyncStore Status:</strong>
       <br />
       This component uses Svelte stores synced via the global EventBus.

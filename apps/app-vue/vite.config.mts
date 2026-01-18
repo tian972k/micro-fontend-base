@@ -1,13 +1,12 @@
 import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import federation from "@originjs/vite-plugin-federation";
-import path from "path";
-import { nonReactShared } from "../../packages/config/src";
+import path from "path";import { promises as fs } from "fs";import { nonReactShared, PORTS, APP_IDS } from "../../packages/config/src";
 
 // Main MFE Entry
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, path.resolve(__dirname, "../../.."), "");
-  const port = parseInt(env.APP_C_PORT || "8003", 10);
+  const port = PORTS[APP_IDS.VUE];
   const url = `http://localhost:${port}`;
 
   return {
@@ -24,9 +23,18 @@ export default defineConfig(({ mode }) => {
       {
         name: "serve-mfe-entry-in-dev",
         configureServer(server) {
-          server.middlewares.use((req, res, next) => {
+          server.middlewares.use(async (req, res, next) => {
             if (req.url === "/assets/entry-mfe.js") {
-              req.url = "/src/entry-mfe.ts";
+              try {
+                const filePath = path.resolve(__dirname, "dist/assets/entry-mfe.js");
+                const content = await fs.readFile(filePath, "utf-8");
+                res.setHeader("Content-Type", "application/javascript");
+                res.setHeader("Access-Control-Allow-Origin", "*");
+                res.end(content);
+                return;
+              } catch (error) {
+                console.error("Failed to serve entry-mfe.js:", error);
+              }
             }
             next();
           });
@@ -43,6 +51,7 @@ export default defineConfig(({ mode }) => {
     build: {
       modulePreload: false,
       target: "esnext",
+      manifest: true,
       minify: false,
       cssCodeSplit: false,
       rollupOptions: {
@@ -55,12 +64,21 @@ export default defineConfig(({ mode }) => {
           chunkFileNames: "assets/[name].js",
           assetFileNames: "assets/[name].[ext]",
         },
+        onwarn(warning, warn) {
+          // Suppress "use client" directive warnings from Radix UI
+          if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
+          warn(warning);
+        },
       },
     },
     server: {
       port: port,
       cors: true,
       origin: url,
+    },
+    preview: {
+      port: port,
+      cors: true,
     },
     base: url,
   };

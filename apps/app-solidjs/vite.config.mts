@@ -3,12 +3,12 @@ import solid from "vite-plugin-solid";
 import federation from "@originjs/vite-plugin-federation";
 import path from "path";
 
-import { nonReactShared } from "../../packages/config/src";
+import { nonReactShared, PORTS, APP_IDS } from "../../packages/config/src";
 
 // Main MFE Entry
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, path.resolve(__dirname, "../../.."), "");
-  const port = parseInt(env.APP_SOLIDJS_PORT || "8005", 10);
+  const port = PORTS[APP_IDS.SOLIDJS];
   const url = `http://localhost:${port}`;
 
   return {
@@ -68,12 +68,21 @@ export default defineConfig(({ mode }) => {
           "svelte",
           /^svelte\/.*/,
         ],
+        onwarn(warning, warn) {
+          // Suppress "use client" directive warnings from Radix UI
+          if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
+          warn(warning);
+        },
       },
     },
     server: {
       port: port,
       cors: true,
       origin: url,
+    },
+    preview: {
+      port: port,
+      cors: true,
     },
     base: url,
   };

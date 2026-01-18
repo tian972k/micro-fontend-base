@@ -2,13 +2,13 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import federation from "@originjs/vite-plugin-federation";
 import path from "path";
-import { federationShared } from "../../packages/config/src";
+import { federationShared, PORTS, APP_IDS } from "../../packages/config/src";
 
 // This Vite config is SPECIFICALLY for building the MFE bundle
 // It ignores Next.js routing and bundles a specific entry point
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, path.resolve(__dirname, "../../.."), "");
-  const port = parseInt(env.APP_B_PORT || "8002", 10);
+  const port = PORTS[APP_IDS.NEXTJS];
   const url = `http://localhost:${port}`;
 
   return {
@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => {
     define: {
       "process.env": {}, // Polyfill process.env for Next.js compat
     },
+    publicDir: false, // Disable publicDir to avoid conflict with outDir
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

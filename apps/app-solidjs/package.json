@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node ../../scripts/generate-manifest.mjs $PWD",
+    "build:mfe": "vite build && node ../../scripts/generate-manifest.mjs $PWD",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "start": "vite preview --port 8005",
+    "start": "vite preview",
     "clean": "rm -rf node_modules dist .cache .turbo"
   },
   "dependencies": {

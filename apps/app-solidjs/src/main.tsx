@@ -2,8 +2,12 @@ import { render } from "solid-js/web";
 import App from "./App";
 import "@repo/ui/globals.css";
 
+// Standalone mode: mount when running independently (not as MFE)
+const isStandalone = import.meta.env.VITE_STANDALONE === 'true';
 const root = document.getElementById("root");
 
-if (root) {
-  render(() => <App name="app-solidjs" />, root);
+if (isStandalone || root) {
+  if (root) {
+    render(() => <App name="app-solidjs" />, root);
+  }
 }

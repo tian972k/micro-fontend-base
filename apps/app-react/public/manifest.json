@@ -1,6 +1,7 @@
 {
-    "index.html": {
-        "file": "assets/entry-mfe.js",
-        "css": []
-    }
+  "index.html": {
+    "file": "src/entry-mfe.tsx",
+    "css": [],
+    "isDev": true
+  }
 }

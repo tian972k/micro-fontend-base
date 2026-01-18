@@ -1,5 +1,5 @@
 {
-    "status": "available",
-    "version": "1.0.0",
-    "message": "App B (Next.js Hybrid) is healthy"
+  "status": "available",
+  "version": "1.0.0",
+  "message": "Next.js MFE is healthy"
 }

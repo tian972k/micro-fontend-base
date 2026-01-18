@@ -3,12 +3,12 @@ import react from "@vitejs/plugin-react";
 import federation from "@originjs/vite-plugin-federation";
 import path from "path";
 
-import { federationShared } from "../../packages/config/src";
+import { federationShared, PORTS, APP_IDS } from "../../packages/config/src";
 
 // Main MFE Entry
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, path.resolve(__dirname, "../../.."), "");
-  const port = parseInt(env.APP_A_PORT || "8001", 10);
+  const port = PORTS[APP_IDS.REACT];
   const url = `http://localhost:${port}`;
 
   return {
@@ -44,6 +44,7 @@ export default defineConfig(({ mode }) => {
     build: {
       modulePreload: false,
       target: "esnext",
+      manifest: true,
       minify: false,
       cssCodeSplit: false, // Injects CSS into JS for simple MFE loading
       rollupOptions: {
@@ -56,12 +57,21 @@ export default defineConfig(({ mode }) => {
           chunkFileNames: "assets/[name].js",
           assetFileNames: "assets/[name].[ext]",
         },
+        onwarn(warning, warn) {
+          // Suppress "use client" directive warnings from Radix UI
+          if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
+          warn(warning);
+        },
       },
     },
     server: {
       port: port,
       cors: true,
       origin: url,
+    },
+    preview: {
+      port: port,
+      cors: true,
     },
     base: url, // Ensures assets are loaded from MFE server, not Shell
   };

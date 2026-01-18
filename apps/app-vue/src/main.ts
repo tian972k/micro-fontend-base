@@ -1,6 +1,8 @@
-import { reactive, watch } from "vue";
+import { createApp, reactive, watch } from "vue";
 import { syncStore, type CounterState } from "@repo/core";
 import { EVENT_KEYS } from "@repo/config";
+import App from "./App.vue";
+import "@repo/ui/globals.css";
 
 // 1. Define reactive state
 export const state = reactive({
@@ -27,3 +29,11 @@ syncStore<CounterState>(
   },
   { key: EVENT_KEYS.APP_COUNTER },
 );
+
+// Standalone mode: mount when running independently (not as MFE)
+const isStandalone = import.meta.env.VITE_STANDALONE === 'true';
+const appElement = document.getElementById("app");
+
+if (isStandalone && appElement) {
+  createApp(App).mount("#app");
+}
