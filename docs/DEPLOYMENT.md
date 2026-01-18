@@ -1,6 +1,6 @@
-# Deployment & CI/CD Guide
+# 🚢 Deployment & CI/CD Guide
 
-This guide details the High-Performance CI/CD strategy for our Micro-Front-End Monorepo.
+This guide details the High-Performance CI/CD strategy for our Micro-Frontend Monorepo.
 
 ## 🏗️ Architecture
 
@@ -89,5 +89,3 @@ sequenceDiagram
         end
     end
 ```
-
-See `scripts/smart-docker-build.js` for implementation details.

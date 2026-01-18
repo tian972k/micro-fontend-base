@@ -1,8 +1,14 @@
-# Coding Standards & Guidelines
+# 📏 Standards & Conventions
 
-This document outlines the standards required to maintain a high-quality, consistent codebase across all micro-front-ends.
+This document outlines the coding standards, structural conventions, and best practices for the **Orbit** platform.
 
-## 1. Naming Conventions
+## 1. Code Style
+
+- **TypeScript**: Strict mode enabled. No explicit `any` unless absolutely necessary for boundary types.
+- **Linting**: We use a shared ESLint config (`@repo/config`). Run `pnpm lint` before committing.
+- **Formatting**: Prettier is enforced via Git hooks.
+
+## 2. Naming Conventions
 
 | Item            | Convention       | Example                             |
 | :-------------- | :--------------- | :---------------------------------- |
@@ -12,58 +18,50 @@ This document outlines the standards required to maintain a high-quality, consis
 | **Functions**   | camelCase        | `handleSubmit`, `fetchData`         |
 | **Constants**   | UPPER_SNAKE_CASE | `API_URL`, `MAX_RETRIES`            |
 
-## 2. Project Structure
+## 3. Application Structure
 
-We follow a **Feature-Based** architecture. Don't group by file type (e.g., all components in one folder). Group by feature.
+We follow a **Feature-Based** architecture. Group files by business logic rather than technical type.
 
 ```text
 src/
   features/
     auth/
-      components/
-        login-form.tsx
-      hooks/
-        use-login.ts
+      components/    # UI specific to Auth
+      hooks/         # Logic specific to Auth
       types.ts
-      index.ts
+      index.ts       # Public API
 ```
 
-## 3. UI & Styling
+## 4. Micro-Frontend Rules
 
-### Design System
+1. **Isolation**: An MFE must **NEVER** import code directly from `apps/shell` or another MFE. Communication happens via the EventBus or APIs.
+2. **Props vs. Events**:
+   - **Props**: Use for passing read-only context (Session, Theme) from Shell to MFE.
+   - **Events**: Use for triggering side effects (Navigation, Notifications).
+3. **Health Checks**: Every MFE must generate a `public/health.json` and `manifest.json` for production discovery.
 
-- Always use components from `@repo/ui` first.
-- Do not install generic UI libraries (like Bootstrap, MUI) in individual apps.
-- Use **Tailwind CSS** for layout and custom spacing.
+## 5. UI & Styling
 
-### Theme
+- **Library**: Use `@repo/ui` for all core components (Buttons, Inputs, Cards).
+- **Styling**: Tailwind CSS is the standard. Avoid arbitrary values (e.g., `w-[123px]`) in favor of design tokens.
+- **Theme**: Use CSS variables and `cn()` utility for conditional styling. Never hardcode hex colors to ensure Dark Mode compatibility.
 
-- Use CSS variables for colors (e.g., `bg-primary`, `text-foreground`).
-- **Never hardcode hex colors** (except in the theme definition). This ensures Dark Mode compatibility.
+## 6. Shared Utilities
 
-## 4. Logging
+- **Logging**: Use the centralized logger from `@repo/core`.
 
-Use the **Centralized Logger** from `@repo/core` instead of `console.log`.
+  ```ts
+  import { logger } from "@repo/core";
+  logger.info("Action performed", { meta: "data" });
+  ```
 
-```typescript
-import { logger } from "@repo/core";
+- **State**: Use `@repo/core` for global state (User, Preferences).
 
-// Good
-logger.info("User logged in", { userId: 123 });
-logger.error("Failed to fetch data", error);
+## 7. Git Workflow
 
-// Bad
-console.log("User logged in");
-```
-
-## 5. State Management
-
-- **Local State**: Use `useState` or `useReducer`.
-- **Global App State (Single MFE)**: Use `zustand` created locally.
-- **Global Platform State (Cross-MFE)**: Use `@repo/core` store.
-
-## 6. Git Workflow
-
-- **Commit Messages**: Follow [Conventional Commits](https://www.conventionalcommits.org/).
-  - `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`
-- **Branches**: `feature/my-feature`, `fix/issue-123`.
+- **Commits**: Follow [Conventional Commits](https://www.conventionalcommits.org/).
+  - `feat`: New feature
+  - `fix`: Bug fix
+  - `docs`: Documentation changes
+  - `refactor`: Code change that neither fixes a bug nor adds a feature
+- **Branches**: Format as `type/description` (e.g., `feat/new-sidebar`, `fix/login-error`).
