@@ -7,16 +7,16 @@ This document outlines the core technical decisions, patterns, and optimization 
 The platform follows a **Hub-and-Spoke** architecture where the **Shell** (Remix) orchestrates multiple **Micro-Frontends (MFEs)** (React, Vue, Svelte, SolidJS).
 
 ```mermaid
-graph TD
-    User[End User] -->|1. Request| CDN["CDN / Edge"]
+flowchart TD
+    User["End User"] -->|1. Request| CDN["CDN / Edge"]
     CDN -->|2. Serve Shell| Shell["Shell App (Remix SSR)"]
 
     subgraph "Browser Runtime"
-        Shell -->|3. Mount| React[App React]:::react
-        Shell -->|3. Mount| Next[App Next.js]:::next
-        Shell -->|3. Mount| Vue[App Vue]:::vue
-        Shell -->|3. Mount| Svelte[App Svelte]:::svelte
-        Shell -->|3. Mount| Solid[App SolidJS]:::solid
+        Shell -->|3. Mount| React["App React"]:::react
+        Shell -->|3. Mount| Next["App Next.js"]:::next
+        Shell -->|3. Mount| Vue["App Vue"]:::vue
+        Shell -->|3. Mount| Svelte["App Svelte"]:::svelte
+        Shell -->|3. Mount| Solid["App SolidJS"]:::solid
     end
 
     subgraph "Shared Layer"
@@ -75,7 +75,7 @@ sequenceDiagram
     participant Health as Health Check
 
     Browser->>Shell: Visit /dashboard/vue
-    Shell->>Health: GET /health.json (Pre-flight)
+    Shell->>Health: GET /health.json [Pre-flight]
 
     alt is Healthy
         Health-->>Shell: 200 OK (status: "up")
@@ -117,13 +117,13 @@ Each MFE manages its own UI state using its framework's native tools (Context, S
 
 ```mermaid
 flowchart LR
-    SourceApp[Any App] -->|Action| GlobalStore[Global Store]
+    SourceApp["Any App"] -->|Action| GlobalStore["Global Store"]
     GlobalStore -->|Notify| EventBus
-    EventBus -->|Update| React[React App]
-    EventBus -->|Update| Next[Next.js App]
-    EventBus -->|Update| Vue[Vue App]
-    EventBus -->|Update| Svelte[Svelte App]
-    EventBus -->|Update| Solid[SolidJS App]
+    EventBus -->|Update| React["React App"]
+    EventBus -->|Update| Next["Next.js App"]
+    EventBus -->|Update| Vue["Vue App"]
+    EventBus -->|Update| Svelte["Svelte App"]
+    EventBus -->|Update| Solid["SolidJS App"]
 ```
 
 ---
@@ -158,22 +158,22 @@ We achieve significant size reduction (~550KB+ per app) through intelligent depe
 ### Dependency Sharing Strategy
 
 ```mermaid
-graph TD
+flowchart TD
     subgraph "Shared Dependencies Configuration"
-        Base[Base Shared<br/>@repo/core, @repo/utils]:::base
-        ReactDeps[React Shared<br/>react, react-dom, @repo/ui]:::react
+        Base["Base Shared<br/>@repo/core, @repo/utils"]:::base
+        ReactDeps["React Shared<br/>react, react-dom, @repo/ui"]:::react
     end
 
     subgraph "React Cluster"
         Shell:::react
-        AppReact[App React]:::react
-        AppNext[App Next.js]:::react
+        AppReact["App React"]:::react
+        AppNext["App Next.js"]:::react
     end
 
     subgraph "Independent Cluster"
-        AppVue[App Vue]:::poly
-        AppSvelte[App Svelte]:::poly
-        AppSolid[App SolidJS]:::poly
+        AppVue["App Vue"]:::poly
+        AppSvelte["App Svelte"]:::poly
+        AppSolid["App SolidJS"]:::poly
     end
 
     Base --> ReactDeps
