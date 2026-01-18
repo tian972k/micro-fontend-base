@@ -8,27 +8,61 @@ services:
     ports:
       - "8000:3000"
     environment:
-      - NODE_ENV=development
-      - MFE_APP_A_URL=http://localhost:8001
-      - MFE_APP_B_URL=http://localhost:8002
+      - NODE_ENV=production
+      - MFE_APP_REACT_URL=http://app-react
+      - MFE_APP_NEXTJS_URL=http://app-nextjs
+      - MFE_APP_VUE_URL=http://app-vue
+      - MFE_APP_SVELTE_URL=http://app-svelte
+      - MFE_APP_SOLIDJS_URL=http://app-solidjs
     depends_on:
-      - app-a
-      - app-b
+      - app-react
+      - app-nextjs
+      - app-vue
+      - app-svelte
+      - app-solidjs
 
-  app-a:
+  app-react:
     build:
       context: .
       dockerfile: Dockerfile.mfe
       args:
-        APP_NAME: app-a
+        APP_NAME: app-react
     ports:
       - "8001:80"
 
-  app-b:
+  app-nextjs:
     build:
       context: .
       dockerfile: Dockerfile.mfe
       args:
-        APP_NAME: app-b
+        APP_NAME: app-nextjs
+        BUILD_OUTPUT_DIR: public
     ports:
       - "8002:80"
+
+  app-vue:
+    build:
+      context: .
+      dockerfile: Dockerfile.mfe
+      args:
+        APP_NAME: app-vue
+    ports:
+      - "8003:80"
+
+  app-svelte:
+    build:
+      context: .
+      dockerfile: Dockerfile.mfe
+      args:
+        APP_NAME: app-svelte
+    ports:
+      - "8004:80"
+
+  app-solidjs:
+    build:
+      context: .
+      dockerfile: Dockerfile.mfe
+      args:
+        APP_NAME: app-solidjs
+    ports:
+      - "8005:80"
