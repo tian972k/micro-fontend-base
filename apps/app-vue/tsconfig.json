@@ -22,7 +22,7 @@
       "@repo/core": ["../../packages/core/src/shared.ts"],
       "@repo/config": ["../../packages/config/src/index.ts"]
     },
-    "types": ["node"]
+    "types": ["node", "vite/client"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
   "references": [{ "path": "./tsconfig.node.json" }]
