@@ -3,7 +3,6 @@ import {
   ChevronsUpDown,
   User,
   Bell,
-  Sparkles,
   BadgeCheck,
   Settings,
   Sun,
@@ -78,10 +77,16 @@ export function UserMenu() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col text-left">
-                  <span className="text-sm font-semibold truncate">
+                  <span
+                    className="text-sm font-semibold truncate"
+                    suppressHydrationWarning
+                  >
                     {user?.name || t("common.guest")}
                   </span>
-                  <span className="text-xs text-muted-foreground truncate">
+                  <span
+                    className="text-xs text-muted-foreground truncate"
+                    suppressHydrationWarning
+                  >
                     {user?.email || t("common.no_email")}
                   </span>
                 </div>
@@ -106,36 +111,23 @@ export function UserMenu() {
                 </Avatar>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-semibold">
+                    <span
+                      className="text-sm font-semibold"
+                      suppressHydrationWarning
+                    >
                       {user?.name || t("common.guest")}
                     </span>
                     <BadgeCheck className="h-4 w-4 text-primary" />
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span
+                    className="text-xs text-muted-foreground"
+                    suppressHydrationWarning
+                  >
                     {user?.email || t("common.no_email")}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
-
-            <DropdownMenuSeparator />
-
-            {/* Premium Badge */}
-            <DropdownMenuGroup>
-              <DropdownMenuItem className="gap-3 px-3 py-2.5 cursor-pointer focus:bg-primary/5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-500">
-                  <Sparkles className="h-4 w-4 text-white" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">
-                    {t("user_menu.upgrade")}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {t("user_menu.upgrade_desc")}
-                  </span>
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
 

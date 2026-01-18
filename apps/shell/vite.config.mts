@@ -6,7 +6,29 @@ import path from "path";
 import * as fs from "fs";
 import { getRouteManifest } from "remix-custom-routes";
 
-import { federationShared } from "../../packages/config/src";
+import { federationShared, PORTS, APP_IDS } from "../../packages/config/src";
+
+// Custom Plugin to generate virtual MFE loaders map
+function mfeLoaderPlugin(mode: string, isSsrBuild?: boolean) {
+  const virtualModuleId = "virtual:mfe-loaders";
+  const resolvedVirtualModuleId = "\0" + virtualModuleId;
+
+  return {
+    name: "vite-plugin-mfe-loaders",
+    resolveId(id: string) {
+      if (id === virtualModuleId) {
+        return resolvedVirtualModuleId;
+      }
+    },
+    load(id: string) {
+      if (id === resolvedVirtualModuleId) {
+        // Always return empty loaders - use manifest-based loading for both dev and prod
+        // Module Federation in dev mode has issues with remoteEntry.js
+        return `export const mfeLoaders = {};`;
+      }
+    },
+  };
+}
 
 export default defineConfig(({ mode, isSsrBuild }) => {
   const env = loadEnv(mode, path.resolve(__dirname, "../.."), "");
@@ -14,6 +36,7 @@ export default defineConfig(({ mode, isSsrBuild }) => {
 
   return {
     plugins: [
+      mfeLoaderPlugin(mode, isSsrBuild),
       remix({
         future: {
           v3_fetcherPersist: true,
@@ -104,12 +127,20 @@ export default defineConfig(({ mode, isSsrBuild }) => {
       !isSsrBuild &&
         federation({
           name: "shell",
-          remotes: {
-            app_a: "http://localhost:8001/assets/remoteEntry.js",
-            app_b: "http://localhost:8002/assets/remoteEntry.js",
-            app_c: "http://localhost:8003/assets/remoteEntry.js",
-            app_d: "http://localhost:8004/assets/remoteEntry.js",
-          },
+          remotes:
+            mode === "production"
+              ? {}
+              : Object.values(APP_IDS).reduce(
+                  (acc, appName) => {
+                    if (appName === "shell") return acc;
+                    // Convention: app-react -> app_react (for remote name)
+                    const remoteName = appName.replace(/-/g, "_");
+                    const port = PORTS[appName];
+                    acc[remoteName] = `http://localhost:${port}/remoteEntry.js`;
+                    return acc;
+                  },
+                  {} as Record<string, string>,
+                ),
           shared: federationShared,
         }),
       tsconfigPaths(),
@@ -121,4 +152,23 @@ export default defineConfig(({ mode, isSsrBuild }) => {
       target: isSsrBuild ? "modules" : "esnext",
     },
   };
-});
+});// Disable federation - use manifest-based loading instead
+      // !isSsrBuild &&
+      //   federation({
+      //     name: "shell",
+      //     remotes:
+      //       mode === "production"
+      //         ? {}
+      //         : Object.values(APP_IDS).reduce(
+      //             (acc, appName) => {
+      //               if (appName === "shell") return acc;
+      //               // Convention: app-react -> app_react (for remote name)
+      //               const remoteName = appName.replace(/-/g, "_");
+      //               const port = PORTS[appName];
+      //               acc[remoteName] = `http://localhost:${port}/remoteEntry.js`;
+      //               return acc;
+      //             },
+      //             {} as Record<string, string>,
+      //           ),
+      //     shared: federationShared,
+      //

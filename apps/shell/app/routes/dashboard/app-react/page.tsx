@@ -1,7 +1,8 @@
 import { json, type MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { APP_IDS } from "@repo/config";
-import { MfeHost } from "@repo/core";
+import { MicroAppType } from "@repo/core";
+import { MfeContainer } from "@/components/mfe/mfe-container";
 import {
   Card,
   CardHeader,
@@ -41,7 +42,11 @@ export default function AppReactRoute() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="min-h-[500px]">
-            <MfeHost name={APP_IDS.REACT} host={appHost} />
+            <MfeContainer
+              appName={APP_IDS.REACT}
+              host={appHost}
+              appType={MicroAppType.REACT}
+            />
           </div>
         </CardContent>
       </Card>

@@ -37,7 +37,7 @@
     "react-dom": "^18.2.0",
     "react-i18next": "^16.5.3",
     "remix-custom-routes": "^1.0.1",
-    "remix-i18next": "^7.4.2",
+    "remix-i18next": "^6.4.1",
     "tailwind-merge": "^2.0.0",
     "tailwindcss-animate": "^1.0.7",
     "zustand": "^4.5.2"

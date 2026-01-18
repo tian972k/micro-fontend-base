@@ -9,6 +9,7 @@ import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import styles from "@repo/ui/globals.css?url";
 import localStyles from "./tailwind.css?url";
 import { ThemeProvider } from "./components/providers/theme-provider";
+import { ThemeScript } from "@repo/ui";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -34,23 +35,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         {/* Inline script to prevent FOUC */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const stored = JSON.parse(localStorage.getItem('mfe-theme') || '{}');
-                  const theme = stored.state?.theme || 'system';
-                  const resolved = theme === 'system' 
-                    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-                    : theme;
-                  document.documentElement.classList.add(resolved);
-                } catch(e) {}
-              })();
-            `,
-          }}
-        />
+        <ThemeScript />
       </head>
       <body>
         {children}
