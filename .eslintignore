@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.svelte-kit/
+storybook-static/
+
+# Cache and temp files
+.turbo/
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+vite.config.*.timestamp-*.mjs
+
+# Generated files
+*.min.js
+*.bundle.js
+*.chunk.js
+
+# Config files (already linted by default)
+*.config.js
+*.config.cjs
+*.config.mjs
+*.config.ts
+
+# Third-party
+public/
+static/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Logs
+*.log

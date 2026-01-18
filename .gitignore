@@ -137,6 +137,13 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+vite.config.mts.timestamp-*
+
+# Generated Public Assets (Module Federation)
+apps/*/public/assets/
+apps/*/public/manifest.json
+apps/*/public/health.json
+
 
 # Turborepo
 .turbo/
