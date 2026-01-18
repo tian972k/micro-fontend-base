@@ -20,3 +20,6 @@ export * from "./state/react/use-user-store";
 
 // Registry
 export * from "./mfe/registry";
+
+// Strategies
+export * from "./mfe/strategy";

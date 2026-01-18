@@ -9,3 +9,4 @@ export * from "./components/react/input/input";
 export * from "./components/react/skeleton/skeleton";
 export * from "./components/react/dropdown-menu/dropdown-menu";
 export * from "./components/react/sidebar/sidebar";
+export * from "./components/providers/theme-script";

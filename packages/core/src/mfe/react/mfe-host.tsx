@@ -4,11 +4,14 @@ import { type MicroAppProps } from "../../types";
 import { MfeError } from "./mfe-host-states/mfe-error";
 import { MfeMaintenance } from "./mfe-host-states/mfe-maintenance";
 import { MfeLoading } from "./mfe-host-states/mfe-loading";
+import { MfeStrategyFactory } from "../strategy/factory";
+import { type MicroAppType, MfeStatus } from "../../types";
 
 const manifestCache: Record<string, string> = {};
 
 export interface MfeHostProps {
   name: string;
+  type: MicroAppType;
   host: string;
   props?: MicroAppProps;
   fallback?: React.ReactNode;
@@ -21,16 +24,9 @@ export interface MfeHostProps {
   className?: string;
 }
 
-type LoadStatus =
-  | "idle"
-  | "checking"
-  | "loading"
-  | "mounted"
-  | "error"
-  | "maintenance";
-
 export function MfeHost({
   name,
+  type,
   host,
   props = {},
   fallback,
@@ -39,11 +35,11 @@ export function MfeHost({
   remoteLoader,
 }: MfeHostProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<LoadStatus>("idle");
+  const [status, setStatus] = useState<MfeStatus>(MfeStatus.IDLE);
   const [errorDetails, setErrorDetails] = useState<string>("");
 
   const handleRetry = () => {
-    setStatus("idle");
+    setStatus(MfeStatus.IDLE);
     window.location.reload();
   };
 
@@ -73,11 +69,11 @@ export function MfeHost({
 
     const loadMfe = async () => {
       if (!mounted) return;
-      setStatus("checking");
+      setStatus(MfeStatus.CHECKING);
       try {
         // 0. Federation / Direct Import Mode
         if (remoteLoader) {
-          if (mounted) setStatus("loading");
+          if (mounted) setStatus(MfeStatus.LOADING);
           await remoteLoader();
           if (mounted) await mountMicroApp();
           return;
@@ -99,12 +95,12 @@ export function MfeHost({
 
         const health: HealthCheckResponse = await healthRes.json();
         if (health.status === "maintenance") {
-          if (mounted) setStatus("maintenance");
+          if (mounted) setStatus(MfeStatus.MAINTENANCE);
           return;
         }
 
         // 2. Load Manifest
-        if (mounted) setStatus("loading");
+        if (mounted) setStatus(MfeStatus.LOADING);
         const manifestRes = await fetch(
           `${host}/manifest.json?t=${Date.now()}`,
         );
@@ -133,23 +129,29 @@ export function MfeHost({
         const scriptUrl = entryFile.startsWith("http")
           ? entryFile
           : `${host}/${entryFile}`;
-        if (!document.querySelector(`script[src^="${scriptUrl}"]`)) {
-          await new Promise<void>((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src = scriptUrl;
-            script.type = "module";
-            script.onload = () => resolve();
-            script.onerror = () =>
-              reject(new Error(`Failed to load script: ${entryFile}`));
-            document.body.appendChild(script);
-          });
+        const scriptUrlWithCache = `${scriptUrl}${scriptUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        
+        // Remove existing script if present (for HMR/dev mode)
+        const existingScript = document.querySelector(`script[src^="${scriptUrl}"]`);
+        if (existingScript) {
+          existingScript.remove();
         }
+        
+        await new Promise<void>((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = scriptUrlWithCache;
+          script.type = "module";
+          script.onload = () => resolve();
+          script.onerror = () =>
+            reject(new Error(`Failed to load script: ${entryFile}`));
+          document.body.appendChild(script);
+        });
 
         if (mounted) await mountMicroApp();
       } catch (err: unknown) {
         console.error("Failed to execute MFE entry script:", err);
         if (mounted) {
-          setStatus("error");
+          setStatus(MfeStatus.ERROR);
           setErrorDetails(err instanceof Error ? err.message : String(err));
         }
       }
@@ -159,12 +161,18 @@ export function MfeHost({
       if (!containerRef.current) return;
       try {
         const microApp = await waitForMfe(name);
-        microApp.mount(containerRef.current, { theme: "light", ...props });
-        if (mounted) setStatus("mounted");
+        // Use Strategy Factory to determine how to mount
+        const strategy = MfeStrategyFactory.get(type);
+        strategy.mount(microApp, containerRef.current, {
+          theme: "light",
+          ...props,
+        });
+
+        if (mounted) setStatus(MfeStatus.MOUNTED);
       } catch (err: unknown) {
         console.error(`[MfeHost] Error mounting ${name}:`, err);
         if (mounted) {
-          setStatus("error");
+          setStatus(MfeStatus.ERROR);
           setErrorDetails(
             err instanceof Error ? err.message : "Failed to mount application",
           );
@@ -176,17 +184,18 @@ export function MfeHost({
 
     return () => {
       mounted = false;
-      if (containerRef.current) {
-        window.MFE?.[name]?.unmount(containerRef.current);
+      if (containerRef.current && window.MFE?.[name]) {
+        const strategy = MfeStrategyFactory.get(type);
+        strategy.unmount(window.MFE[name], containerRef.current);
       }
     };
-  }, [name, host, JSON.stringify(props)]);
+  }, [name, host, type, JSON.stringify(props)]);
 
-  if (status === "maintenance") {
+  if (status === MfeStatus.MAINTENANCE) {
     return maintenanceComponent || <MfeMaintenance name={name} />;
   }
 
-  if (status === "error") {
+  if (status === MfeStatus.ERROR) {
     return (
       fallback || (
         <MfeError
@@ -199,8 +208,11 @@ export function MfeHost({
   }
 
   return (
-    <div className="relative min-h-[100px] w-full h-full">
-      {(status === "checking" || status === "loading") &&
+    <div
+      className="relative min-h-[100px] w-full h-full"
+      suppressHydrationWarning
+    >
+      {(status === MfeStatus.CHECKING || status === MfeStatus.LOADING) &&
         (loadingComponent || <MfeLoading name={name} />)}
       <div
         ref={containerRef}

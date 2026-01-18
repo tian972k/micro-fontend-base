@@ -5,6 +5,14 @@ export interface User {
   avatar?: string;
 }
 
+export enum MicroAppType {
+  VUE = "vue",
+  REACT = "react",
+  SVELTE = "svelte",
+  NEXTJS = "nextjs",
+  SOLID = "solid",
+}
+
 export interface MicroAppConfig {
   theme?: "light" | "dark" | "system";
   locale?: string;
@@ -43,6 +51,15 @@ export interface HealthCheckResponse {
   status: HealthStatus;
   message?: string;
   version?: string;
+}
+
+export enum MfeStatus {
+  IDLE = "idle",
+  CHECKING = "checking",
+  LOADING = "loading",
+  MOUNTED = "mounted",
+  ERROR = "error",
+  MAINTENANCE = "maintenance",
 }
 
 export interface MfeManifest {
