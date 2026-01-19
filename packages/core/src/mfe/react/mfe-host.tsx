@@ -129,14 +129,16 @@ export function MfeHost({
         const scriptUrl = entryFile.startsWith("http")
           ? entryFile
           : `${host}/${entryFile}`;
-        const scriptUrlWithCache = `${scriptUrl}${scriptUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
-        
+        const scriptUrlWithCache = `${scriptUrl}${scriptUrl.includes("?") ? "&" : "?"}t=${Date.now()}`;
+
         // Remove existing script if present (for HMR/dev mode)
-        const existingScript = document.querySelector(`script[src^="${scriptUrl}"]`);
+        const existingScript = document.querySelector(
+          `script[src^="${scriptUrl}"]`,
+        );
         if (existingScript) {
           existingScript.remove();
         }
-        
+
         await new Promise<void>((resolve, reject) => {
           const script = document.createElement("script");
           script.src = scriptUrlWithCache;

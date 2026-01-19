@@ -29,7 +29,7 @@ const microApp: MicroApp = { mount, unmount };
 AppRegistry.register(APP_IDS.NEXTJS, microApp);
 
 // Standalone mode: mount to #root when running independently (not as MFE)
-const isStandalone = import.meta.env.VITE_STANDALONE === 'true';
+const isStandalone = import.meta.env.VITE_STANDALONE === "true";
 const rootElement = document.getElementById("root");
 
 if (isStandalone && rootElement) {

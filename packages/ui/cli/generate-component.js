@@ -49,7 +49,10 @@ const toKebabCase = (str) => {
 };
 
 // Templates
-const getReactTemplate = (pascalName, componentName) => `import * as React from "react"
+const getReactTemplate = (
+  pascalName,
+  componentName,
+) => `import * as React from "react"
 import { cn } from "@repo/utils"
 
 export interface ${pascalName}Props extends React.HTMLAttributes<HTMLDivElement> {
@@ -74,7 +77,10 @@ ${pascalName}.displayName = "${pascalName}"
 export { ${pascalName} }
 `;
 
-const getReactStoryTemplate = (pascalName, componentName) => `import type { Meta, StoryObj } from "@storybook/react";
+const getReactStoryTemplate = (
+  pascalName,
+  componentName,
+) => `import type { Meta, StoryObj } from "@storybook/react";
 import { ${pascalName} } from "./${componentName}";
 
 const meta: Meta<typeof ${pascalName}> = {
@@ -145,7 +151,10 @@ const classes = computed(() => {
 </style>
 `;
 
-const getVueStoryTemplate = (pascalName, componentName) => `import type { Meta, StoryObj } from "@storybook/vue3";
+const getVueStoryTemplate = (
+  pascalName,
+  componentName,
+) => `import type { Meta, StoryObj } from "@storybook/vue3";
 import ${pascalName} from "./${pascalName}.vue";
 
 const meta: Meta<typeof ${pascalName}> = {
@@ -200,7 +209,10 @@ const getSvelteTemplate = (pascalName, componentName) => `<script lang="ts">
 </style>
 `;
 
-const getSvelteStoryTemplate = (pascalName, componentName) => `import type { Meta, StoryObj } from "@storybook/svelte";
+const getSvelteStoryTemplate = (
+  pascalName,
+  componentName,
+) => `import type { Meta, StoryObj } from "@storybook/svelte";
 import ${pascalName} from "./${pascalName}.svelte";
 
 const meta: Meta<typeof ${pascalName}> = {
@@ -242,7 +254,9 @@ const createComponent = (componentName, framework) => {
   const kebabName = toKebabCase(componentName);
 
   if (fs.existsSync(componentDir)) {
-    console.error(`❌ Component '${componentName}' already exists in ${fw.name}.`);
+    console.error(
+      `❌ Component '${componentName}' already exists in ${fw.name}.`,
+    );
     process.exit(1);
   }
 
@@ -286,7 +300,9 @@ const createComponent = (componentName, framework) => {
     }
   }
 
-  console.log(`\n✅ Successfully created ${fw.name} component '${componentName}'!`);
+  console.log(
+    `\n✅ Successfully created ${fw.name} component '${componentName}'!`,
+  );
   console.log(`📁 Location: ${componentDir}`);
   console.log(`📄 Files created:`);
   console.log(`   - ${componentFile}`);
@@ -324,7 +340,7 @@ const askComponentName = (framework, callback) => {
         process.exit(1);
       }
       callback(name.trim());
-    }
+    },
   );
 };
 

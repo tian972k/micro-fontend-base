@@ -31,7 +31,7 @@ syncStore<CounterState>(
 );
 
 // Standalone mode: mount when running independently (not as MFE)
-const isStandalone = import.meta.env.VITE_STANDALONE === 'true';
+const isStandalone = import.meta.env.VITE_STANDALONE === "true";
 const appElement = document.getElementById("app");
 
 if (isStandalone && appElement) {
