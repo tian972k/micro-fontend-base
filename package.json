@@ -24,7 +24,8 @@
     "storybook": "pnpm --filter @repo/ui storybook",
     "cli": "node scripts/cli.mjs",
     "create-app": "node scripts/create-app.mjs",
-    "generate-ui": "node scripts/generate-ui.mjs"
+    "generate-ui": "node scripts/generate-ui.mjs",
+    "validate:app-ids": "node scripts/validate-app-ids.mjs"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

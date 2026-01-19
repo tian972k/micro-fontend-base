@@ -70,6 +70,22 @@ async function main() {
     process.exit(1);
   }
 
+  // Check for duplicate APP_ID in central config
+  const checkAppsConfigPath = path.join(
+    __dirname,
+    "../packages/config/src/constants/apps.ts",
+  );
+  if (fs.existsSync(checkAppsConfigPath)) {
+    const appsContent = fs.readFileSync(checkAppsConfigPath, "utf8");
+    if (appsContent.includes(`"${appName}"`)) {
+      console.error(
+        `❌ APP_ID "${appName}" is already registered in @repo/config!\n` +
+          `   This would cause a registry collision. Please choose a unique name.`,
+      );
+      process.exit(1);
+    }
+  }
+
   // 2. Choose Framework
   console.log("\n🎨 Choose Framework:");
   console.log("  1. React (Vite + Remix)");

@@ -64,7 +64,13 @@ We utilize a **Hybrid Loading Strategy** to balance Developer Experience (DX) an
 - **Mechanism**: Native Fetch + Dynamic Import.
 - **Benefit**: Stability, Cacheability, Independent Deployments.
 
-#### Orchestration Flow
+#### Orchestration & Mounting Strategy
+
+To handle diverse frameworks, we separate the **Loading Phase** (Common) from the **Mounting Phase** (Framework-Specific).
+
+##### Phase 1: Loading (Common)
+
+Regardless of the framework, the Shell uses a unified strategy to fetch and inject the micro-app.
 
 ```mermaid
 sequenceDiagram
@@ -81,24 +87,115 @@ sequenceDiagram
         Health-->>Shell: 200 OK (status: "up")
         Shell->>Remote: Fetch remoteEntry.js
         Remote-->>Shell: JS Bundle
-        Shell->>Remote: Fetch specific module (./entry)
-        Shell->>Shell: Link Shared Dependencies (React, Core)
-        Shell->>Remote: Call mount(container_id)
-        Remote-->>Browser: UI Renders
+        Shell->>Remote: Fetch module (./Mfe)
+        Shell->>Shell: Link Shared Deps (Core, UI)
+        Shell->>Remote: Call mount(container, props)
     else is Maintenance
         Health-->>Shell: 200 OK (status: "maintenance")
         Shell->>Browser: Render Maintenance Banner
     else is Down
         Health-->>Shell: 500 / Timeout
-        Shell->>Browser: Render Error Boundary (Retry)
+        Shell->>Browser: Render "App Unavailable"
     end
 ```
 
-- **Flow**:
-  1. Build generates `manifest.json` for each MFE.
-  2. Shell fetches `health.json` to check availability.
-  3. Shell fetches `manifest.json` to resolve entry assets.
-  4. Script tags are injected to load the MFE.
+##### Phase 2: Mounting (Framework Variations)
+
+Once `mount()` is called, each framework handles initialization differently.
+
+###### Version A: React (Root API)
+
+Uses `ReactDOM.createRoot` and stores the root instance on the DOM node for unmounting.
+
+```mermaid
+sequenceDiagram
+    participant Host
+    participant MFE as React Entry
+    participant DOM as ReactDOM
+
+    Host->>MFE: mount(container, props)
+    MFE->>DOM: createRoot(container)
+    MFE->>DOM: root.render(<App />)
+    MFE-->>Host: Attach _reactRoot to container
+
+    Host->>MFE: unmount(container)
+    MFE->>DOM: root.unmount()
+```
+
+###### Version B: Vue (Create App)
+
+Uses `createApp` and mounts the app instance.
+
+```mermaid
+sequenceDiagram
+    participant Host
+    participant MFE as Vue Entry
+    participant App as Vue App
+
+    Host->>MFE: mount(container, props)
+    MFE->>App: createApp(App, props)
+    MFE->>App: app.mount(container)
+    MFE-->>Host: Attach _vueApp to container
+
+    Host->>MFE: unmount(container)
+    MFE->>App: app.unmount()
+```
+
+###### Version C: Svelte (Component API)
+
+Instantiates the main component directly, targeting the container.
+
+```mermaid
+sequenceDiagram
+    participant Host
+    participant MFE as Svelte Entry
+    participant App as Svelte Component
+
+    Host->>MFE: mount(container, props)
+    MFE->>App: new App({ target: container, props })
+    MFE-->>Host: Attach _svelteApp to container
+
+    Host->>MFE: unmount(container)
+    MFE->>App: app.$destroy()
+```
+
+###### Version D: SolidJS (Render / Dispose)
+
+Uses `render()` which returns a disposal function for cleanup.
+
+```mermaid
+sequenceDiagram
+    participant Host
+    participant MFE as Solid Entry
+    participant Solid as SolidJS
+
+    Host->>MFE: mount(container, props)
+    MFE->>Solid: render(<App />, container)
+    Solid-->>MFE: return dispose()
+    MFE-->>Host: Attach _solidDispose to container
+
+    Host->>MFE: unmount(container)
+    MFE->>Solid: call dispose()
+```
+
+### Handling Multiple Instances
+
+A common question is: _"What happens if two Vue apps run simultaneously?"_
+
+1. **Same App, Multiple Places**:
+   - The `entry-mfe` registers the factory **once**.
+   - Calling `mount()` multiple times creates **independent instances** (e.g., `createApp()` is called for each container).
+   - Result: Safe. No conflict.
+
+2. **Different Apps, Same Framework**:
+   - Each app must register with a **unique ID** (e.g., `app-vue-marketing`, `app-vue-dashboard`).
+   - If IDs collide, the last loaded app overwrites the registry.
+   - **Solution**: Ensure unique `APP_IDS` in `@repo/config`.
+
+> [!WARNING]
+> **Duplicate APP_ID will cause silent failures.** The `create-app` CLI validates for duplicates, and the `AppRegistry` logs a warning at runtime.
+
+**Build-time Validation**: Run `pnpm validate:app-ids` to verify all `APP_IDS` match `package.json` names. This is also enforced in the pre-commit hook.
 
 ---
 

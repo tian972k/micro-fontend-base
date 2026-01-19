@@ -1,6 +1,6 @@
 import { render } from "solid-js/web";
 import App from "./App";
-import "@repo/ui/globals.css";
+import "./index.css";
 import { AppRegistry, type MicroApp, type MicroAppProps } from "@repo/core";
 import { APP_IDS } from "@repo/config";
 

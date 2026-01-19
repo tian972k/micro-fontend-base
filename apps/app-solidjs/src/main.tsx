@@ -1,6 +1,6 @@
 import { render } from "solid-js/web";
 import App from "./App";
-import "@repo/ui/globals.css";
+import "./index.css";
 
 // Standalone mode: mount when running independently (not as MFE)
 const isStandalone = import.meta.env.VITE_STANDALONE === 'true';

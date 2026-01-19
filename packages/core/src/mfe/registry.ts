@@ -7,10 +7,20 @@ import type { MicroApp } from "../types";
 export class AppRegistry {
   /**
    * Registers a Micro-App instance globally.
+   * @warn If an app with the same name is already registered, it will be overwritten.
    */
   static register(name: string, app: MicroApp): void {
     if (typeof window !== "undefined") {
       window.MFE = window.MFE || {};
+
+      // Warn if overwriting an existing registration
+      if (window.MFE[name]) {
+        console.warn(
+          `[AppRegistry] ⚠️ WARNING: MicroApp "${name}" is already registered and will be OVERWRITTEN.\n` +
+            `This may cause unexpected behavior. Ensure each app has a unique APP_ID in @repo/config.`,
+        );
+      }
+
       window.MFE[name] = app;
       console.debug(`[AppRegistry] MicroApp "${name}" registered.`);
     }

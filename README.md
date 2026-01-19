@@ -21,7 +21,7 @@ We have consolidated our documentation to help you get started quickly:
 
 ---
 
-## �🌟 Key Features
+## 🌟 Key Features
 
 ### ✨ Multi-Framework Support
 

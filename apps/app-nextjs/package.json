@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev -p 8002",
     "dev:with-mfe": "pnpm build:mfe && pnpm watch:mfe & pnpm dev",
-    "build": "yarn build:mfe && next build",
+    "build": "pnpm build:mfe && next build",
     "start": "next start -p 8002",
     "lint": "next lint",
     "build:mfe": "vite build -c vite.config.mts && node ../../scripts/generate-manifest.mjs $PWD public",
