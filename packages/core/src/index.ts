@@ -1,5 +1,6 @@
 export * from "./events/event-bus";
 export * from "./types";
+export * from "./constants/keys";
 // React MFE Components
 export * from "./mfe/react/mfe-host";
 
@@ -23,3 +24,9 @@ export * from "./mfe/registry";
 
 // Strategies
 export * from "./mfe/strategy";
+
+// MFE Factories
+export * from "./mfe/factories";
+
+// Shared Features
+export * from "./features/user-profile-feature";

@@ -4,20 +4,31 @@
   "type": "module",
   "private": true,
   "files": [
+    "dist",
     "eslint-preset.cjs",
     "tailwind.config.ts",
     "tsconfig.base.json"
   ],
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "types": "./src/index.ts",
+      "development": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./vite": {
+      "types": "./src/vite.ts",
+      "development": "./src/vite.ts",
+      "import": "./dist/vite.js"
+    },
     "./tsconfig.base.json": "./tsconfig.base.json",
     "./tailwind.config": "./tailwind.config.ts",
     "./eslint-preset": "./eslint-preset.cjs",
     "./package.json": "./package.json"
   },
   "scripts": {
+    "build": "tsc --project tsconfig.build.json",
     "clean": "rm -rf node_modules dist .turbo"
   },
   "devDependencies": {
@@ -32,7 +43,8 @@
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0",
     "@types/node": "^20.0.0",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "@originjs/vite-plugin-federation": "^1.4.1"
   },
   "dependencies": {
     "tailwindcss-animate": "^1.0.7"

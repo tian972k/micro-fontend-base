@@ -25,9 +25,9 @@ syncStore<CounterState>(
 );
 
 // Standalone mode: mount when running independently (not as MFE)
-const isStandalone = import.meta.env.VITE_STANDALONE === "true";
+// Auto-mount if there's an #app element (dev/preview mode)
 const target = document.getElementById("app");
 
-if (isStandalone && target) {
+if (target) {
   new App({ target });
 }

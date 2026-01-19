@@ -17,6 +17,7 @@
     "clean": "rm -rf node_modules .next out dist .cache .turbo"
   },
   "dependencies": {
+    "@repo/config": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",

@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ESNext"
+  },
+  "include": [
+    "src/index.ts",
+    "src/vite.ts",
+    "src/vite-plugins.ts",
+    "src/vite-config-factory.ts",
+    "src/env/*.ts",
+    "src/constants/*.ts",
+    "src/shared-deps.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

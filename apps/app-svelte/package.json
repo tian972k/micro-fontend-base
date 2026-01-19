@@ -6,12 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node ../../scripts/generate-manifest.mjs $PWD",
-    "build:mfe": "vite build && node ../../scripts/generate-manifest.mjs $PWD",
+    "build:mfe": "MFE_MODE=true vite build && node ../../scripts/generate-manifest.mjs $PWD",
+    "build:standalone": "vite build",
     "preview": "vite preview",
     "start": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
+    "@repo/config": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:^",

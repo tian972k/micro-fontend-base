@@ -1,4 +1,4 @@
-import { APP_IDS } from "../constants/apps";
+import { APP_IDS } from "../constants/apps.js";
 
 /**
  * Centralized port configuration for all applications in the monorepo.

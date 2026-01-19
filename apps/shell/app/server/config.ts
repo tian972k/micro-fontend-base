@@ -3,10 +3,11 @@ import { PORTS, APP_IDS } from "@repo/config";
 // This file is strictly for server-side usage in Remix loaders
 export function getAppConfig() {
   const isDevelopment = process.env.NODE_ENV !== "production";
+  const forceLocalhost = process.env.MFE_FORCE_LOCALHOST === "true";
 
   // In production (Docker), use service names. In dev, use localhost with ports
   const getAppUrl = (appId: string) => {
-    if (isDevelopment) {
+    if (isDevelopment || forceLocalhost) {
       return `http://localhost:${(PORTS as any)[appId]}`;
     }
     // In production, use Docker service names (no port needed, nginx runs on 80)

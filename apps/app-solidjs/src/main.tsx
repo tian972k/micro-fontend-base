@@ -3,11 +3,9 @@ import App from "./App";
 import "./index.css";
 
 // Standalone mode: mount when running independently (not as MFE)
-const isStandalone = import.meta.env.VITE_STANDALONE === "true";
+// Auto-mount if there's a #root element (dev/preview mode)
 const root = document.getElementById("root");
 
-if (isStandalone || root) {
-  if (root) {
-    render(() => <App name="app-solidjs" />, root);
-  }
+if (root) {
+  render(() => <App />, root);
 }

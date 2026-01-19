@@ -1,6 +1,6 @@
 import { importShared } from './__federation_fn_import.js';
-import { j as jsxRuntimeExports } from './jsx-runtime.js';
 import { r as reactDomExports } from './index2.js';
+import { j as jsxRuntimeExports } from './jsx-runtime.js';
 
 var client = {};
 
@@ -135,23 +135,17 @@ function MfeComponent(_props) {
 }
 
 const React = await importShared('react');
-const {AppRegistry} = await importShared('@repo/core');
-const mount = (container, props) => {
-  const root = client.createRoot(container);
-  root.render(
-    /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(MfeComponent, { ...props }) })
-  );
-  container._reactRoot = root;
-};
-const unmount = (container) => {
-  const root = container._reactRoot;
-  if (root) {
-    root.unmount();
-    delete container._reactRoot;
-  }
-};
-const microApp = { mount, unmount };
-AppRegistry.register(APP_IDS.NEXTJS, microApp);
-document.getElementById("root");
+const {AppRegistry,createReactMfeEntry} = await importShared('@repo/core');
+const { mount, unmount, default: microApp } = createReactMfeEntry({
+  AppComponent: MfeComponent,
+  appId: APP_IDS.NEXTJS,
+  registry: AppRegistry,
+  StrictMode: React.StrictMode,
+  createRoot: client.createRoot
+});
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  mount(rootElement, { name: "app-nextjs" });
+}
 
 export { microApp as default, mount, unmount };

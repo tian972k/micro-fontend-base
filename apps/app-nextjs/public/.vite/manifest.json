@@ -1,0 +1,94 @@
+{
+  "../../node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/index.js?commonjs-entry": {
+    "file": "assets/__federation_shared_react-dom.js",
+    "name": "__federation_shared_react-dom",
+    "src": "../../node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/index.js?commonjs-entry",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "../../node_modules/.pnpm/react@18.3.1/node_modules/react/index.js?commonjs-entry": {
+    "file": "assets/__federation_shared_react.js",
+    "name": "__federation_shared_react",
+    "src": "../../node_modules/.pnpm/react@18.3.1/node_modules/react/index.js?commonjs-entry",
+    "isEntry": true,
+    "imports": [
+      "_index.js"
+    ]
+  },
+  "../../packages/core/src/index.ts": {
+    "file": "assets/__federation_shared_@repo/core.js",
+    "name": "__federation_shared_@repo/core",
+    "src": "../../packages/core/src/index.ts",
+    "isEntry": true,
+    "imports": [
+      "virtual:__federation_fn_import",
+      "_jsx-runtime.js",
+      "_createLucideIcon.js"
+    ]
+  },
+  "../../packages/ui/dist/index.js": {
+    "file": "assets/__federation_shared_@repo/ui.js",
+    "name": "__federation_shared_@repo/ui",
+    "src": "../../packages/ui/dist/index.js",
+    "isEntry": true,
+    "imports": [
+      "virtual:__federation_fn_import",
+      "_jsx-runtime.js",
+      "_createLucideIcon.js",
+      "_index.js"
+    ]
+  },
+  "_createLucideIcon.js": {
+    "file": "assets/createLucideIcon.js",
+    "name": "createLucideIcon",
+    "imports": [
+      "virtual:__federation_fn_import"
+    ]
+  },
+  "_index.js": {
+    "file": "assets/index.js",
+    "name": "index"
+  },
+  "_index2.js": {
+    "file": "assets/index2.js",
+    "name": "index",
+    "imports": [
+      "_index.js"
+    ]
+  },
+  "_jsx-runtime.js": {
+    "file": "assets/jsx-runtime.js",
+    "name": "jsx-runtime",
+    "imports": [
+      "_index.js"
+    ]
+  },
+  "src/entry-mfe.tsx": {
+    "file": "assets/main.js",
+    "name": "main",
+    "src": "src/entry-mfe.tsx",
+    "isEntry": true,
+    "imports": [
+      "virtual:__federation_fn_import",
+      "src/entry-mfe.tsx"
+    ]
+  },
+  "style.css": {
+    "file": "assets/style.css",
+    "src": "style.css"
+  },
+  "virtual:__federation_fn_import": {
+    "file": "assets/__federation_fn_import.js",
+    "name": "__federation_fn_import",
+    "src": "virtual:__federation_fn_import",
+    "isEntry": true
+  },
+  "virtual:__remoteEntryHelper__remoteEntry.js": {
+    "file": "assets/remoteEntry.js",
+    "name": "remoteEntry",
+    "src": "virtual:__remoteEntryHelper__remoteEntry.js",
+    "isEntry": true
+  }
+}

@@ -38,6 +38,9 @@ importers:
 
   apps/app-nextjs:
     dependencies:
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@repo/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -66,9 +69,6 @@ importers:
       '@originjs/vite-plugin-federation':
         specifier: ^1.4.1
         version: 1.4.1
-      '@repo/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.28
@@ -99,6 +99,9 @@ importers:
 
   apps/app-react:
     dependencies:
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@repo/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -124,9 +127,6 @@ importers:
       '@originjs/vite-plugin-federation':
         specifier: ^1.4.1
         version: 1.4.1
-      '@repo/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.28
@@ -154,6 +154,9 @@ importers:
 
   apps/app-solidjs:
     dependencies:
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@repo/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -170,9 +173,6 @@ importers:
       '@originjs/vite-plugin-federation':
         specifier: ^1.4.1
         version: 1.4.1
-      '@repo/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.28
@@ -194,6 +194,9 @@ importers:
 
   apps/app-svelte:
     dependencies:
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@repo/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -237,6 +240,9 @@ importers:
 
   apps/app-vue:
     dependencies:
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@repo/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -390,6 +396,9 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.19)
     devDependencies:
+      '@originjs/vite-plugin-federation':
+        specifier: ^1.4.1
+        version: 1.4.1
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.28
@@ -454,6 +463,9 @@ importers:
       '@repo/config':
         specifier: workspace:*
         version: link:../config
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.28
       '@types/react':
         specifier: ^18.2.20
         version: 18.3.27

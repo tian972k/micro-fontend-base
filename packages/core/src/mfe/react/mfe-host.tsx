@@ -107,10 +107,20 @@ export function MfeHost({
         if (!manifestRes.ok) throw new Error("Manifest not found");
         const manifest: MfeManifest = await manifestRes.json();
 
-        const entryFile = manifest["index.html"]?.file;
-        const cssFiles = manifest["index.html"]?.css || [];
+        // Try to find the MFE entry point (src/entry-mfe.ts/tsx/js)
+        // Fallback to index.html if not found (though index.html usually points to standalone main.ts)
+        const mfeEntryKey = Object.keys(manifest).find((key) =>
+          key.match(/^src\/entry-mfe\.(ts|tsx|js)$/),
+        );
 
-        if (!entryFile) throw new Error("Entry file not found in manifest");
+        const entryKey = mfeEntryKey || "index.html";
+        const entryData =
+          manifest[entryKey] || (manifest["index.html"] as any);
+
+        if (!entryData) throw new Error("Entry file not found in manifest");
+
+        const entryFile = entryData.file;
+        const cssFiles = entryData.css || [];
 
         // --- CACHE CHECK ---
         manifestCache[name] = entryFile;

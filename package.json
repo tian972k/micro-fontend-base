@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "build:packages": "turbo run build --filter='./packages/*'",
+    "build:apps": "turbo run build --filter='./apps/*'",
+    "build:mfes": "pnpm --filter=app-react build:mfe && pnpm --filter=app-nextjs build:mfe && pnpm --filter=app-vue build:mfe && pnpm --filter=app-svelte build:mfe && pnpm --filter=app-solidjs build:mfe",
     "start": "turbo run start",
     "dev": "node scripts/build-all-mfes.mjs && node scripts/generate-dev-manifest.mjs && turbo run dev",
     "build:all-mfes": "node scripts/build-all-mfes.mjs",
@@ -16,6 +19,7 @@
     "dev:standalone:svelte": "VITE_STANDALONE=true turbo run dev --filter=app-svelte",
     "dev:standalone:solidjs": "VITE_STANDALONE=true turbo run dev --filter=app-solidjs",
     "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"!node_modules\" \"!**/node_modules\"",
     "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"!node_modules\" \"!**/node_modules\"",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json,css}\"",
@@ -25,7 +29,11 @@
     "cli": "node scripts/cli.mjs",
     "create-app": "node scripts/create-app.mjs",
     "generate-ui": "node scripts/generate-ui.mjs",
-    "validate:app-ids": "node scripts/validate-app-ids.mjs"
+    "validate:app-ids": "node scripts/validate-app-ids.mjs",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

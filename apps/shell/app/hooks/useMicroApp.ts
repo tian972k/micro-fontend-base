@@ -64,18 +64,33 @@ export function useMicroApp({ name, host }: UseMicroAppOptions) {
           return;
         }
 
-        // 2. Load Manifest
+        // 2. Load Manifest or fallback to dev mode
         if (mounted) setStatus("loading");
-        const manifestRes = await fetch(
-          `${host}/manifest.json?t=${Date.now()}`,
-        );
-        if (!manifestRes.ok) throw new Error("Manifest not found");
-        const manifest = await manifestRes.json();
-
-        const entryFile = manifest["index.html"]?.file;
-        const cssFiles = manifest["index.html"]?.css || [];
-
-        if (!entryFile) throw new Error("Entry file not found in manifest");
+        
+        let entryFile: string;
+        let cssFiles: string[] = [];
+        
+        try {
+          const manifestRes = await fetch(
+            `${host}/manifest.json?t=${Date.now()}`,
+          );
+          
+          if (manifestRes.ok) {
+            const manifest = await manifestRes.json();
+            entryFile = manifest["index.html"]?.file;
+            cssFiles = manifest["index.html"]?.css || [];
+            
+            if (!entryFile) throw new Error("Entry file not found in manifest");
+          } else {
+            // Dev mode: manifest doesn't exist, use direct entry file
+            console.info(`[useMicroApp] Dev mode detected for ${name}, using direct entry`);
+            entryFile = "src/entry-mfe.ts"; // or "src/entry-mfe.tsx" for React/Next
+          }
+        } catch (err) {
+          // Fallback to dev mode
+          console.info(`[useMicroApp] Manifest error for ${name}, using dev mode entry`);
+          entryFile = "src/entry-mfe.ts";
+        }
 
         // Optimization: Skip injection if already loaded and version hasn't changed
         const isAlreadyRegistered = AppRegistry.isRegistered(name);

@@ -2,37 +2,22 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import MfeComponent from "./mfe-component";
 import "@repo/ui/globals.css";
-import { AppRegistry, type MicroApp, type MicroAppProps } from "@repo/core";
+import { AppRegistry, createReactMfeEntry } from "@repo/core";
 import { APP_IDS } from "@repo/config";
 
-const mount = (container: HTMLElement, props: MicroAppProps) => {
-  const root = ReactDOM.createRoot(container);
-  root.render(
-    <React.StrictMode>
-      <MfeComponent {...props} />
-    </React.StrictMode>,
-  );
-
-  (container as any)._reactRoot = root;
-};
-
-const unmount = (container: HTMLElement) => {
-  const root = (container as any)._reactRoot as ReactDOM.Root;
-  if (root) {
-    root.unmount();
-    delete (container as any)._reactRoot;
-  }
-};
-
-const microApp: MicroApp = { mount, unmount };
-
-AppRegistry.register(APP_IDS.NEXTJS, microApp);
+const { mount, unmount, default: microApp } = createReactMfeEntry({
+  AppComponent: MfeComponent,
+  appId: APP_IDS.NEXTJS,
+  registry: AppRegistry,
+  StrictMode: React.StrictMode,
+  createRoot: ReactDOM.createRoot,
+});
 
 // Standalone mode: mount to #root when running independently (not as MFE)
-const isStandalone = import.meta.env.VITE_STANDALONE === "true";
+// Auto-mount if there's a #root element (dev/preview mode)
 const rootElement = document.getElementById("root");
 
-if (isStandalone && rootElement) {
+if (rootElement) {
   mount(rootElement, { name: "app-nextjs" });
 }
 

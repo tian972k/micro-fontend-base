@@ -7,6 +7,7 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
     "moduleResolution": "bundler",
+    "verbatimModuleSyntax": false,
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -18,9 +19,7 @@
     "noImplicitReturns": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@repo/core": ["../../packages/core/src/shared.ts"],
-      "@repo/config": ["../../packages/config/src/index.ts"]
+      "@/*": ["./src/*"]
     },
     "types": ["node", "vite/client"]
   },

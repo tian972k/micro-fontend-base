@@ -6,7 +6,7 @@ import path from "path";
 import * as fs from "fs";
 import { getRouteManifest } from "remix-custom-routes";
 
-import { federationShared, PORTS, APP_IDS } from "../../packages/config/src";
+import { federationShared, PORTS, APP_IDS } from "@repo/config/vite";
 
 // Custom Plugin to generate virtual MFE loaders map
 function mfeLoaderPlugin(mode: string, isSsrBuild?: boolean) {
