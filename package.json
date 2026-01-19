@@ -18,7 +18,7 @@
     "lint": "turbo run lint",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"!node_modules\" \"!**/node_modules\"",
     "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"!node_modules\" \"!**/node_modules\"",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json,css}\"",
     "prepare": "husky install",
     "clean": "turbo run clean && rm -rf node_modules",
     "storybook": "pnpm --filter @repo/ui storybook",

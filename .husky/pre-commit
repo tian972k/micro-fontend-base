@@ -2,5 +2,8 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 echo "🚧 Running build verification before push..."
+echo "Verifying code formatting..."
+npx lint-staged
+
 pnpm validate:app-ids
 pnpm build
