@@ -219,25 +219,25 @@ graph TB
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Setup: pnpm install
-    Setup --> Dev: pnpm dev
+    [*] --> Setup: "pnpm install"
+    Setup --> Dev: "pnpm dev"
 
     state Dev {
         [*] --> EditCode
-        EditCode --> HMR: Save File
-        HMR --> Preview: Hot Reload
+        EditCode --> HMR: "Save File"
+        HMR --> Preview: "Hot Reload"
         Preview --> EditCode: Continue
     }
 
-    Dev --> Test: pnpm test
-    Test --> Lint: pnpm lint
-    Lint --> Build: pnpm build
-    Build --> Deploy: pnpm docker:build:smart
+    Dev --> Test: "pnpm test"
+    Test --> Lint: "pnpm lint"
+    Lint --> Build: "pnpm build"
+    Build --> Deploy: "pnpm docker:build:smart"
     Deploy --> [*]
 
-    Test --> Dev: Fix Issues
-    Lint --> Dev: Fix Issues
-    Build --> Dev: Fix Issues
+    Test --> Dev: "Fix Issues"
+    Lint --> Dev: "Fix Issues"
+    Build --> Dev: "Fix Issues"
 ```
 
 ---

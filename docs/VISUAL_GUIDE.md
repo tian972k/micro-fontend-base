@@ -546,9 +546,9 @@ graph TB
 stateDiagram-v2
     [*] --> Idle
 
-    Idle --> Loading: User Action
-    Loading --> Success: Data Received
-    Loading --> Error: Request Failed
+    Idle --> Loading: "User Action"
+    Loading --> Success: "Data Received"
+    Loading --> Error: "Request Failed"
 
     Success --> Idle: Reset
     Error --> Idle: Retry
