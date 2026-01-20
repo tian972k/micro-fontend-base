@@ -2,6 +2,7 @@
 export * from "./env/ports";
 export * from "./constants/keys";
 export * from "./constants/apps";
+export * from "./constants/routes";
 export {
   baseShared,
   reactShared,

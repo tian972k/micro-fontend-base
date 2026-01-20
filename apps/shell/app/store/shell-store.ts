@@ -1,36 +1,30 @@
-import { create } from "zustand";
-import { syncStore, type CounterState } from "@repo/core/react";
-import { EVENT_KEYS } from "@repo/config";
+import React from "react";
+import { counterStore, incrementCounter } from "@repo/core/react";
 
-interface ShellState {
-  globalCount: number;
-  increment: () => void;
-  setGlobalCount: (count: number) => void;
+// NOTE: For shared counter, use counterStore directly from @repo/core
+// counterStore already has EventBus sync built-in
+// This file provides React integration with the framework-agnostic counterStore
+
+/**
+ * React hook to get counter value from shared counterStore
+ * This provides React integration with the framework-agnostic counterStore
+ */
+export function useSharedCounter() {
+  const [count, setCount] = React.useState(counterStore.getState().count);
+
+  React.useEffect(() => {
+    // Subscribe to counterStore changes
+    const unsubscribe = counterStore.subscribe((state) => {
+      setCount(state.count);
+    });
+    return unsubscribe;
+  }, []);
+
+  return {
+    globalCount: count,
+    increment: incrementCounter,
+  };
 }
 
-export const useShellStore = create<ShellState>((set) => ({
-  globalCount: 0,
-  increment: () =>
-    set((state: ShellState) => ({ globalCount: state.globalCount + 1 })),
-  setGlobalCount: (count: number) => set({ globalCount: count }),
-}));
-
-// Initialize synchronization
-if (typeof window !== "undefined") {
-  syncStore<CounterState>(
-    {
-      getState: (): CounterState => ({
-        count: useShellStore.getState().globalCount,
-      }),
-      setState: (state: CounterState) => {
-        useShellStore.getState().setGlobalCount(state.count);
-      },
-      subscribe: (listener: (state: CounterState) => void) => {
-        return useShellStore.subscribe((state: ShellState) =>
-          listener({ count: state.globalCount }),
-        );
-      },
-    },
-    { key: EVENT_KEYS.APP_COUNTER },
-  );
-}
+// Legacy alias for backward compatibility
+export const useShellStore = useSharedCounter;

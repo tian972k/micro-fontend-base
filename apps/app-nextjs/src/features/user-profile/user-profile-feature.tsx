@@ -1,37 +1,39 @@
-import { Button, Card, CardHeader, CardTitle, CardContent } from "@repo/ui";
+import { Button } from "@repo/ui";
 import {
-  useUserStore,
   useCounterStore,
+  useUserStore,
   incrementCounter,
   decrementCounter,
-} from "../react";
+} from "@repo/core/react";
 
 /**
- * Shared User Profile Feature component
+ * Next.js User Profile Feature Component
  * Demonstrates cross-framework state sync with counter
- * Usage: Import from @repo/core in any React-based MFE
  */
 export function UserProfileFeature() {
+  // Use the shared counter store with proper React hook
   const count = useCounterStore((state) => state.count);
   const user = useUserStore((state) => state.user);
 
   return (
     <div className="p-4 bg-background">
-      <Card className="border-primary/20 shadow-sm overflow-hidden">
-        <CardHeader className="bg-primary/[0.03] space-y-1">
-          <CardTitle className="text-xl">User Profile</CardTitle>
+      <div className="border border-primary/20 shadow-sm overflow-hidden rounded-lg bg-card">
+        <div className="bg-primary/[0.03] p-4 space-y-1">
+          <h2 className="text-xl font-semibold">User Profile</h2>
           <p className="text-sm text-muted-foreground">
-            Shared Component from @repo/core
+            Shared Component from Next.js
           </p>
-        </CardHeader>
-        <CardContent className="pt-6 space-y-4">
+        </div>
+        <div className="p-6 space-y-4">
           <div className="flex items-center space-x-4 p-3 rounded-lg bg-muted/30 border border-border/50">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
-              {user?.name.charAt(0)}
+              {user?.name?.charAt(0) || "U"}
             </div>
             <div>
-              <h3 className="font-semibold text-lg">{user?.name}</h3>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <h3 className="font-semibold text-lg">{user?.name || "Guest"}</h3>
+              <p className="text-sm text-muted-foreground">
+                {user?.email || "No email"}
+              </p>
             </div>
           </div>
 
@@ -59,8 +61,8 @@ export function UserProfileFeature() {
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

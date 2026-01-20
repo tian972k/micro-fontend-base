@@ -9,10 +9,10 @@ const {
   unmount,
   default: microApp,
 } = createSolidMfeEntry({
-  AppComponent: App,
   appId: APP_IDS.SOLIDJS,
   registry: AppRegistry,
-  render,
+  // SolidJS JSX stays in this file (compiled by vite-plugin-solid)
+  renderApp: (container, props) => render(() => <App {...props} />, container),
 });
 
 export { mount, unmount };

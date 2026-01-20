@@ -1,8 +1,9 @@
 import React, { type ReactNode } from "react";
-import { globalEventBus } from "@repo/core/react";
 import { useShellStore } from "@/store/shell-store";
 import { Outlet, Link, useLocation } from "@remix-run/react";
-import { Button, cn } from "@repo/ui";
+import { Button } from "@repo/ui";
+import { cn } from "@repo/utils";
+import { NAV_ITEMS, ROUTES } from "@repo/config";
 
 interface MainLayoutProps {
   children?: ReactNode;
@@ -12,26 +13,18 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const { globalCount, increment } = useShellStore();
   const location = useLocation();
 
+  // increment() from useShellStore now calls incrementCounter from @repo/core
+  // which automatically broadcasts to all MFEs via EventBus
   const handleBroadcast = () => {
     increment();
-    // Also keep legacy event bus signal for backward compatibility or different logic
-    globalEventBus.emit("SHELL_COUNTER_UPDATE", globalCount + 1);
   };
-
-  const navItems = [
-    { label: "Home", href: "/" },
-    { label: "Application A", href: "/app-a" },
-    { label: "Application B", href: "/app-b" },
-    { label: "Application C", href: "/app-c" },
-    { label: "Application D", href: "/app-d" },
-  ];
 
   return (
     <div className="flex min-h-screen flex-col bg-background font-sans antialiased text-foreground">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to={ROUTES.HOME} className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
                 M
               </div>
@@ -40,7 +33,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </span>
             </Link>
             <nav className="flex items-center space-x-6 text-sm font-medium">
-              {navItems.map((item) => (
+              {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
                   to={item.href}

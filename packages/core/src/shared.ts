@@ -14,11 +14,12 @@ export * from "./types";
 // Constants
 export * from "./constants/keys";
 
-// State Management (framework-agnostic)
+// State Management (framework-agnostic vanilla stores)
 export * from "./state/sync-store";
 export * from "./state/common/user-store";
-export * from "./state/theme-store";
-export * from "./state/locale-store";
+export * from "./state/common/theme-store";
+export * from "./state/common/locale-store";
+export * from "./state/common/counter-store";
 
 // Internationalization
 export * from "./i18n";

@@ -1,7 +1,0 @@
-{
-  "index.html": {
-    "file": "src/entry-mfe.tsx",
-    "css": [],
-    "isDev": true
-  }
-}

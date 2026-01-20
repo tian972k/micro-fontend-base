@@ -141,6 +141,8 @@ vite.config.mts.timestamp-*
 
 # Generated Public Assets (Module Federation)
 apps/*/public/assets/
+apps/*/public/.vite/
+apps/*/public/.well-known/
 apps/*/public/manifest.json
 apps/*/public/health.json
 

@@ -1,36 +1,70 @@
 <script setup lang="ts">
-import { state } from "@/main";
+import { ref, onMounted, onUnmounted } from "vue";
+import { counterStore, incrementCounter, decrementCounter, userStore } from "@repo/core/vue";
 
-const increment = () => {
-  state.count++;
-};
+const count = ref(counterStore.getState().count);
+const user = ref(userStore.getState().user);
+
+let unsubCounter: (() => void) | undefined;
+let unsubUser: (() => void) | undefined;
+
+onMounted(() => {
+  unsubCounter = counterStore.subscribe((state) => {
+    count.value = state.count;
+  });
+  unsubUser = userStore.subscribe((state) => {
+    user.value = state.user;
+  });
+});
+
+onUnmounted(() => {
+  unsubCounter?.();
+  unsubUser?.();
+});
 </script>
 
 <template>
-  <div
-    class="p-6 border rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-100 border-emerald-200 dark:border-emerald-800"
-  >
-    <h2 class="text-2xl font-bold mb-4">Micro App C (Vue 3)</h2>
-    <p class="mb-4 opacity-80">
-      This is a full Vue application running as a micro-frontend!
-    </p>
-
-    <div class="flex flex-col gap-4">
-      <div class="flex items-center gap-4">
-        <button
-          @click="increment"
-          class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors"
-        >
-          Vue Count: {{ state.count }}
-        </button>
+  <div class="p-4 bg-background">
+    <div class="border border-primary/20 shadow-sm overflow-hidden rounded-lg bg-card">
+      <div class="bg-primary/[0.03] p-4 space-y-1">
+        <h2 class="text-xl font-semibold">User Profile</h2>
+        <p class="text-sm text-muted-foreground">
+          Shared Component from Vue
+        </p>
       </div>
+      <div class="p-6 space-y-4">
+        <div class="flex items-center space-x-4 p-3 rounded-lg bg-muted/30 border border-border/50">
+          <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+            {{ user?.name?.charAt(0) || "U" }}
+          </div>
+          <div>
+            <h3 class="font-semibold text-lg">{{ user?.name || "Guest" }}</h3>
+            <p class="text-sm text-muted-foreground">{{ user?.email || "No email" }}</p>
+          </div>
+        </div>
 
-      <div
-        class="p-4 bg-white/50 dark:bg-black/20 rounded-md border border-emerald-100 dark:border-emerald-900 text-sm"
-      >
-        <strong>SyncStore Status:</strong>
-        <br />
-        This value is reactive and synced across React/Redux/Svelte apps.
+        <div class="p-4 rounded-lg bg-accent/20 border border-accent/30 text-center space-y-3">
+          <p class="text-sm font-medium text-accent-foreground">
+            Shared State Sync
+          </p>
+          <div class="text-4xl font-bold tracking-tighter text-primary">
+            {{ count }}
+          </div>
+          <div class="flex justify-center gap-2">
+            <button
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+              @click="decrementCounter()"
+            >
+              -
+            </button>
+            <button
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+              @click="incrementCounter()"
+            >
+              +
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

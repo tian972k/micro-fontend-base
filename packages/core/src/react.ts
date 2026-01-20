@@ -16,6 +16,9 @@ export * from "./mfe/react/mfe-host";
 
 // React Hooks
 export * from "./state/react/use-user-store";
+export * from "./state/react/use-theme-store";
+export * from "./state/react/use-locale-store";
+export * from "./state/react/use-counter-store";
 
 // React-specific factory
 export { createReactMfeEntry } from "./mfe/react-factory";

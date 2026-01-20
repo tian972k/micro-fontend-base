@@ -1,33 +1,69 @@
 <script lang="ts">
-  import { count } from "../../main";
+  import { onMount, onDestroy } from "svelte";
+  import { counterStore, incrementCounter, decrementCounter, userStore } from "@repo/core/svelte";
 
-  function increment() {
-    $count++;
-  }
+  let count = counterStore.getState().count;
+  let user = userStore.getState().user;
+
+  let unsubCounter: (() => void) | undefined;
+  let unsubUser: (() => void) | undefined;
+
+  onMount(() => {
+    unsubCounter = counterStore.subscribe((state) => {
+      count = state.count;
+    });
+    unsubUser = userStore.subscribe((state) => {
+      user = state.user;
+    });
+  });
+
+  onDestroy(() => {
+    unsubCounter?.();
+    unsubUser?.();
+  });
 </script>
 
-<div
-  class="p-6 border rounded-lg bg-orange-50 dark:bg-orange-950/30 text-orange-900 dark:text-orange-100 border-orange-200 dark:border-orange-800"
->
-  <h2 class="text-2xl font-bold mb-4">Micro App D (Svelte 4)</h2>
-  <p class="mb-4 opacity-80">
-    This is a full Svelte application running as a micro-frontend!
-  </p>
-
-  <div class="flex flex-col gap-4">
-    <div class="flex items-center gap-4">
-      <button
-        on:click={increment}
-        class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors"
-      >
-        Svelte Count: {$count}
-      </button>
+<div class="p-4 bg-background">
+  <div class="border border-primary/20 shadow-sm overflow-hidden rounded-lg bg-card">
+    <div class="bg-primary/[0.03] p-4 space-y-1">
+      <h2 class="text-xl font-semibold">User Profile</h2>
+      <p class="text-sm text-muted-foreground">
+        Shared Component from Svelte
+      </p>
     </div>
+    <div class="p-6 space-y-4">
+      <div class="flex items-center space-x-4 p-3 rounded-lg bg-muted/30 border border-border/50">
+        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+          {user?.name?.charAt(0) || "U"}
+        </div>
+        <div>
+          <h3 class="font-semibold text-lg">{user?.name || "Guest"}</h3>
+          <p class="text-sm text-muted-foreground">{user?.email || "No email"}</p>
+        </div>
+      </div>
 
-    <div class="p-4 bg-white/50 dark:bg-black/20 rounded-md border border-orange-100 dark:border-orange-900 text-sm">
-      <strong>SyncStore Status:</strong>
-      <br />
-      This component uses Svelte stores synced via the global EventBus.
+      <div class="p-4 rounded-lg bg-accent/20 border border-accent/30 text-center space-y-3">
+        <p class="text-sm font-medium text-accent-foreground">
+          Shared State Sync
+        </p>
+        <div class="text-4xl font-bold tracking-tighter text-primary">
+          {count}
+        </div>
+        <div class="flex justify-center gap-2">
+          <button
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+            on:click={() => decrementCounter()}
+          >
+            -
+          </button>
+          <button
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+            on:click={() => incrementCounter()}
+          >
+            +
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

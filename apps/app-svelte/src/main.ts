@@ -1,28 +1,9 @@
-import { writable, get } from "svelte/store";
-import { syncStore, type CounterState } from "@repo/core/svelte";
-import { EVENT_KEYS } from "@repo/config";
 import App from "./App.svelte";
 import "@repo/ui/globals.css";
 
-// 1. Define Svelte store
-export const count = writable(0);
-
-// 2. Synchronize with other apps
-syncStore<CounterState>(
-  {
-    getState: (): CounterState => ({ count: get(count) }),
-    setState: (newState: CounterState) => {
-      count.set(newState.count);
-    },
-    subscribe: (listener: (state: CounterState) => void) => {
-      const unsubscribe = count.subscribe((val) => {
-        listener({ count: val });
-      });
-      return unsubscribe;
-    },
-  },
-  { key: EVENT_KEYS.APP_COUNTER },
-);
+// NOTE: Counter sync is handled by counterStore singleton in @repo/core
+// which already has EventBus listener built-in. No need for syncStore here.
+// Dashboard.svelte uses counterStore directly for proper state sync.
 
 // Standalone mode: mount when running independently (not as MFE)
 // Auto-mount if there's an #app element (dev/preview mode)
