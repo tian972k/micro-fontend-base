@@ -12,17 +12,56 @@
 **Hub-and-Spoke Architecture:** Like planets orbiting a sun, your micro-frontends (React, Vue, Svelte, SolidJS) revolve around a central Remix Shell, working in perfect harmony while maintaining independence.
 
 ```mermaid
-flowchart LR
-    Shell["Shell (Remix)"] --> React["React"]
-    Shell --> Vue["Vue"]
-    Shell --> Svelte["Svelte"]
-    Shell --> Solid["SolidJS"]
-    Shell --> Next["Next.js"]
+graph TB
+    subgraph "Browser Runtime"
+        Shell["🏠 Shell (Remix SSR)<br/>:8000"]:::shell
+
+        subgraph MFEs ["Micro-Frontends"]
+            React["⚛️ React<br/>:8001"]:::react
+            Next["▲ Next.js<br/>:8002"]:::next
+            Vue["💚 Vue 3<br/>:8003"]:::vue
+            Svelte["🔥 Svelte<br/>:8004"]:::svelte
+            Solid["💎 SolidJS<br/>:8005"]:::solid
+        end
+
+        subgraph Shared ["Shared Layer"]
+            Core["📦 @repo/core<br/>(State & Events)"]:::pkg
+            UI["🎨 @repo/ui<br/>(Components)"]:::pkg
+            Utils["🔧 @repo/utils<br/>(Helpers)"]:::pkg
+        end
+    end
+
+    Shell -->|"Module Federation"| React
+    Shell -->|"Module Federation"| Next
+    Shell -->|"Module Federation"| Vue
+    Shell -->|"Module Federation"| Svelte
+    Shell -->|"Module Federation"| Solid
+
+    React -.->|"imports"| Core
+    React -.->|"imports"| UI
+    React -.->|"imports"| Utils
+
+    Vue -.->|"imports"| Core
+    Vue -.->|"imports"| UI
+    Svelte -.->|"imports"| Core
+    Svelte -.->|"imports"| UI
+    Solid -.->|"imports"| Core
+    Solid -.->|"imports"| UI
+
+    classDef shell fill:#22c55e,stroke:#16a34a,color:#fff
+    classDef react fill:#61dafb,stroke:#0088cc,color:#000
+    classDef next fill:#000,stroke:#333,color:#fff
+    classDef vue fill:#42b883,stroke:#35495e,color:#fff
+    classDef svelte fill:#ff3e00,stroke:#cc3200,color:#fff
+    classDef solid fill:#2c4f7c,stroke:#1e3552,color:#fff
+    classDef pkg fill:#8b5cf6,stroke:#6d28d9,color:#fff
 ```
 
 ---
 
 ## Documentation
+
+### Core Guides
 
 | Guide                                        | Description                                        |
 | -------------------------------------------- | -------------------------------------------------- |
@@ -31,6 +70,18 @@ flowchart LR
 | [Architecture](./docs/ARCHITECTURE.md)       | System design, Module Federation, State Management |
 | [Standards](./docs/STANDARDS.md)             | Code style, Naming conventions, Best practices     |
 | [Deployment](./docs/DEPLOYMENT.md)           | CI/CD, Docker strategies, Production setup         |
+| [📊 Visual Guide](./docs/VISUAL_GUIDE.md)    | **Comprehensive diagrams & architecture visuals**  |
+
+### Additional Resources
+
+| Guide                                        | Description                                      |
+| -------------------------------------------- | ------------------------------------------------ |
+| [Contributing](./CONTRIBUTING.md)            | Development workflow, PR guidelines, Code review |
+| [Troubleshooting](./docs/TROUBLESHOOTING.md) | Common issues and solutions                      |
+| [Scripts Reference](./docs/SCRIPTS.md)       | Documentation for all automation scripts         |
+| [Performance](./docs/PERFORMANCE.md)         | Optimization strategies and best practices       |
+| [Security](./SECURITY.md)                    | Security guidelines and vulnerability reporting  |
+| [CI/CD Reference](./docs/CI_CD_REFERENCE.md) | Pipeline optimization and technologies           |
 
 ---
 
@@ -80,26 +131,114 @@ Build with **React, Vue, Svelte, SolidJS, or Next.js**. Each micro-frontend can 
 
 ## Quick Start
 
+```mermaid
+flowchart LR
+    A[📥 Clone Repo] --> B[📦 pnpm install]
+    B --> C[⚙️ Setup .env]
+    C --> D[🚀 pnpm dev]
+    D --> E[🌐 localhost:8000]
+
+    style A fill:#3b82f6,stroke:#2563eb,color:#fff
+    style B fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style C fill:#eab308,stroke:#ca8a04,color:#000
+    style D fill:#22c55e,stroke:#16a34a,color:#fff
+    style E fill:#ec4899,stroke:#db2777,color:#fff
+```
+
 ### Prerequisites
 
-- **Node.js** v18 or higher
-- **pnpm** v8 or higher (`npm install -g pnpm`)
+| Tool    | Version | Check           | Install                            |
+| ------- | ------- | --------------- | ---------------------------------- |
+| Node.js | v18+    | `node -v`       | [nodejs.org](https://nodejs.org)   |
+| pnpm    | v8+     | `pnpm -v`       | `npm i -g pnpm`                    |
+| Git     | Latest  | `git --version` | [git-scm.com](https://git-scm.com) |
 
 ### Installation
 
 ```bash
-# Clone repository
+# 1️⃣ Clone repository
 git clone <repository-url>
 cd micro-frontend-base
 
-# Install dependencies
+# 2️⃣ Install dependencies
 pnpm install
 
-# Start development
+# 3️⃣ Setup environment
+bash scripts/onboard.sh
+
+# 4️⃣ Start development
 pnpm dev
 ```
 
-**Open [http://localhost:8000](http://localhost:8000)**
+**✨ Open [http://localhost:8000](http://localhost:8000)**
+
+---
+
+## 📁 Project Structure Overview
+
+```mermaid
+graph TB
+    subgraph Monorepo ["🌟 Orbit Monorepo"]
+        subgraph Apps ["apps/ - Applications"]
+            Shell[🏠 shell<br/>Remix SSR]:::app
+            React[⚛️ app-react<br/>Vite + React]:::app
+            Next["▲ app-nextjs<br/>Next.js"]:::app
+            Vue["💚 app-vue<br/>Vite + Vue 3"]:::app
+            Svelte["🔥 app-svelte<br/>Vite + Svelte"]:::app
+            Solid["💎 app-solidjs<br/>Vite + Solid"]:::app
+        end
+
+        subgraph Packages ["packages/ - Shared Code"]
+            Core[💡 core<br/>State & Events]:::pkg
+            UI[🎨 ui<br/>Components]:::pkg
+            Utils[🔧 utils<br/>Helpers]:::pkg
+            Config[⚙️ config<br/>Configs]:::pkg
+        end
+
+        subgraph Tooling ["Infrastructure"]
+            Scripts[📦 scripts/<br/>Automation]:::tool
+            Docs[📝 docs/<br/>Documentation]:::tool
+            CI[🔄 .github/<br/>CI/CD]:::tool
+        end
+    end
+
+    Shell & React & Next & Vue & Svelte & Solid -.->|"depends on"| Core & UI & Utils
+    Core & UI -.->|"uses"| Config
+    Scripts -.->|"builds"| Apps
+    Scripts -.->|"builds"| Packages
+    CI -.->|"automates"| Scripts
+
+    classDef app fill:#22c55e,stroke:#16a34a,color:#fff
+    classDef pkg fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    classDef tool fill:#3b82f6,stroke:#2563eb,color:#fff
+```
+
+---
+
+## Development Workflow
+
+```mermaid
+stateDiagram-v2
+    [*] --> Setup: pnpm install
+    Setup --> Dev: pnpm dev
+
+    state Dev {
+        [*] --> EditCode
+        EditCode --> HMR: Save File
+        HMR --> Preview: Hot Reload
+        Preview --> EditCode: Continue
+    }
+
+    Dev --> Test: pnpm test
+    Test --> Lint: pnpm lint
+    Lint --> Build: pnpm build
+    Build --> Deploy: pnpm docker:build:smart
+    Deploy --> [*]
+
+    Test --> Dev: Fix Issues
+    Lint --> Dev: Fix Issues
+    Build --> Dev: Fix Issues
+```
 
 ---
 
@@ -136,7 +275,7 @@ pnpm dev
 
 ---
 
-## Project Structure
+## Detailed Directory Structure
 
 ```text
 micro-frontend-base/

@@ -20,32 +20,43 @@ This guide covers deployment strategies, CI/CD pipelines, and production setup f
 
 ## 1. Architecture Overview
 
-> **Note**: For a detailed deep-dive into the system architecture, component roles, and design principles, please refer to [ARCHITECTURE.md](./ARCHITECTURE.md).
+> 📚 **Deep Dive**: For detailed architecture, component roles, and design principles, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ### Deployment Topology
 
 ```mermaid
-flowchart TD
-    subgraph "Edge Layer"
-        CDN["CDN / Edge Cache"]
+flowchart TB
+    User[👤 User] --> CDN[🌐 CDN/Edge Cache]
+
+    subgraph Cloud ["Cloud Infrastructure"]
+        CDN --> LB[⚖️ Load Balancer]
+
+        subgraph Apps ["Application Layer"]
+            LB --> Shell1[🏠 Shell 1<br/>Node.js:3000]
+            LB --> Shell2[🏠 Shell 2<br/>Node.js:3000]
+
+            Shell1 & Shell2 --> MFE1[⚛️ React MFE<br/>Nginx:80]
+            Shell1 & Shell2 --> MFE2["▲ Next.js MFE<br/>Nginx:80"]
+            Shell1 & Shell2 --> MFE3["💚 Vue MFE<br/>Nginx:80"]
+            Shell1 & Shell2 --> MFE4["🔥 Svelte MFE<br/>Nginx:80"]
+        end
+
+        subgraph Data ["Data Layer"]
+            Redis[(🟥 Redis<br/>Sessions)]
+            DB[(🟢 PostgreSQL<br/>Database)]
+        end
     end
 
-    subgraph "Application Layer"
-        Shell["Shell Container<br/>(Node.js/Remix)"]
-        React["React MFE<br/>(Nginx Static)"]
-        Vue["Vue MFE<br/>(Nginx Static)"]
-        Svelte["Svelte MFE<br/>(Nginx Static)"]
-    end
+    Shell1 & Shell2 -.-> Redis
+    Shell1 & Shell2 -.-> DB
 
-    subgraph "Persistence Layer"
-        Redis["Redis (Sessions)"]
-        DB["Database"]
-    end
-
-    User --> CDN
-    CDN --> Shell
-    Shell --> React & Vue & Svelte
-    Shell --> Redis & DB
+    style User fill:#3b82f6,stroke:#2563eb,color:#fff
+    style CDN fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style LB fill:#eab308,stroke:#ca8a04,color:#000
+    style Shell1 fill:#22c55e,stroke:#16a34a,color:#fff
+    style Shell2 fill:#22c55e,stroke:#16a34a,color:#fff
+    style Redis fill:#ef4444,stroke:#dc2626,color:#fff
+    style DB fill:#10b981,stroke:#059669,color:#fff
 ```
 
 ### The Build Matrix
@@ -81,27 +92,40 @@ All MFE apps are configured in `scripts/mfe.config.mjs`. This configuration driv
 ### Turbo Build Pipeline
 
 ```mermaid
-flowchart LR
-    subgraph "Stage 1: Packages"
-        Config["@repo/config"]
-        Utils["@repo/utils"]
+flowchart TB
+    subgraph Stage1 ["Stage 1: Foundation (Parallel)"]
+        Config[📦 @repo/config<br/>~5s]:::pkg
+        Utils[🔧 @repo/utils<br/>~3s]:::pkg
     end
 
-    subgraph "Stage 2: Core"
-        Core["@repo/core"]
-        UI["@repo/ui"]
+    subgraph Stage2 ["Stage 2: Core Libraries (Parallel)"]
+        Core[💡 @repo/core<br/>~8s]:::pkg
+        UI[🎨 @repo/ui<br/>~12s]:::pkg
     end
 
-    subgraph "Stage 3: Apps"
-        Shell["Shell"]
-        React["App React"]
-        Vue["App Vue"]
+    subgraph Stage3 ["Stage 3: Applications (Parallel)"]
+        Shell[🏠 Shell<br/>~15s]:::app
+        React[⚛️ React<br/>~10s]:::app
+        Vue["💚 Vue<br/>~10s"]:::app
+        Svelte["🔥 Svelte<br/>~8s"]:::app
+        Solid["💎 Solid<br/>~8s"]:::app
     end
 
-    Config --> Core & UI
-    Utils --> Core & UI
-    Core --> Shell & React & Vue
-    UI --> Shell & React
+    Config & Utils --> Core & UI
+    Core & UI --> Shell & React & Vue & Svelte & Solid
+
+    Stage1 -.->|"Total: ~5s"| T1[ ]
+    Stage2 -.->|"Total: ~12s"| T2[ ]
+    Stage3 -.->|"Total: ~15s"| T3[ ]
+
+    T1 & T2 & T3 -.-> Total[\Total Build Time: ~32s/]
+
+    classDef pkg fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    classDef app fill:#22c55e,stroke:#16a34a,color:#fff
+    style Total fill:#3b82f6,stroke:#2563eb,color:#fff
+    style T1 fill:none,stroke:none
+    style T2 fill:none,stroke:none
+    style T3 fill:none,stroke:none
 ```
 
 ### Validate Before Build
@@ -119,7 +143,38 @@ pnpm type-check
 
 ---
 
-## 3. Local Development & Docker
+## 3. Docker Deployment
+
+### Docker Build & Deploy Flow
+
+```mermaid
+flowchart LR
+    subgraph Local ["Local Development"]
+        Code[💻 Source Code] --> Build[🔨 Build Assets]
+    end
+
+    subgraph Docker ["Docker Build"]
+        Build --> Multi[Multi-Stage Build]
+        Multi --> D1[🏠 Shell Image]:::shell
+        Multi --> D2[⚛️ React Image]:::mfe
+        Multi --> D3["💚 Vue Image"]:::mfe
+    end
+
+    subgraph Registry ["Container Registry"]
+        D1 --> R1[ghcr.io/org/shell:latest]
+        D2 --> R2[ghcr.io/org/react:latest]
+        D3 --> R3[ghcr.io/org/vue:latest]
+    end
+
+    subgraph Deploy ["Deployment"]
+        R1 & R2 & R3 --> K8s[⎈ Kubernetes/<br/>Docker Swarm]
+        K8s --> Live[🌐 Production]
+    end
+
+    classDef shell fill:#22c55e,stroke:#16a34a,color:#fff
+    classDef mfe fill:#3b82f6,stroke:#2563eb,color:#fff
+    style Live fill:#ec4899,stroke:#db2777,color:#fff
+```
 
 ### Local Development (Recommended)
 

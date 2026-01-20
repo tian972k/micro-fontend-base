@@ -61,6 +61,31 @@ docker -v  # Optional - for production simulation
 
 ## Quick Setup
 
+### Setup Flow
+
+```mermaid
+flowchart TD
+    Start([Start]) --> Clone[📥 Clone Repository]
+    Clone --> Install[📦 pnpm install]
+    Install --> Env[⚙️ Setup Environment]
+
+    Env --> Choice{Setup Method?}
+    Choice -->|Automated| Auto[bash onboard.sh]
+    Choice -->|Manual| Manual[Manual .env setup]
+
+    Auto --> Validate[✔️ Validate Setup]
+    Manual --> Validate
+
+    Validate --> Dev[🚀 pnpm dev]
+    Dev --> Success[✨ Ready!<br/>localhost:8000]
+
+    style Start fill:#3b82f6,stroke:#2563eb,color:#fff
+    style Success fill:#22c55e,stroke:#16a34a,color:#fff
+    style Choice fill:#eab308,stroke:#ca8a04,color:#000
+    style Auto fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style Manual fill:#8b5cf6,stroke:#6d28d9,color:#fff
+```
+
 ### Step 1: Clone the Repository
 
 ```bash
@@ -128,19 +153,58 @@ pnpm dev
 
 ## Development Workflow
 
-### Understanding the Architecture
-
-> **Note**: For a comprehensive guide on the system architecture, loading strategies, and state management, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+### Architecture Overview
 
 ```mermaid
-graph TD
-    User((Developer)) -->|Opens Browser| Shell["Shell App :8000"]
-    Shell -->|Module Federation| React["React MFE :8001"]
-    Shell -->|Module Federation| Next["Next.js MFE :8002"]
-    Shell -->|Module Federation| Vue["Vue MFE :8003"]
-    Shell -->|Module Federation| Svelte["Svelte MFE :8004"]
-    Shell -->|Module Federation| Solid["SolidJS MFE :8005"]
+graph TB
+    subgraph Browser ["Development Environment"]
+        Dev[👨‍💻 Developer<br/>localhost:8000]
+
+        subgraph Shell ["Shell Application"]
+            RemixApp[🏠 Remix App]
+            Router[🛣️ Router]
+            Layout[📋 Layout]
+        end
+
+        subgraph Federation ["Module Federation Runtime"]
+            MF1[⚛️ React MFE<br/>:8001]
+            MF2["▲ Next.js MFE<br/>:8002"]
+            MF3["💚 Vue MFE<br/>:8003"]
+            MF4["🔥 Svelte MFE<br/>:8004"]
+            MF5["💎 Solid MFE<br/>:8005"]
+        end
+
+        subgraph Packages ["Shared Packages"]
+            Core[📦 @repo/core]
+            UI[🎨 @repo/ui]
+            Utils[🔧 @repo/utils]
+        end
+    end
+
+    Dev --> RemixApp
+    RemixApp --> Router
+    Router --> Layout
+
+    Layout -->|"Dynamic Load"| MF1
+    Layout -->|"Dynamic Load"| MF2
+    Layout -->|"Dynamic Load"| MF3
+    Layout -->|"Dynamic Load"| MF4
+    Layout -->|"Dynamic Load"| MF5
+
+    MF1 -.->|"Import"| Core & UI & Utils
+    MF2 -.->|"Import"| Core & UI & Utils
+    MF3 -.->|"Import"| Core & UI & Utils
+    MF4 -.->|"Import"| Core & UI & Utils
+    MF5 -.->|"Import"| Core & UI & Utils
+
+    style Dev fill:#3b82f6,stroke:#2563eb,color:#fff
+    style RemixApp fill:#22c55e,stroke:#16a34a,color:#fff
+    style Core fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style UI fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style Utils fill:#8b5cf6,stroke:#6d28d9,color:#fff
 ```
+
+> 📚 **Deep Dive**: For detailed architecture, loading strategies, and state management, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ### Development Modes
 
