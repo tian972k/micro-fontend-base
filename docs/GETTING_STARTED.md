@@ -494,10 +494,44 @@ Default ports used by Orbit:
 # Clean turbo cache
 pnpm clean
 
+# Clear turbo cache only
+rm -rf .turbo node_modules/.cache
+
 # Remove node_modules (nuclear option)
 rm -rf node_modules apps/*/node_modules packages/*/node_modules
 pnpm install
 ```
+
+### Turbo Configuration (v2.7+)
+
+The project uses Turborepo 2.7+ for build orchestration. Key features:
+
+```json
+// turbo.json highlights
+{
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"], // Ignore README changes
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"] // Exclude cache
+    },
+    "build:mfe": {
+      "outputs": ["public/assets/**", "public/manifest.json"]
+    }
+  }
+}
+```
+
+**Task Dependencies:**
+
+- `^build`: Run build in dependencies first
+- `dependsOn: ["build"]`: Run build in same package first
+
+**Caching:**
+
+- `inputs`: Files that affect task hash (use `$TURBO_DEFAULT$` + exclusions)
+- `outputs`: Files to cache after task completes
+- `cache: false`: Disable caching for dev/start tasks
 
 ### Check for Issues
 
