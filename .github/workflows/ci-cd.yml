@@ -492,7 +492,8 @@ jobs:
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      needs.build-shell.result == 'success'
+      needs.build-shell.result == 'success' &&
+      secrets.DOCKERHUB_USERNAME != ''
     steps:
       - uses: actions/checkout@v4
 
@@ -538,7 +539,8 @@ jobs:
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      needs.build-app-react.result == 'success'
+      needs.build-app-react.result == 'success' &&
+      secrets.DOCKERHUB_USERNAME != ''
     steps:
       - uses: actions/checkout@v4
 
@@ -586,7 +588,8 @@ jobs:
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      needs.build-app-nextjs.result == 'success'
+      needs.build-app-nextjs.result == 'success' &&
+      secrets.DOCKERHUB_USERNAME != ''
     steps:
       - uses: actions/checkout@v4
 
@@ -635,7 +638,8 @@ jobs:
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      needs.build-app-vue.result == 'success'
+      needs.build-app-vue.result == 'success' &&
+      secrets.DOCKERHUB_USERNAME != ''
     steps:
       - uses: actions/checkout@v4
 
@@ -683,7 +687,8 @@ jobs:
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      needs.build-app-svelte.result == 'success'
+      needs.build-app-svelte.result == 'success' &&
+      secrets.DOCKERHUB_USERNAME != ''
     steps:
       - uses: actions/checkout@v4
 
@@ -731,7 +736,8 @@ jobs:
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      needs.build-app-solidjs.result == 'success'
+      needs.build-app-solidjs.result == 'success' &&
+      secrets.DOCKERHUB_USERNAME != ''
     steps:
       - uses: actions/checkout@v4
 
