@@ -130,6 +130,61 @@ sequenceDiagram
 - **Mechanism**: Native Fetch + Dynamic Import
 - **Benefit**: Stability, Cacheability, Independent Deployments
 
+### MFE Lifecycle Flow
+
+Complete flow from user navigation to MFE render:
+
+```mermaid
+flowchart TD
+    subgraph "1. User Navigation"
+        A1["User clicks /dashboard/react"]
+        A2["Remix Router matches route"]
+    end
+
+    subgraph "2. Shell Loading"
+        B1["MfeHost component mounts"]
+        B2["Check loading strategy"]
+        B3{"Development?"}
+    end
+
+    subgraph "3a. Dev: Module Federation"
+        C1["Fetch remoteEntry.js"]
+        C2["Execute federation runtime"]
+        C3["Get MFE module"]
+    end
+
+    subgraph "3b. Prod: Manifest Loading"
+        D1["Fetch health.json"]
+        D2{"Status?"}
+        D3["Fetch manifest.json"]
+        D4["Fetch entry bundle"]
+        D5["Show maintenance UI"]
+        D6["Show error UI"]
+    end
+
+    subgraph "4. MFE Mounting"
+        E1["Get mount function"]
+        E2["Create container div"]
+        E3["Call mount(container, props)"]
+        E4["Framework renders UI"]
+    end
+
+    subgraph "5. Cleanup (on unmount)"
+        F1["Call unmount(container)"]
+        F2["Framework cleanup"]
+        F3["Remove container"]
+    end
+
+    A1 --> A2 --> B1 --> B2 --> B3
+    B3 -->|Yes| C1 --> C2 --> C3 --> E1
+    B3 -->|No| D1 --> D2
+    D2 -->|up| D3 --> D4 --> E1
+    D2 -->|maintenance| D5
+    D2 -->|error| D6
+    E1 --> E2 --> E3 --> E4
+    E4 -.->|Route change| F1 --> F2 --> F3
+```
+
 ### Framework-Specific Mounting
 
 Each framework handles mounting differently:
@@ -221,6 +276,7 @@ flowchart LR
     end
 
     subgraph "Global State (@repo/core)"
+        CounterStore["Counter Store"]
         UserStore["User Store"]
         ThemeStore["Theme Store"]
         LocaleStore["Locale Store"]
@@ -232,9 +288,31 @@ flowchart LR
     SvelteState --> EventBus
     SolidState --> EventBus
 
+    EventBus --> CounterStore
     EventBus --> UserStore
     EventBus --> ThemeStore
     EventBus --> LocaleStore
+```
+
+### Store Singleton Flow
+
+All stores are singletons attached to `window` to ensure single instance across all MFEs:
+
+```mermaid
+flowchart TD
+    subgraph "First MFE Load (React)"
+        A1["import counterStore"] --> A2{"window[Symbol] exists?"}
+        A2 -->|No| A3["Create new store"]
+        A3 --> A4["Attach to window[Symbol]"]
+        A4 --> A5["Return store reference"]
+    end
+
+    subgraph "Second MFE Load (Vue)"
+        B1["import counterStore"] --> B2{"window[Symbol] exists?"}
+        B2 -->|Yes| B5["Return existing store"]
+    end
+
+    A5 -.->|Same instance| B5
 ```
 
 ### Local State
@@ -250,24 +328,113 @@ Each MFE manages its own UI state using framework-native tools:
 
 ### Global State (`@repo/core`)
 
-For cross-MFE state, use the shared stores via **framework-specific imports**:
+For cross-MFE state, use the shared **vanilla Zustand stores** with framework-specific imports.
+
+#### Singleton Pattern
+
+All stores (`counterStore`, `userStore`, `themeStore`, `localeStore`) are singletons attached to `window`, ensuring all MFEs share the same instance.
 
 ```typescript
-// React/Next.js
-import { useUserStore, useThemeStore, useLocaleStore } from "@repo/core/react";
-// Vue: @repo/core/vue, SolidJS: @repo/core/solid, Svelte: @repo/core/svelte
+// React/Next.js - Use React hooks
+import {
+  useCounterStore,
+  useUserStore,
+  incrementCounter,
+  decrementCounter
+} from "@repo/core/react";
 
-// Get current state
-const user = useUserStore.getState().user;
-const theme = useThemeStore.getState().theme;
+function Counter() {
+  const count = useCounterStore((state) => state.count);
+  return (
+    <div>
+      <span>{count}</span>
+      <button onClick={() => incrementCounter()}>+</button>
+    </div>
+  );
+}
 
-// Update state
-useUserStore.getState().setUser({ id: "123", name: "John" });
+// Vue/Svelte/SolidJS - Use vanilla stores directly
+import { counterStore, incrementCounter, decrementCounter } from "@repo/core/vue";
 
 // Subscribe to changes
-useUserStore.subscribe((state) => {
-  console.log("User changed:", state.user);
+const unsub = counterStore.subscribe((state) => {
+  console.log("Count:", state.count);
 });
+
+// Increment (auto-broadcasts via EventBus)
+incrementCounter();
+```
+
+#### Built-in EventBus Sync
+
+The `counterStore` automatically listens to `EVENT_KEYS.APP_COUNTER` events. When you call `incrementCounter()`:
+
+1. Updates the local store state
+2. Emits an event to `globalEventBus`
+3. All other MFEs receive the event and update their stores
+
+```mermaid
+sequenceDiagram
+    participant React as React MFE
+    participant Store as counterStore
+    participant Bus as EventBus
+    participant Vue as Vue MFE
+    participant Svelte as Svelte MFE
+
+    Note over React,Svelte: User clicks + button in React MFE
+
+    React->>Store: incrementCounter()
+    Store->>Store: setState({count: 1})
+    Store->>Bus: emit(APP_COUNTER, {count: 1})
+
+    par Broadcast to all MFEs
+        Bus->>Vue: on(APP_COUNTER)
+        Bus->>Svelte: on(APP_COUNTER)
+    end
+
+    Vue->>Vue: counterStore.setState({count: 1})
+    Svelte->>Svelte: counterStore.setState({count: 1})
+
+    Note over React,Svelte: All UIs show count = 1
+```
+
+### Complete State Sync Flow
+
+```mermaid
+flowchart TD
+    subgraph "User Action"
+        Click["User clicks +1"]
+    end
+
+    subgraph "React MFE"
+        R1["onClick handler"]
+        R2["incrementCounter()"]
+        R3["counterStore.setState()"]
+        R4["React re-renders"]
+    end
+
+    subgraph "EventBus (window.__MFE_EVENT_BUS__)"
+        E1["emit(APP_COUNTER, state)"]
+        E2["Notify all listeners"]
+    end
+
+    subgraph "Vue MFE"
+        V1["counterStore listener"]
+        V2["Update ref value"]
+        V3["Vue re-renders"]
+    end
+
+    subgraph "Svelte MFE"
+        S1["counterStore listener"]
+        S2["Update let binding"]
+        S3["Svelte re-renders"]
+    end
+
+    Click --> R1 --> R2 --> R3
+    R3 --> R4
+    R3 --> E1 --> E2
+    E2 --> V1 --> V2 --> V3
+    E2 --> S1 --> S2 --> S3
 ```
 
 ### Event Bus
@@ -446,6 +613,53 @@ flowchart LR
 | **Props**  | Passing read-only context | Session, Theme, Locale    |
 | **Events** | Triggering side effects   | Navigation, Notifications |
 
+### Cross-MFE Communication Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant ReactMFE as React MFE
+    participant Bus as EventBus
+    participant Shell
+    participant VueMFE as Vue MFE
+
+    Note over User,VueMFE: Scenario: User saves data in React, Vue needs to refresh
+
+    User->>ReactMFE: Click "Save"
+    ReactMFE->>ReactMFE: API call success
+    ReactMFE->>Bus: emit("data:updated", {entity: "orders"})
+
+    par Shell handles notification
+        Bus->>Shell: on("data:updated")
+        Shell->>User: Show toast "Data saved!"
+    and Vue refreshes
+        Bus->>VueMFE: on("data:updated")
+        VueMFE->>VueMFE: Refetch orders list
+    end
+```
+
+### Full Navigation Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant MFE as Any MFE
+    participant Bus as EventBus
+    participant Shell
+    participant Router as Remix Router
+    participant Target as Target MFE
+
+    User->>MFE: Click link to /settings
+    MFE->>Bus: emit("nav:navigate", {path: "/settings"})
+    Bus->>Shell: on("nav:navigate")
+    Shell->>Router: navigate("/settings")
+    Router->>Router: Match route
+    Router->>Target: Render Settings MFE
+    Target->>Bus: emit("mfe:mounted", {id: "settings"})
+    Bus->>Shell: on("mfe:mounted")
+    Shell->>Shell: Log analytics
+```
+
 ### Event Naming Convention
 
 ```
@@ -553,6 +767,35 @@ micro-frontend-base/
 ---
 
 ## 8. Security Considerations
+
+### Deployment Flow
+
+```mermaid
+flowchart TD
+    subgraph "CI/CD Pipeline"
+        A1["Git Push"] --> A2["GitHub Actions"]
+        A2 --> A3["Detect changed apps"]
+        A3 --> A4["Build affected MFEs"]
+        A4 --> A5["Run tests"]
+        A5 --> A6["Build Docker images"]
+    end
+
+    subgraph "Docker Build"
+        A6 --> B1["smart-docker-build.js"]
+        B1 --> B2{"Changed apps?"}
+        B2 -->|app-react| B3["Build app-react image"]
+        B2 -->|app-vue| B4["Build app-vue image"]
+        B2 -->|shell| B5["Build shell image"]
+        B3 & B4 & B5 --> B6["Push to registry"]
+    end
+
+    subgraph "Production"
+        B6 --> C1["CDN / Edge"]
+        C1 --> C2["Static MFE assets"]
+        B6 --> C3["Container Platform"]
+        C3 --> C4["Shell container"]
+    end
+```
 
 ### Content Security Policy
 

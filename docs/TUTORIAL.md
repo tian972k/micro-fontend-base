@@ -399,26 +399,42 @@ Each MFE manages its own state using framework-native tools:
 
 ### Global State (`@repo/core`)
 
-For truly global state (user session, theme, locale), use the shared stores:
+For truly global state (user session, theme, locale, counter), use the shared stores:
 
 ```typescript
-// React apps
-import { useUserStore, useThemeStore, useLocaleStore } from "@repo/core/react";
+// React apps - use hooks
+import {
+  useUserStore,
+  useThemeStore,
+  useCounterStore,
+  incrementCounter,
+  decrementCounter,
+} from "@repo/core/react";
 
-// Vue/Solid/Svelte apps - use syncStore for cross-framework sync
-import { syncStore, useThemeStore } from "@repo/core/vue"; // or /solid, /svelte
+// Vue/Solid/Svelte apps - use vanilla stores directly
+import {
+  counterStore,
+  userStore,
+  incrementCounter,
+  decrementCounter,
+} from "@repo/core/vue"; // or /solid, /svelte
 
-// Get current user
-const user = useUserStore.getState().user;
+// Get current state
+const user = userStore.getState().user;
+const count = counterStore.getState().count;
 
 // Subscribe to changes
-useUserStore.subscribe((state) => {
-  console.log("User changed:", state.user);
+counterStore.subscribe((state) => {
+  console.log("Counter changed:", state.count);
 });
 
-// Update state
-useUserStore.getState().setUser({ id: "123", name: "John" });
+// Update counter (auto-broadcasts to all MFEs via EventBus)
+incrementCounter();
+decrementCounter();
 ```
+
+> **Best Practice**: Use `incrementCounter()`/`decrementCounter()` functions instead of manually
+> calling `setState()`. These functions automatically emit events to sync across all MFEs.
 
 ### React Integration
 
@@ -443,19 +459,97 @@ function Profile() {
 
 ```vue
 <script setup lang="ts">
-import { computed, watchEffect } from "vue";
-import { useThemeStore } from "@repo/core/vue";
+import { ref, onMounted, onUnmounted } from "vue";
+import {
+  counterStore,
+  incrementCounter,
+  decrementCounter,
+  userStore,
+} from "@repo/core/vue";
 
-const themeStore = useThemeStore;
-const theme = computed(() => themeStore.getState().theme);
+const count = ref(counterStore.getState().count);
+const user = ref(userStore.getState().user);
 
-// Watch for changes
-watchEffect(() => {
-  themeStore.subscribe((state) => {
-    console.log("Theme updated:", state.theme);
+let unsubCounter: (() => void) | undefined;
+
+onMounted(() => {
+  unsubCounter = counterStore.subscribe((state) => {
+    count.value = state.count;
   });
 });
+
+onUnmounted(() => {
+  unsubCounter?.();
+});
+
+// Increment/decrement will auto-sync to all MFEs
+const handleIncrement = () => incrementCounter();
+const handleDecrement = () => decrementCounter();
 </script>
+
+<template>
+  <div>
+    <p>Count: {{ count }}</p>
+    <button @click="handleDecrement">-</button>
+    <button @click="handleIncrement">+</button>
+  </div>
+</template>
+```
+
+### Svelte Integration
+
+```svelte
+<script lang="ts">
+  import { onMount, onDestroy } from "svelte";
+  import { counterStore, incrementCounter, decrementCounter } from "@repo/core/svelte";
+
+  let count = counterStore.getState().count;
+  let unsub: (() => void) | undefined;
+
+  onMount(() => {
+    unsub = counterStore.subscribe((state) => {
+      count = state.count;
+    });
+  });
+
+  onDestroy(() => unsub?.());
+</script>
+
+<div>
+  <p>Count: {count}</p>
+  <button on:click={() => decrementCounter()}>-</button>
+  <button on:click={() => incrementCounter()}>+</button>
+</div>
+```
+
+### SolidJS Integration
+
+```tsx
+import { createSignal, onMount, onCleanup } from "solid-js";
+import {
+  counterStore,
+  incrementCounter,
+  decrementCounter,
+} from "@repo/core/solid";
+
+function Counter() {
+  const [count, setCount] = createSignal(counterStore.getState().count);
+
+  onMount(() => {
+    const unsub = counterStore.subscribe((state) => {
+      setCount(state.count);
+    });
+    onCleanup(() => unsub());
+  });
+
+  return (
+    <div>
+      <p>Count: {count()}</p>
+      <button onClick={() => decrementCounter()}>-</button>
+      <button onClick={() => incrementCounter()}>+</button>
+    </div>
+  );
+}
 ```
 
 ---
