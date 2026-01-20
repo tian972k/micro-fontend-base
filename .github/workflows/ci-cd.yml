@@ -20,6 +20,25 @@ env:
 
 jobs:
   # ========================================
+  # STEP 0: Check if Docker secrets are configured
+  # ========================================
+  check-docker-secrets:
+    name: 🔐 Check Docker Secrets
+    runs-on: ubuntu-latest
+    outputs:
+      has_docker_secrets: ${{ steps.check.outputs.has_secrets }}
+    steps:
+      - name: Check if Docker secrets exist
+        id: check
+        run: |
+          if [[ -n "${{ secrets.DOCKERHUB_USERNAME }}" && -n "${{ secrets.DOCKERHUB_TOKEN }}" ]]; then
+            echo "has_secrets=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_secrets=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Docker secrets not configured. Docker jobs will be skipped."
+          fi
+
+  # ========================================
   # STEP 1: Detect what changed
   # ========================================
   detect-changes:
@@ -487,13 +506,13 @@ jobs:
   docker-shell:
     name: 🐳 Docker Shell
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-shell]
+    needs: [detect-changes, build-shell, check-docker-secrets]
     if: |
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
       needs.build-shell.result == 'success' &&
-      secrets.DOCKERHUB_USERNAME != ''
+      needs.check-docker-secrets.outputs.has_docker_secrets == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -534,13 +553,13 @@ jobs:
   docker-app-react:
     name: 🐳 Docker App React
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-app-react]
+    needs: [detect-changes, build-app-react, check-docker-secrets]
     if: |
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
       needs.build-app-react.result == 'success' &&
-      secrets.DOCKERHUB_USERNAME != ''
+      needs.check-docker-secrets.outputs.has_docker_secrets == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -583,13 +602,13 @@ jobs:
   docker-app-nextjs:
     name: 🐳 Docker App Next.js
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-app-nextjs]
+    needs: [detect-changes, build-app-nextjs, check-docker-secrets]
     if: |
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
       needs.build-app-nextjs.result == 'success' &&
-      secrets.DOCKERHUB_USERNAME != ''
+      needs.check-docker-secrets.outputs.has_docker_secrets == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -633,13 +652,13 @@ jobs:
   docker-app-vue:
     name: 🐳 Docker App Vue
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-app-vue]
+    needs: [detect-changes, build-app-vue, check-docker-secrets]
     if: |
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
       needs.build-app-vue.result == 'success' &&
-      secrets.DOCKERHUB_USERNAME != ''
+      needs.check-docker-secrets.outputs.has_docker_secrets == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -682,13 +701,13 @@ jobs:
   docker-app-svelte:
     name: 🐳 Docker App Svelte
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-app-svelte]
+    needs: [detect-changes, build-app-svelte, check-docker-secrets]
     if: |
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
       needs.build-app-svelte.result == 'success' &&
-      secrets.DOCKERHUB_USERNAME != ''
+      needs.check-docker-secrets.outputs.has_docker_secrets == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -731,13 +750,13 @@ jobs:
   docker-app-solidjs:
     name: 🐳 Docker App SolidJS
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-app-solidjs]
+    needs: [detect-changes, build-app-solidjs, check-docker-secrets]
     if: |
       always() &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
       needs.build-app-solidjs.result == 'success' &&
-      secrets.DOCKERHUB_USERNAME != ''
+      needs.check-docker-secrets.outputs.has_docker_secrets == 'true'
     steps:
       - uses: actions/checkout@v4
 
