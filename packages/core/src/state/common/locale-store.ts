@@ -1,4 +1,4 @@
-import { createStore } from "zustand/vanilla";
+import { createStore, type StoreApi } from "zustand/vanilla";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { globalEventBus } from "../../events/event-bus";
 import { EVENT_KEYS } from "../../constants/keys";
@@ -12,14 +12,18 @@ export interface LocaleState {
 
 // --- Store Creation ---
 
-const GLOBAL_STORE_SYMBOL = Symbol.for("@repo/core/locale-store");
+type LocaleStoreApi = StoreApi<LocaleState>;
 
-const createLocaleStore = () =>
-  createStore<LocaleState>()(
+interface GlobalWindow extends Window {
+  __LOCALE_STORE__?: LocaleStoreApi;
+}
+
+const createLocaleStore = (): LocaleStoreApi => {
+  const store = createStore<LocaleState>()(
     persist(
-      (set) => ({
+      (set): LocaleState => ({
         locale: "en",
-        setLocale: (locale) => {
+        setLocale: (locale: Locale): void => {
           set({ locale });
           globalEventBus.emit(EVENT_KEYS.LOCALE_CHANGE, { locale });
         },
@@ -30,33 +34,40 @@ const createLocaleStore = () =>
           typeof window !== "undefined"
             ? localStorage
             : {
-                getItem: () => null,
-                setItem: () => {},
-                removeItem: () => {},
+                getItem: (): null => null,
+                setItem: (): void => {},
+                removeItem: (): void => {},
               },
         ),
       },
     ),
   );
 
+  // Listen for cross-MFE sync
+  globalEventBus.on(EVENT_KEYS.LOCALE_CHANGE, (data: unknown) => {
+    const payload = data as { locale: Locale };
+    if (
+      payload &&
+      payload.locale &&
+      payload.locale !== store.getState().locale
+    ) {
+      store.setState({ locale: payload.locale });
+    }
+  });
+
+  return store;
+};
+
 // --- Singleton Logic ---
 
-let store$: ReturnType<typeof createLocaleStore>;
+let store$: LocaleStoreApi;
 
 if (typeof window !== "undefined") {
-  const win = window as unknown as Window & {
-    [GLOBAL_STORE_SYMBOL]?: ReturnType<typeof createLocaleStore>;
-  };
-  if (!win[GLOBAL_STORE_SYMBOL]) {
-    const newStore = createLocaleStore();
-    Object.defineProperty(win, GLOBAL_STORE_SYMBOL, {
-      value: newStore,
-      enumerable: false,
-      writable: false,
-      configurable: false,
-    });
+  const win = window as GlobalWindow;
+  if (!win.__LOCALE_STORE__) {
+    win.__LOCALE_STORE__ = createLocaleStore();
   }
-  store$ = win[GLOBAL_STORE_SYMBOL]!;
+  store$ = win.__LOCALE_STORE__;
 } else {
   store$ = createLocaleStore();
 }

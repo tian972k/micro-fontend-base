@@ -8,11 +8,18 @@ import { themeStore, type ThemeState } from "../common/theme-store";
  *   // OR for all state:
  *   const { theme, setTheme } = useThemeStore();
  */
+/* eslint-disable no-redeclare */
+export function useThemeStore(): ThemeState;
+export function useThemeStore<T>(selector: (state: ThemeState) => T): T;
 export function useThemeStore<T = ThemeState>(
   selector?: (state: ThemeState) => T,
 ): T {
-  return useStore(themeStore, selector ?? ((state) => state as unknown as T));
+  return useStore(
+    themeStore,
+    selector ?? ((state: ThemeState) => state as unknown as T),
+  );
 }
+/* eslint-enable no-redeclare */
 
 // Re-export types and utilities
 export {

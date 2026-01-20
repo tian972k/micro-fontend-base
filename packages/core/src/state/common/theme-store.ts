@@ -1,4 +1,4 @@
-import { createStore } from "zustand/vanilla";
+import { createStore, type StoreApi } from "zustand/vanilla";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 export type Theme = "light" | "dark" | "system";
@@ -10,9 +10,13 @@ export interface ThemeState {
 
 // --- Store Creation ---
 
-const GLOBAL_STORE_SYMBOL = Symbol.for("@repo/core/theme-store");
+type ThemeStoreApi = StoreApi<ThemeState>;
 
-const createThemeStore = () =>
+interface GlobalWindow extends Window {
+  __THEME_STORE__?: ThemeStoreApi;
+}
+
+const createThemeStore = (): ThemeStoreApi =>
   createStore<ThemeState>()(
     persist(
       (set) => ({
@@ -36,22 +40,14 @@ const createThemeStore = () =>
 
 // --- Singleton Logic ---
 
-let store$: ReturnType<typeof createThemeStore>;
+let store$: ThemeStoreApi;
 
 if (typeof window !== "undefined") {
-  const win = window as unknown as Window & {
-    [GLOBAL_STORE_SYMBOL]?: ReturnType<typeof createThemeStore>;
-  };
-  if (!win[GLOBAL_STORE_SYMBOL]) {
-    const newStore = createThemeStore();
-    Object.defineProperty(win, GLOBAL_STORE_SYMBOL, {
-      value: newStore,
-      enumerable: false,
-      writable: false,
-      configurable: false,
-    });
+  const win = window as GlobalWindow;
+  if (!win.__THEME_STORE__) {
+    win.__THEME_STORE__ = createThemeStore();
   }
-  store$ = win[GLOBAL_STORE_SYMBOL]!;
+  store$ = win.__THEME_STORE__;
 } else {
   store$ = createThemeStore();
 }

@@ -34,6 +34,7 @@ import { useSubmit } from "@remix-run/react";
 import {
   useUserStore,
   useThemeStore,
+  useLocaleStore,
   type Theme,
   LOCALES,
   type Locale,
@@ -43,6 +44,7 @@ import { useTranslation } from "react-i18next";
 export function UserMenu() {
   const user = useUserStore((state) => state.user);
   const { theme, setTheme } = useThemeStore();
+  const { setLocale } = useLocaleStore();
   const submit = useSubmit();
   const { t, i18n } = useTranslation();
 
@@ -50,8 +52,9 @@ export function UserMenu() {
     submit(null, { method: "post", action: "/logout" });
   };
 
-  const handleLanguageChange = (locale: Locale) => {
-    i18n.changeLanguage(locale);
+  const handleLanguageChange = (newLocale: Locale) => {
+    setLocale(newLocale);
+    i18n.changeLanguage(newLocale);
   };
 
   const themeOptions: { value: Theme; label: string; icon: typeof Sun }[] = [

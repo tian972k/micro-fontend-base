@@ -1,4 +1,4 @@
-import { createStore } from "zustand/vanilla";
+import { createStore, type StoreApi } from "zustand/vanilla";
 
 // --- Types ---
 
@@ -19,14 +19,19 @@ export interface UserState {
 
 // --- Store Creation ---
 
-const GLOBAL_STORE_SYMBOL = Symbol.for("@repo/core/user-store");
+type UserStoreApi = StoreApi<UserState>;
+
+interface GlobalWindow extends Window {
+  __USER_STORE__?: UserStoreApi;
+}
+
 const initialState = {
   isAuthenticated: false,
   user: null,
 };
 
 // Factory function to create the store
-const createUserStore = () =>
+const createUserStore = (): UserStoreApi =>
   createStore<UserState>((set) => ({
     ...initialState,
     login: (user) => set({ isAuthenticated: true, user }),
@@ -39,23 +44,14 @@ const createUserStore = () =>
 
 // --- Singleton Logic ---
 
-let store$: ReturnType<typeof createUserStore>;
+let store$: UserStoreApi;
 
 if (typeof window !== "undefined") {
-  const win = window as unknown as Window & {
-    [GLOBAL_STORE_SYMBOL]?: ReturnType<typeof createUserStore>;
-  };
-  if (!win[GLOBAL_STORE_SYMBOL]) {
-    const newStore = createUserStore();
-    // Use Object.defineProperty to hide it from iteration but keep it accessible via Symbol
-    Object.defineProperty(win, GLOBAL_STORE_SYMBOL, {
-      value: newStore,
-      enumerable: false, // Hidden from for...in / Object.keys
-      writable: false, // Read-only reference (store internal state is mutable)
-      configurable: false,
-    });
+  const win = window as GlobalWindow;
+  if (!win.__USER_STORE__) {
+    win.__USER_STORE__ = createUserStore();
   }
-  store$ = win[GLOBAL_STORE_SYMBOL]!;
+  store$ = win.__USER_STORE__;
 } else {
   // Server-side: Create a fresh store per request context (conceptually)
   store$ = createUserStore();

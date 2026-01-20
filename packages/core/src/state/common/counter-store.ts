@@ -1,13 +1,17 @@
-import { createStore } from "zustand/vanilla";
+import { createStore, type StoreApi } from "zustand/vanilla";
 import { globalEventBus } from "../../events/event-bus";
 import { EVENT_KEYS } from "../../constants/keys";
 import type { CounterState } from "../../types";
 
 // --- Store Creation ---
 
-const GLOBAL_STORE_SYMBOL = Symbol.for("@repo/core/counter-store");
+type CounterStoreApi = StoreApi<CounterState>;
 
-const createCounterStore = () => {
+interface GlobalWindow extends Window {
+  __COUNTER_STORE__?: CounterStoreApi;
+}
+
+const createCounterStore = (): CounterStoreApi => {
   const store = createStore<CounterState>(() => ({
     count: 0,
   }));
@@ -25,22 +29,14 @@ const createCounterStore = () => {
 
 // --- Singleton Logic ---
 
-let store$: ReturnType<typeof createCounterStore>;
+let store$: CounterStoreApi;
 
 if (typeof window !== "undefined") {
-  const win = window as unknown as Window & {
-    [GLOBAL_STORE_SYMBOL]?: ReturnType<typeof createCounterStore>;
-  };
-  if (!win[GLOBAL_STORE_SYMBOL]) {
-    const newStore = createCounterStore();
-    Object.defineProperty(win, GLOBAL_STORE_SYMBOL, {
-      value: newStore,
-      enumerable: false,
-      writable: false,
-      configurable: false,
-    });
+  const win = window as GlobalWindow;
+  if (!win.__COUNTER_STORE__) {
+    win.__COUNTER_STORE__ = createCounterStore();
   }
-  store$ = win[GLOBAL_STORE_SYMBOL]!;
+  store$ = win.__COUNTER_STORE__;
 } else {
   store$ = createCounterStore();
 }
