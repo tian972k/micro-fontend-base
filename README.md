@@ -1,4 +1,4 @@
-# 🪐 Orbit: Enterprise Micro-Frontend Platform
+# Orbit: Enterprise Micro-Frontend Platform
 
 > **Production-ready, multi-framework micro-frontend architecture** optimized for scalability, performance, and developer experience.
 
@@ -13,30 +13,30 @@
 
 ```mermaid
 flowchart LR
-    Shell["🌟 Shell (Remix)"] --> React["⚛️ React"]
-    Shell --> Vue["💚 Vue"]
-    Shell --> Svelte["🧡 Svelte"]
-    Shell --> Solid["💙 Solid"]
-    Shell --> Next["▲ Next.js"]
+    Shell["Shell (Remix)"] --> React["React"]
+    Shell --> Vue["Vue"]
+    Shell --> Svelte["Svelte"]
+    Shell --> Solid["SolidJS"]
+    Shell --> Next["Next.js"]
 ```
 
 ---
 
-## 📚 Documentation
+## Documentation
 
-| Guide                                           | Description                                        |
-| ----------------------------------------------- | -------------------------------------------------- |
-| [🚀 Getting Started](./docs/GETTING_STARTED.md) | Setup, Installation, and Running the Platform      |
-| [📖 Tutorial](./docs/TUTORIAL.md)               | Step-by-step guide to building your first MFE      |
-| [🏗️ Architecture](./docs/ARCHITECTURE.md)       | System design, Module Federation, State Management |
-| [📏 Standards](./docs/STANDARDS.md)             | Code style, Naming conventions, Best practices     |
-| [🚢 Deployment](./docs/DEPLOYMENT.md)           | CI/CD, Docker strategies, Production setup         |
+| Guide                                        | Description                                        |
+| -------------------------------------------- | -------------------------------------------------- |
+| [Getting Started](./docs/GETTING_STARTED.md) | Setup, Installation, and Running the Platform      |
+| [Tutorial](./docs/TUTORIAL.md)               | Step-by-step guide to building your first MFE      |
+| [Architecture](./docs/ARCHITECTURE.md)       | System design, Module Federation, State Management |
+| [Standards](./docs/STANDARDS.md)             | Code style, Naming conventions, Best practices     |
+| [Deployment](./docs/DEPLOYMENT.md)           | CI/CD, Docker strategies, Production setup         |
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 🎯 Multi-Framework Support
+### Multi-Framework Support
 
 Build with **React, Vue, Svelte, SolidJS, or Next.js**. Each micro-frontend can use its optimal framework while sharing state and UI components seamlessly.
 
@@ -48,28 +48,28 @@ Build with **React, Vue, Svelte, SolidJS, or Next.js**. Each micro-frontend can 
 | SolidJS   |   ✅   |      ✅       |        ✅        |
 | Next.js   |   ✅   |      ✅       |        ✅        |
 
-### ⚡ Lightning-Fast Development
+### Lightning-Fast Development
 
 - **Vite-powered** builds (< 2s for most apps)
 - **Turborepo caching** - never rebuild the same code twice
 - **Hot Module Replacement** across all frameworks
 - **Parallel builds** with intelligent dependency graph
 
-### 📦 Optimized Bundle Sizes
+### Optimized Bundle Sizes
 
 - **Tree-shaking enabled** with proper `sideEffects` configuration
 - **Framework-specific builds** - No React in Vue apps
 - **~550KB+ savings** per non-React app
 - **Shared dependencies** managed centrally
 
-### 🔄 Smart CI/CD Pipeline
+### Smart CI/CD Pipeline
 
 - **Change Detection** - Only build what changed
 - **Conditional Docker** - Skip unchanged apps
 - **~70% faster builds** on average
 - **Parallel deployments**
 
-### 🎨 Multi-Framework UI Library
+### Multi-Framework UI Library
 
 - **Consistent design system** across all frameworks
 - **Shared variants** using CVA (Class Variance Authority)
@@ -78,7 +78,7 @@ Build with **React, Vue, Svelte, SolidJS, or Next.js**. Each micro-frontend can 
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -99,11 +99,11 @@ pnpm install
 pnpm dev
 ```
 
-🎉 **Open [http://localhost:8000](http://localhost:8000)**
+**Open [http://localhost:8000](http://localhost:8000)**
 
 ---
 
-## 📋 Common Commands
+## Common Commands
 
 ### Development
 
@@ -136,36 +136,36 @@ pnpm dev
 
 ---
 
-## 📦 Project Structure
+## Project Structure
 
 ```text
 micro-frontend-base/
 ├── apps/
-│   ├── shell/           # 🌟 Remix host application (SSR)
-│   ├── app-react/       # ⚛️  React micro-frontend
-│   ├── app-nextjs/      # ▲  Next.js micro-frontend
-│   ├── app-vue/         # 💚 Vue 3 micro-frontend
-│   ├── app-svelte/      # 🧡 Svelte micro-frontend
-│   └── app-solidjs/     # 💙 SolidJS micro-frontend
+│   ├── shell/           # Remix host application (SSR)
+│   ├── app-react/       # React micro-frontend
+│   ├── app-nextjs/      # Next.js micro-frontend
+│   ├── app-vue/         # Vue 3 micro-frontend
+│   ├── app-svelte/      # Svelte micro-frontend
+│   └── app-solidjs/     # SolidJS micro-frontend
 │
 ├── packages/
-│   ├── ui/              # 🎨 Multi-framework design system
-│   ├── core/            # 🧠 State management & MFE utilities
-│   ├── utils/           # 🔧 Helper functions
-│   └── config/          # ⚙️  Shared configurations
+│   ├── ui/              # Multi-framework design system
+│   ├── core/            # State management & MFE utilities
+│   ├── utils/           # Helper functions
+│   └── config/          # Shared configurations
 │
 ├── scripts/
-│   ├── mfe.config.mjs   # 📋 Central MFE configuration
-│   ├── cli.mjs          # 🛠️  Interactive CLI
-│   ├── create-app.mjs   # 📁 App scaffolding
-│   └── ...              # 🏗️  Build & utility scripts
+│   ├── mfe.config.mjs   # Central MFE configuration
+│   ├── cli.mjs          # Interactive CLI
+│   ├── create-app.mjs   # App scaffolding
+│   └── ...              # Build & utility scripts
 │
-└── docs/                # 📚 Documentation
+└── docs/                # Documentation
 ```
 
 ---
 
-## 🎨 UI Component Library
+## UI Component Library
 
 Our multi-framework UI library provides consistent components across all frameworks:
 
@@ -211,7 +211,7 @@ pnpm storybook:svelte  # Port 6009
 
 ---
 
-## 🔧 MFE Configuration
+## MFE Configuration
 
 All MFE apps are configured centrally in `scripts/mfe.config.mjs`:
 
@@ -282,7 +282,7 @@ FORCE_ALL=true EXECUTE=true node scripts/smart-docker-build.js
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ```mermaid
 flowchart TD
@@ -308,7 +308,7 @@ See [Architecture Guide](./docs/ARCHITECTURE.md) for detailed documentation.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feat/amazing-feature`)
@@ -320,15 +320,15 @@ See [Standards](./docs/STANDARDS.md) for coding conventions.
 
 ---
 
-## 📬 Support
+## Support
 
-- 📖 Read the [Documentation](./docs/)
-- 🐛 Report issues on GitHub
-- 💬 Contact: [phamtuandev0907@gmail.com](mailto:phamtuandev0907@gmail.com)
+- Read the [Documentation](./docs/)
+- Report issues on GitHub
+- Contact: [phamtuandev0907@gmail.com](mailto:phamtuandev0907@gmail.com)
 
 ---
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](./LICENSE) for details.
 

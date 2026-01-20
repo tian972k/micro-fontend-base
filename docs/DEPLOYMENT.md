@@ -1,10 +1,10 @@
-# 🚢 Deployment Guide
+# Deployment Guide
 
 This guide covers deployment strategies, CI/CD pipelines, and production setup for the Orbit Micro-Frontend Platform.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1. [Architecture Overview](#1-architecture-overview)
 2. [Build System](#2-build-system)
@@ -724,7 +724,7 @@ kubectl rollout status deployment/orbit-shell
 
 ---
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [CI/CD Pipeline](../.github/CI_CD.md) - Detailed CI/CD configuration
 - [Getting Started](./GETTING_STARTED.md) - Local development setup

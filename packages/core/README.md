@@ -4,30 +4,30 @@ The **nervous system** of the Micro-Frontend platform. This package contains sha
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
-1. [Overview](#-overview)
-2. [Installation](#-installation)
+1. [Overview](#overview)
+2. [Installation](#installation)
 3. [Application Registry](#1-application-registry)
 4. [Event Bus](#2-event-bus)
 5. [State Management](#3-state-management)
 6. [MFE Utilities](#4-mfe-utilities)
 7. [Logger](#5-logger)
 8. [I18n](#6-i18n)
-9. [API Reference](#-api-reference)
+9. [API Reference](#api-reference)
 
 ---
 
-## 🌟 Overview
+## Overview
 
 `@repo/core` provides:
 
-- **🔌 Application Registry**: Manage MFE lifecycle and metadata
-- **📡 Event Bus**: Cross-MFE communication
-- **🗃️ State Management**: Zustand stores for global state
-- **🏗️ MFE Utilities**: Factories for creating MFE entry points
-- **📝 Logger**: Standardized logging
-- **🌍 I18n**: Internationalization support
+- **Application Registry**: Manage MFE lifecycle and metadata
+- **Event Bus**: Cross-MFE communication
+- **State Management**: Zustand stores for global state
+- **MFE Utilities**: Factories for creating MFE entry points
+- **Logger**: Standardized logging
+- **I18n**: Internationalization support
 
 ### Framework-Specific Entry Points
 
@@ -54,7 +54,7 @@ import { EventBus, Logger, syncStore } from "@repo/core/shared";
 
 ---
 
-## 📦 Installation
+## Installation
 
 The package is automatically available in the monorepo:
 
@@ -625,7 +625,7 @@ function Welcome() {
 
 ---
 
-## 📖 API Reference
+## API Reference
 
 ### AppRegistry
 
@@ -720,7 +720,7 @@ interface Logger {
 
 ---
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [Architecture](../../docs/ARCHITECTURE.md) - System design and patterns
 - [Tutorial](../../docs/TUTORIAL.md) - Step-by-step development guide

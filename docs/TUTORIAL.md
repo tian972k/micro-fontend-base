@@ -1,4 +1,4 @@
-# 📖 Orbit Platform Tutorial
+# Orbit Platform Tutorial
 
 > **Complete hands-on guide** to building micro-frontends with the Orbit platform.
 
@@ -6,20 +6,20 @@
 
 ## Table of Contents
 
-1. [Introduction](#-introduction)
-2. [Your First Micro-Frontend](#-your-first-micro-frontend)
-3. [Working with UI Components](#-working-with-ui-components)
-4. [Cross-MFE Communication](#-cross-mfe-communication)
-5. [State Management](#-state-management)
-6. [Adding New Components](#-adding-new-components)
-7. [Storybook Development](#-storybook-development)
-8. [Testing Your MFE](#-testing-your-mfe)
-9. [Production Build](#-production-build)
-10. [Common Recipes](#-common-recipes)
+1. [Introduction](#introduction)
+2. [Your First Micro-Frontend](#your-first-micro-frontend)
+3. [Working with UI Components](#working-with-ui-components)
+4. [Cross-MFE Communication](#cross-mfe-communication)
+5. [State Management](#state-management)
+6. [Adding New Components](#adding-new-components)
+7. [Storybook Development](#storybook-development)
+8. [Testing Your MFE](#testing-your-mfe)
+9. [Production Build](#production-build)
+10. [Common Recipes](#common-recipes)
 
 ---
 
-## 🌟 Introduction
+## Introduction
 
 Welcome to the Orbit Platform Tutorial! This guide will walk you through everything you need to know to build, develop, and deploy micro-frontends.
 
@@ -44,7 +44,7 @@ Before starting, ensure you have:
 
 ---
 
-## 🚀 Your First Micro-Frontend
+## Your First Micro-Frontend
 
 Let's create a new micro-frontend from scratch!
 
@@ -160,7 +160,7 @@ import { createSvelteMfeEntry, AppRegistry } from "@repo/core/svelte";
 
 ---
 
-## 🎨 Working with UI Components
+## Working with UI Components
 
 The `@repo/ui` package provides a multi-framework component library.
 
@@ -296,7 +296,7 @@ const outlineCard = cn(cardVariants({ variant: 'outline' }));
 
 ---
 
-## 🔄 Cross-MFE Communication
+## Cross-MFE Communication
 
 MFEs communicate via the **EventBus** - a pub/sub system provided by `@repo/core`.
 
@@ -386,7 +386,7 @@ Use a `namespace:action` pattern:
 
 ---
 
-## 📦 State Management
+## State Management
 
 ### Local State
 
@@ -590,7 +590,7 @@ export * from "./my-component"; // Add this
 
 ---
 
-## 📚 Storybook Development
+## Storybook Development
 
 ### Running Storybook
 
@@ -720,7 +720,7 @@ export default factory.createMainConfig({
 
 ---
 
-## 🧪 Testing Your MFE
+## Testing Your MFE
 
 ### Unit Testing
 
@@ -751,7 +751,7 @@ pnpm test:e2e
 
 ---
 
-## 🚀 Production Build
+## Production Build
 
 ### Building Your App
 
@@ -795,7 +795,7 @@ curl http://localhost:3000/manifest.json
 
 ---
 
-## 📋 Common Recipes
+## Common Recipes
 
 ### Recipe 1: Fetch Data on Mount
 
@@ -926,7 +926,7 @@ function CleanupExample() {
 
 ---
 
-## 📚 Next Steps
+## Next Steps
 
 - **[Architecture Guide](./ARCHITECTURE.md)** - Deep dive into system design
 - **[Standards](./STANDARDS.md)** - Coding conventions and best practices
@@ -936,8 +936,8 @@ function CleanupExample() {
 
 ---
 
-## ❓ Need Help?
+## Need Help?
 
-- 📖 Check the [Getting Started](./GETTING_STARTED.md) guide
-- 🐛 Report issues on GitHub
-- 💬 Contact: [phamtuandev0907@gmail.com](mailto:phamtuandev0907@gmail.com)
+- Check the [Getting Started](./GETTING_STARTED.md) guide
+- Report issues on GitHub
+- Contact: [phamtuandev0907@gmail.com](mailto:phamtuandev0907@gmail.com)

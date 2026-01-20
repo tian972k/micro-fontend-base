@@ -1,23 +1,23 @@
-# 🚀 Getting Started
+# Getting Started
 
 Welcome to **Orbit**! This comprehensive guide will get you up and running with your Micro-Frontend development environment in minutes.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
-1. [Prerequisites](#-prerequisites)
-2. [Quick Setup](#️-quick-setup)
-3. [Development Workflow](#️-development-workflow)
-4. [CLI Tools](#-cli-tools)
-5. [MFE Configuration](#️-mfe-configuration)
-6. [Production Simulation](#-production-simulation)
-7. [Troubleshooting](#-troubleshooting)
-8. [Next Steps](#-next-steps)
+1. [Prerequisites](#prerequisites)
+2. [Quick Setup](#quick-setup)
+3. [Development Workflow](#development-workflow)
+4. [CLI Tools](#cli-tools)
+5. [MFE Configuration](#mfe-configuration)
+6. [Production Simulation](#production-simulation)
+7. [Troubleshooting](#troubleshooting)
+8. [Next Steps](#next-steps)
 
 ---
 
-## 🏁 Prerequisites
+## Prerequisites
 
 Before you start, make sure you have the following installed:
 
@@ -59,7 +59,7 @@ docker -v  # Optional - for production simulation
 
 ---
 
-## 🛠️ Quick Setup
+## Quick Setup
 
 ### Step 1: Clone the Repository
 
@@ -122,11 +122,11 @@ pnpm type-check
 pnpm dev
 ```
 
-🎉 **You're ready!** Open [http://localhost:8000](http://localhost:8000)
+**You're ready!** Open [http://localhost:8000](http://localhost:8000)
 
 ---
 
-## 🏃‍♂️ Development Workflow
+## Development Workflow
 
 ### Understanding the Architecture
 
@@ -226,7 +226,7 @@ pnpm dev --filter=shell
 
 ---
 
-## 🛠 CLI Tools
+## CLI Tools
 
 ### The Interactive CLI
 
@@ -318,7 +318,7 @@ EXECUTE=true pnpm docker:build:smart
 
 ---
 
-## ⚙️ MFE Configuration
+## MFE Configuration
 
 All MFE apps are configured in a single source of truth:
 
@@ -408,7 +408,7 @@ pnpm dev --filter=app-my-dashboard
 
 ---
 
-## 🚢 Production Simulation
+## Production Simulation
 
 Test the full production setup locally using Docker:
 
@@ -458,7 +458,7 @@ docker-compose down -v --rmi all
 
 ---
 
-## ❓ Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -523,16 +523,16 @@ DEBUG=* pnpm dev
 
 ---
 
-## 📚 Next Steps
+## Next Steps
 
 Now that you're set up, explore these resources:
 
 ### Tutorials & Guides
 
-- **[📖 Tutorial](./TUTORIAL.md)**: Step-by-step guide to building your first MFE
-- **[🏗️ Architecture](./ARCHITECTURE.md)**: System design and patterns
-- **[📏 Standards](./STANDARDS.md)**: Coding conventions and best practices
-- **[🚢 Deployment](./DEPLOYMENT.md)**: CI/CD and production setup
+- **[Tutorial](./TUTORIAL.md)**: Step-by-step guide to building your first MFE
+- **[Architecture](./ARCHITECTURE.md)**: System design and patterns
+- **[Standards](./STANDARDS.md)**: Coding conventions and best practices
+- **[Deployment](./DEPLOYMENT.md)**: CI/CD and production setup
 
 ### Package Documentation
 
@@ -552,8 +552,8 @@ Now that you're set up, explore these resources:
 
 ---
 
-## 📬 Need Help?
+## Need Help?
 
-- 📖 Check the [Tutorial](./TUTORIAL.md)
-- 🐛 Report issues on GitHub
-- 💬 Contact: [phamtuandev0907@gmail.com](mailto:phamtuandev0907@gmail.com)
+- Check the [Tutorial](./TUTORIAL.md)
+- Report issues on GitHub
+- Contact: [phamtuandev0907@gmail.com](mailto:phamtuandev0907@gmail.com)

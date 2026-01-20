@@ -1,10 +1,10 @@
-# 📏 Standards & Conventions
+# Standards & Conventions
 
 This document outlines the coding standards, structural conventions, and best practices for the **Orbit** platform.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1. [Code Style](#1-code-style)
 2. [Naming Conventions](#2-naming-conventions)
@@ -652,7 +652,7 @@ Each package should have a README with:
 
 ---
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [Getting Started](./GETTING_STARTED.md) - Local development setup
 - [Tutorial](./TUTORIAL.md) - Hands-on development guide

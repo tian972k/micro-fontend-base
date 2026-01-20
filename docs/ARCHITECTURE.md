@@ -1,10 +1,10 @@
-# 🏗️ Architecture & System Design
+# Architecture & System Design
 
 This document outlines the core technical decisions, patterns, and optimization strategies of the **Orbit** Micro-Frontend Platform.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1. [High-Level Architecture](#1-high-level-architecture)
 2. [Loading Strategies](#2-loading-strategies)
@@ -599,7 +599,7 @@ SESSION_SECRET=your-secret-here
 
 ---
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [Getting Started](./GETTING_STARTED.md) - Local development setup
 - [Tutorial](./TUTORIAL.md) - Hands-on development guide

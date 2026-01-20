@@ -4,30 +4,30 @@ A **multi-framework UI component library** with shared variants and consistent s
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
-1. [Overview](#-overview)
-2. [Installation](#-installation)
-3. [Usage](#-usage)
+1. [Overview](#overview)
+2. [Installation](#installation)
+3. [Usage](#usage)
 4. [Available Components](#-available-components)
 5. [Shared Variants](#-shared-variants)
-6. [Storybook](#-storybook)
+6. [Storybook](#storybook)
 7. [Generate Components](#-generate-components)
 8. [Project Structure](#-project-structure)
-9. [API Reference](#-api-reference)
+9. [API Reference](#api-reference)
 
 ---
 
-## 🌟 Overview
+## Overview
 
 `@repo/ui` is a design system that provides:
 
-- **🎯 Multi-Framework Support**: React, Vue 3, SolidJS, and Svelte components
-- **🎨 Consistent Design**: Shared variants using CVA (Class Variance Authority)
-- **🌙 Dark Mode Ready**: All components support light/dark themes
-- **♿ Accessible**: Built on Radix UI primitives (React)
-- **🌳 Tree Shakeable**: Import only what you need
-- **📚 Storybook**: Visual documentation for each framework
+- **Multi-Framework Support**: React, Vue 3, SolidJS, and Svelte components
+- **Consistent Design**: Shared variants using CVA (Class Variance Authority)
+- **Dark Mode Ready**: All components support light/dark themes
+- **Accessible**: Built on Radix UI primitives (React)
+- **Tree Shakeable**: Import only what you need
+- **Storybook**: Visual documentation for each framework
 
 ### Supported Frameworks
 
@@ -40,7 +40,7 @@ A **multi-framework UI component library** with shared variants and consistent s
 
 ---
 
-## 📦 Installation
+## Installation
 
 The package is automatically available in the monorepo. No additional installation needed.
 
@@ -55,7 +55,7 @@ The package is automatically available in the monorepo. No additional installati
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ### 1. Import Global Styles
 
@@ -191,7 +191,7 @@ export function MyComponent() {
 
 ---
 
-## 🎨 Shared Variants
+## Shared Variants
 
 Shared variants are framework-agnostic styling definitions using CVA:
 
@@ -288,7 +288,7 @@ export function CustomButton({
 
 ---
 
-## 📚 Storybook
+## Storybook
 
 Each framework has its own Storybook instance for visual documentation.
 
@@ -307,11 +307,11 @@ pnpm storybook:svelte  # http://localhost:6009
 
 ### Storybook Features
 
-- **📖 Auto-generated docs** from TypeScript types
-- **🎮 Interactive controls** to test props
-- **🌙 Dark mode toggle** for theme testing
-- **📱 Responsive viewport** testing
-- **♿ Accessibility** testing addon
+- **Auto-generated docs** from TypeScript types
+- **Interactive controls** to test props
+- **Dark mode toggle** for theme testing
+- **Responsive viewport** testing
+- **Accessibility** testing addon
 
 ### Building Storybook
 
@@ -322,7 +322,7 @@ pnpm storybook:build
 
 ---
 
-## ⚙️ Generate Components
+## Generate Components
 
 Use the CLI to generate new components:
 
@@ -411,7 +411,7 @@ packages/ui/
 
 ---
 
-## 📖 API Reference
+## API Reference
 
 ### Exports
 
@@ -499,7 +499,7 @@ interface TooltipProps {
 
 ---
 
-## 🎨 Theming
+## Theming
 
 ### CSS Variables
 
@@ -537,7 +537,7 @@ Override CSS variables in your app:
 
 ---
 
-## 🔧 Tailwind Configuration
+## Tailwind Configuration
 
 Export a shared Tailwind config preset:
 
@@ -556,7 +556,7 @@ export default {
 
 ---
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [Tutorial](../../docs/TUTORIAL.md) - Step-by-step component usage guide
 - [Standards](../../docs/STANDARDS.md) - Coding conventions
