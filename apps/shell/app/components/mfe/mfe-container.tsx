@@ -1,4 +1,4 @@
-import { MfeHost, MicroAppType } from "@repo/core";
+import { MfeHost, MicroAppType } from "@repo/core/react";
 import { mfeLoaders } from "virtual:mfe-loaders";
 
 interface MfeContainerProps {

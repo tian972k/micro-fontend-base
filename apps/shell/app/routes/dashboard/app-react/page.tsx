@@ -1,7 +1,7 @@
 import { json, type MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { APP_IDS } from "@repo/config";
-import { MicroAppType } from "@repo/core";
+import { MicroAppType } from "@repo/core/react";
 import { MfeContainer } from "@/components/mfe/mfe-container";
 import {
   Card,

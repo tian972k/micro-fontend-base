@@ -7,7 +7,7 @@ import {
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { useEffect } from "react";
-import { userActions } from "@repo/core";
+import { userActions } from "@repo/core/react";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const cookieHeader = request.headers.get("Cookie");

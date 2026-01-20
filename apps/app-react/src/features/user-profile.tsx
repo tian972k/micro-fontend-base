@@ -1,3 +1,3 @@
-import { UserProfileFeature } from "@repo/core";
+import { UserProfileFeature } from "@repo/core/react";
 
 export { UserProfileFeature };

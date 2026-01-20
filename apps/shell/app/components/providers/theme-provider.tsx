@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useThemeStore, getResolvedTheme } from "@repo/core";
+import { useThemeStore, getResolvedTheme } from "@repo/core/react";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const theme = useThemeStore((state) => state.theme);

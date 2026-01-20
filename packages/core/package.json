@@ -14,10 +14,25 @@
       "development": "./src/shared.ts",
       "import": "./dist/shared.js"
     },
+    "./vue": {
+      "types": "./src/vue.ts",
+      "development": "./src/vue.ts",
+      "import": "./dist/vue.js"
+    },
     "./react": {
-      "types": "./src/mfe/react/mfe-host.tsx",
-      "development": "./src/mfe/react/mfe-host.tsx",
-      "import": "./dist/mfe/react/mfe-host.js"
+      "types": "./src/react.ts",
+      "development": "./src/react.ts",
+      "import": "./dist/react.js"
+    },
+    "./solid": {
+      "types": "./src/solid.ts",
+      "development": "./src/solid.ts",
+      "import": "./dist/solid.js"
+    },
+    "./svelte": {
+      "types": "./src/svelte.ts",
+      "development": "./src/svelte.ts",
+      "import": "./dist/svelte.js"
     },
     "./store/react": {
       "types": "./src/state/react/use-user-store.ts",

@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
-import { AppRegistry, createVueMfeEntry } from "@repo/core";
+import { AppRegistry, createVueMfeEntry } from "@repo/core/vue";
 import { APP_IDS } from "@repo/config";
 import "@repo/ui/globals.css";
 

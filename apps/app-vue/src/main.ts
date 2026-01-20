@@ -1,5 +1,5 @@
 import { createApp, reactive, watch } from "vue";
-import { syncStore, type CounterState } from "@repo/core";
+import { syncStore, type CounterState } from "@repo/core/vue";
 import { EVENT_KEYS } from "@repo/config";
 import App from "./App.vue";
 import "@repo/ui/globals.css";

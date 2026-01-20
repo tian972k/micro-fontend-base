@@ -37,7 +37,7 @@ import {
   type Theme,
   LOCALES,
   type Locale,
-} from "@repo/core";
+} from "@repo/core/react";
 import { useTranslation } from "react-i18next";
 
 export function UserMenu() {

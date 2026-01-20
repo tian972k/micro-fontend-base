@@ -1,32 +1,26 @@
-export * from "./events/event-bus";
-export * from "./types";
-export * from "./constants/keys";
-// React MFE Components
+/**
+ * @repo/core - Main Entry Point
+ *
+ * ⚠️ RECOMMENDATION: Use framework-specific entry points for better tree-shaking
+ * and to avoid type conflicts:
+ *
+ * - @repo/core/vue    → Vue applications
+ * - @repo/core/react  → React applications
+ * - @repo/core/solid  → SolidJS applications
+ * - @repo/core/svelte → Svelte applications
+ * - @repo/core/shared → Framework-agnostic utilities only
+ *
+ * This main entry includes everything for backward compatibility,
+ * but may cause type conflicts in non-React apps.
+ */
+
+// Re-export shared (framework-agnostic)
+export * from "./shared";
+
+// React-specific exports (for backward compatibility)
 export * from "./mfe/react/mfe-host";
-
-// Common State
-export * from "./state/sync-store";
-export * from "./state/common/user-store";
-export * from "./state/theme-store";
-export * from "./state/locale-store";
-
-// i18n
-export * from "./i18n";
-
-// Logger
-export * from "./logger";
-
-// React Hooks
 export * from "./state/react/use-user-store";
-
-// Registry
-export * from "./mfe/registry";
-
-// Strategies
-export * from "./mfe/strategy";
-
-// MFE Factories
-export * from "./mfe/factories";
-
-// Shared Features
 export * from "./features/user-profile-feature";
+
+// All MFE Factories
+export * from "./mfe/factories";

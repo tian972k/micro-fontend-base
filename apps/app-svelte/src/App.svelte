@@ -1,6 +1,6 @@
 <script lang="ts">
   import Dashboard from "./features/dashboard/Dashboard.svelte";
-  import type { User } from "@repo/core";
+  import type { User } from "@repo/core/svelte";
 
   // svelte-ignore unused-export-let
   export let theme: "light" | "dark" | "system" | undefined = undefined;

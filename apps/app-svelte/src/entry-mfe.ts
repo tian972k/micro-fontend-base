@@ -1,5 +1,9 @@
 import App from "./App.svelte";
-import { AppRegistry, type MicroApp, type MicroAppProps } from "@repo/core";
+import {
+  AppRegistry,
+  type MicroApp,
+  type MicroAppProps,
+} from "@repo/core/svelte";
 import { APP_IDS } from "@repo/config";
 import "@repo/ui/globals.css";
 

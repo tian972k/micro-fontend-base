@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "@repo/ui/globals.css";
-import { AppRegistry, createReactMfeEntry } from "@repo/core";
+import { AppRegistry, createReactMfeEntry } from "@repo/core/react";
 import { APP_IDS } from "@repo/config";
 
 const {

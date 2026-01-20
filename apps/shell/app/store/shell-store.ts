@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { syncStore, type CounterState } from "@repo/core";
+import { syncStore, type CounterState } from "@repo/core/react";
 import { EVENT_KEYS } from "@repo/config";
 
 interface ShellState {

@@ -1,5 +1,5 @@
 import React, { type ReactNode } from "react";
-import { globalEventBus } from "@repo/core";
+import { globalEventBus } from "@repo/core/react";
 import { useShellStore } from "@/store/shell-store";
 import { Outlet, Link, useLocation } from "@remix-run/react";
 import { Button, cn } from "@repo/ui";

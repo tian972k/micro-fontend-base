@@ -1,7 +1,7 @@
 import { render } from "solid-js/web";
 import App from "./App";
 import "./index.css";
-import { AppRegistry, createSolidMfeEntry } from "@repo/core";
+import { AppRegistry, createSolidMfeEntry } from "@repo/core/solid";
 import { APP_IDS } from "@repo/config";
 
 const {

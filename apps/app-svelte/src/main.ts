@@ -1,5 +1,5 @@
 import { writable, get } from "svelte/store";
-import { syncStore, type CounterState } from "@repo/core";
+import { syncStore, type CounterState } from "@repo/core/svelte";
 import { EVENT_KEYS } from "@repo/config";
 import App from "./App.svelte";
 import "@repo/ui/globals.css";

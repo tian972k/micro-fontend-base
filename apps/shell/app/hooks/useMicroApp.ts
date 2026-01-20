@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import type { HealthCheckResponse, MicroApp } from "@repo/core";
-import { AppRegistry } from "@repo/core";
+import type { HealthCheckResponse, MicroApp } from "@repo/core/react";
+import { AppRegistry } from "@repo/core/react";
 
 const manifestCache: Record<string, string> = {};
 
