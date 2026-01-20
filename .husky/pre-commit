@@ -1,9 +1,17 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🚧 Running build verification before push..."
-echo "Verifying code formatting..."
+echo "� Running pre-commit checks..."
+echo ""
+
+# 1. Lint and format staged files
+echo "📝 Linting and formatting staged files..."
 npx lint-staged
 
+# 2. Validate app IDs are unique
+echo ""
+echo "🔗 Validating app IDs..."
 pnpm validate:app-ids
-pnpm build
+
+echo ""
+echo "✅ Pre-commit checks passed!"

@@ -6,8 +6,15 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "public/build/**", "build/**"]
     },
+    "build:mfe": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "public/assets/**"]
+    },
     "lint": {
       "dependsOn": ["^lint"]
+    },
+    "type-check": {
+      "dependsOn": ["^build"]
     },
     "dev": {
       "cache": false,

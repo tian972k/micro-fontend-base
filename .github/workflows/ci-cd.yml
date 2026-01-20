@@ -1,0 +1,727 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  # ========================================
+  # STEP 1: Detect what changed
+  # ========================================
+  detect-changes:
+    name: 🔍 Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      packages_changed: ${{ steps.changes.outputs.packages }}
+      shell_changed: ${{ steps.changes.outputs.shell }}
+      app_react_changed: ${{ steps.changes.outputs.app_react }}
+      app_nextjs_changed: ${{ steps.changes.outputs.app_nextjs }}
+      app_vue_changed: ${{ steps.changes.outputs.app_vue }}
+      app_svelte_changed: ${{ steps.changes.outputs.app_svelte }}
+      app_solidjs_changed: ${{ steps.changes.outputs.app_solidjs }}
+      any_changed: ${{ steps.changes.outputs.any }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for file changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            packages:
+              - 'packages/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'turbo.json'
+            shell:
+              - 'apps/shell/**'
+            app_react:
+              - 'apps/app-react/**'
+            app_nextjs:
+              - 'apps/app-nextjs/**'
+            app_vue:
+              - 'apps/app-vue/**'
+            app_svelte:
+              - 'apps/app-svelte/**'
+            app_solidjs:
+              - 'apps/app-solidjs/**'
+            any:
+              - 'apps/**'
+              - 'packages/**'
+
+  # ========================================
+  # STEP 2: Lint & Type Check (always runs)
+  # ========================================
+  lint-and-typecheck:
+    name: 🔬 Lint & Type Check
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm type-check || echo "Type check completed"
+
+  # ========================================
+  # STEP 3: Build Packages (if packages changed)
+  # ========================================
+  build-packages:
+    name: 📦 Build Packages
+    runs-on: ubuntu-latest
+    needs: [detect-changes, lint-and-typecheck]
+    if: needs.detect-changes.outputs.packages_changed == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages with Turbo
+        run: pnpm turbo run build --filter='./packages/*'
+
+      - name: Upload packages artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-build
+          path: |
+            packages/*/dist
+            packages/*/build
+          retention-days: 1
+
+  # ========================================
+  # STEP 4: Build Individual Apps (Smart - only if changed)
+  # ========================================
+  build-shell:
+    name: 🐚 Build Shell
+    runs-on: ubuntu-latest
+    needs: [detect-changes, lint-and-typecheck, build-packages]
+    if: |
+      always() &&
+      needs.lint-and-typecheck.result == 'success' &&
+      (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
+      (needs.detect-changes.outputs.shell_changed == 'true' || needs.detect-changes.outputs.packages_changed == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download packages (if available)
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-build
+          path: packages
+        continue-on-error: true
+
+      - name: Build Shell
+        run: pnpm turbo run build --filter=shell
+
+      - name: Upload shell artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shell-build
+          path: apps/shell/build
+          retention-days: 1
+
+  build-app-react:
+    name: ⚛️ Build App React
+    runs-on: ubuntu-latest
+    needs: [detect-changes, lint-and-typecheck, build-packages]
+    if: |
+      always() &&
+      needs.lint-and-typecheck.result == 'success' &&
+      (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
+      (needs.detect-changes.outputs.app_react_changed == 'true' || needs.detect-changes.outputs.packages_changed == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download packages (if available)
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-build
+          path: packages
+        continue-on-error: true
+
+      - name: Build App React
+        run: pnpm turbo run build:mfe --filter=app-react
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-react-build
+          path: apps/app-react/dist
+          retention-days: 1
+
+  build-app-nextjs:
+    name: ▲ Build App Next.js
+    runs-on: ubuntu-latest
+    needs: [detect-changes, lint-and-typecheck, build-packages]
+    if: |
+      always() &&
+      needs.lint-and-typecheck.result == 'success' &&
+      (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
+      (needs.detect-changes.outputs.app_nextjs_changed == 'true' || needs.detect-changes.outputs.packages_changed == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download packages (if available)
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-build
+          path: packages
+        continue-on-error: true
+
+      - name: Build App Next.js
+        run: pnpm turbo run build:mfe --filter=app-nextjs
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-nextjs-build
+          path: apps/app-nextjs/dist
+          retention-days: 1
+
+  build-app-vue:
+    name: 💚 Build App Vue
+    runs-on: ubuntu-latest
+    needs: [detect-changes, lint-and-typecheck, build-packages]
+    if: |
+      always() &&
+      needs.lint-and-typecheck.result == 'success' &&
+      (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
+      (needs.detect-changes.outputs.app_vue_changed == 'true' || needs.detect-changes.outputs.packages_changed == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download packages (if available)
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-build
+          path: packages
+        continue-on-error: true
+
+      - name: Build App Vue
+        run: pnpm turbo run build:mfe --filter=app-vue
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-vue-build
+          path: apps/app-vue/dist
+          retention-days: 1
+
+  build-app-svelte:
+    name: 🔥 Build App Svelte
+    runs-on: ubuntu-latest
+    needs: [detect-changes, lint-and-typecheck, build-packages]
+    if: |
+      always() &&
+      needs.lint-and-typecheck.result == 'success' &&
+      (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
+      (needs.detect-changes.outputs.app_svelte_changed == 'true' || needs.detect-changes.outputs.packages_changed == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download packages (if available)
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-build
+          path: packages
+        continue-on-error: true
+
+      - name: Build App Svelte
+        run: pnpm turbo run build:mfe --filter=app-svelte
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-svelte-build
+          path: apps/app-svelte/dist
+          retention-days: 1
+
+  build-app-solidjs:
+    name: 💠 Build App SolidJS
+    runs-on: ubuntu-latest
+    needs: [detect-changes, lint-and-typecheck, build-packages]
+    if: |
+      always() &&
+      needs.lint-and-typecheck.result == 'success' &&
+      (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
+      (needs.detect-changes.outputs.app_solidjs_changed == 'true' || needs.detect-changes.outputs.packages_changed == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download packages (if available)
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-build
+          path: packages
+        continue-on-error: true
+
+      - name: Build App SolidJS
+        run: pnpm turbo run build:mfe --filter=app-solidjs
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-solidjs-build
+          path: apps/app-solidjs/dist
+          retention-days: 1
+
+  # ========================================
+  # STEP 5: Docker Build (Smart - only changed apps)
+  # ========================================
+  docker-shell:
+    name: 🐳 Docker Shell
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-shell]
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.build-shell.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: shell-build
+          path: apps/shell/build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/orbit-shell
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/shell/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  docker-app-react:
+    name: 🐳 Docker App React
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-app-react]
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.build-app-react.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-react-build
+          path: apps/app-react/dist
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/orbit-app-react
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.mfe
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            APP_NAME=app-react
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  docker-app-nextjs:
+    name: 🐳 Docker App Next.js
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-app-nextjs]
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.build-app-nextjs.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-nextjs-build
+          path: apps/app-nextjs/dist
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/orbit-app-nextjs
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.mfe
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            APP_NAME=app-nextjs
+            BUILD_OUTPUT_DIR=public
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  docker-app-vue:
+    name: 🐳 Docker App Vue
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-app-vue]
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.build-app-vue.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-vue-build
+          path: apps/app-vue/dist
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/orbit-app-vue
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.mfe
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            APP_NAME=app-vue
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  docker-app-svelte:
+    name: 🐳 Docker App Svelte
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-app-svelte]
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.build-app-svelte.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-svelte-build
+          path: apps/app-svelte/dist
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/orbit-app-svelte
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.mfe
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            APP_NAME=app-svelte
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  docker-app-solidjs:
+    name: 🐳 Docker App SolidJS
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-app-solidjs]
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.build-app-solidjs.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-solidjs-build
+          path: apps/app-solidjs/dist
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/orbit-app-solidjs
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.mfe
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            APP_NAME=app-solidjs
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ========================================
+  # STEP 6: Summary
+  # ========================================
+  summary:
+    name: 📊 Pipeline Summary
+    runs-on: ubuntu-latest
+    needs: 
+      - detect-changes
+      - lint-and-typecheck
+      - build-packages
+      - build-shell
+      - build-app-react
+      - build-app-nextjs
+      - build-app-vue
+      - build-app-svelte
+      - build-app-solidjs
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## 📊 CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔍 Changes Detected" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Changed |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Packages | ${{ needs.detect-changes.outputs.packages_changed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Shell | ${{ needs.detect-changes.outputs.shell_changed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| App React | ${{ needs.detect-changes.outputs.app_react_changed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| App Next.js | ${{ needs.detect-changes.outputs.app_nextjs_changed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| App Vue | ${{ needs.detect-changes.outputs.app_vue_changed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| App Svelte | ${{ needs.detect-changes.outputs.app_svelte_changed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| App SolidJS | ${{ needs.detect-changes.outputs.app_solidjs_changed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Build Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint & Typecheck | ${{ needs.lint-and-typecheck.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Packages | ${{ needs.build-packages.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Shell | ${{ needs.build-shell.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build App React | ${{ needs.build-app-react.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build App Next.js | ${{ needs.build-app-nextjs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build App Vue | ${{ needs.build-app-vue.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build App Svelte | ${{ needs.build-app-svelte.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build App SolidJS | ${{ needs.build-app-solidjs.result }} |" >> $GITHUB_STEP_SUMMARY

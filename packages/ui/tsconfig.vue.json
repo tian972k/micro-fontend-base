@@ -1,0 +1,16 @@
+{
+  "extends": "@repo/config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist/vue",
+    "rootDir": "src",
+    "jsx": "preserve",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "#variants/*": ["./src/shared/variants/*"],
+      "#shared/*": ["./src/shared/*"],
+      "#components/*": ["./src/components/*"]
+    }
+  },
+  "include": ["src/components/vue/**/*", "src/vue.ts", "src/shared/**/*"]
+}

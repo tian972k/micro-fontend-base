@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-push verification..."
+echo ""
+
+# 1. Type check all packages and apps
+echo "🔬 Running type check..."
+pnpm type-check
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Type check failed! Please fix type errors before pushing."
+    exit 1
+fi
+
+# 2. Build packages to verify they compile
+echo ""
+echo "📦 Building packages..."
+pnpm build:packages
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Package build failed! Please fix build errors before pushing."
+    exit 1
+fi
+
+echo ""
+echo "✅ Pre-push verification passed!"
+echo "🚀 Pushing to remote..."

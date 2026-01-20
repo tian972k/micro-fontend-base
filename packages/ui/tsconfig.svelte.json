@@ -1,0 +1,22 @@
+{
+  "extends": "@repo/config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist/svelte",
+    "rootDir": "src",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "#variants/*": ["./src/shared/variants/*"],
+      "#shared/*": ["./src/shared/*"],
+      "#components/*": ["./src/components/*"]
+    },
+    "types": ["svelte"]
+  },
+  "include": [
+    "src/components/svelte/**/*.ts",
+    "src/components/svelte/**/*.svelte",
+    "src/svelte.ts",
+    "src/shared/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

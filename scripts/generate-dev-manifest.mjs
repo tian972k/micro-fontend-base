@@ -6,38 +6,40 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { getMfeApps } from './mfe.config.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const apps = ['app-react', 'app-vue', 'app-svelte', 'app-solidjs', 'app-nextjs'];
+const mfeApps = getMfeApps();
 
-apps.forEach(appName => {
+mfeApps.forEach(appConfig => {
+  const { name: appName, entryFile, outputDir } = appConfig;
   const publicDir = path.join(__dirname, '..', 'apps', appName, 'public');
-  const distDir = path.join(__dirname, '..', 'apps', appName, 'dist');
+  const distDir = path.join(__dirname, '..', 'apps', appName, outputDir);
   
   // Create public directory if it doesn't exist
   if (!fs.existsSync(publicDir)) {
     fs.mkdirSync(publicDir, { recursive: true });
   }
   
-  // Determine entry file path based on app
-  let entryFile;
+  // Determine entry file path based on app config
+  let entryFilePath;
   let cssFiles = [];
-  let outputDir = publicDir; // Where to write manifest
+  let targetDir = outputDir === 'public' ? publicDir : distDir;
   
-  if (appName === 'app-nextjs') {
+  if (appConfig.framework === 'nextjs') {
     // Next.js: Check if MFE build exists in public/assets
     const assetsDir = path.join(publicDir, 'assets');
     if (!fs.existsSync(assetsDir)) {
-      console.log(`⚠️  ${appName}: MFE build not found. Run 'cd apps/app-nextjs && pnpm build:mfe' first`);
-      entryFile = 'assets/entry-mfe.js'; // Fallback path
+      console.log(`⚠️  ${appName}: MFE build not found. Run 'cd apps/${appName} && pnpm build:mfe' first`);
+      entryFilePath = `assets/${entryFile.replace('.tsx', '.js').replace('.ts', '.js')}`;
     } else {
       const files = fs.readdirSync(assetsDir);
       const jsFile = files.find(f => f.startsWith('entry-mfe') && f.endsWith('.js'));
       const cssFile = files.find(f => f.startsWith('entry-mfe') && f.endsWith('.css'));
       
-      entryFile = jsFile ? `assets/${jsFile}` : 'assets/entry-mfe.js';
+      entryFilePath = jsFile ? `assets/${jsFile}` : `assets/entry-mfe.js`;
       if (cssFile) cssFiles.push(`assets/${cssFile}`);
     }
   } else {
@@ -51,15 +53,12 @@ apps.forEach(appName => {
       const jsFile = files.find(f => f.startsWith('entry-mfe') && f.endsWith('.js'));
       const cssFile = files.find(f => f.startsWith('entry-mfe') && f.endsWith('.css'));
       
-      entryFile = jsFile ? `assets/${jsFile}` : 'assets/entry-mfe.js';
+      entryFilePath = jsFile ? `assets/${jsFile}` : 'assets/entry-mfe.js';
       if (cssFile) cssFiles.push(`assets/${cssFile}`);
-      
-      // For built version, copy manifest to dist folder too
-      outputDir = distDir;
+      targetDir = distDir;
     } else {
       // Use src version for dev (Vite serves src files directly)
-      const ext = appName === 'app-vue' || appName === 'app-svelte' ? '.ts' : '.tsx';
-      entryFile = `src/entry-mfe${ext}`;
+      entryFilePath = `src/${entryFile}`;
       console.log(`ℹ️  ${appName}: Using src version. For production-like dev, run 'cd apps/${appName} && pnpm build:mfe'`);
     }
   }
@@ -67,16 +66,22 @@ apps.forEach(appName => {
   // Create dev manifest
   const manifest = {
     "index.html": {
-      "file": entryFile,
+      "file": entryFilePath,
       "css": cssFiles,
       "isDev": true
     }
   };
   
-  const manifestPath = path.join(outputDir, 'manifest.json');
+  const manifestPath = path.join(targetDir, 'manifest.json');
+  
+  // Ensure target directory exists
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+  
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
   
-  console.log(`✅ Created dev manifest for ${appName} -> ${entryFile}`);
+  console.log(`✅ Created dev manifest for ${appName} -> ${entryFilePath}`);
 });
 
 console.log('\n✅ All dev manifests created successfully!');

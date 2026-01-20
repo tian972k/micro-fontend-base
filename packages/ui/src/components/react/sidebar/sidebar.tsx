@@ -7,7 +7,12 @@ import { cn } from "@repo/utils";
 import { Button } from "../button/button";
 import { Input } from "../input/input";
 import { Separator } from "../separator/separator";
-import { Sheet, SheetContent } from "../sheet/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetDescription,
+} from "../sheet/sheet";
 import { Skeleton } from "../skeleton/skeleton";
 import {
   Tooltip,
@@ -206,6 +211,10 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
+            <SheetTitle className="sr-only">Sidebar</SheetTitle>
+            <SheetDescription className="sr-only">
+              Navigation menu
+            </SheetDescription>
             <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>
         </Sheet>
@@ -270,7 +279,7 @@ const SidebarTrigger = React.forwardRef<
       variant="ghost"
       size="icon"
       className={cn("h-7 w-7", className)}
-      onClick={(event) => {
+      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
         toggleSidebar();
       }}

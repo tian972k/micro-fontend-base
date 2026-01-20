@@ -1,0 +1,17 @@
+{
+  "extends": "@repo/config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist/solid",
+    "rootDir": "src",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "#variants/*": ["./src/shared/variants/*"],
+      "#shared/*": ["./src/shared/*"],
+      "#components/*": ["./src/components/*"]
+    }
+  },
+  "include": ["src/components/solid/**/*", "src/solid.ts", "src/shared/**/*"]
+}

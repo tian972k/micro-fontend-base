@@ -25,6 +25,11 @@ const FRAMEWORKS = {
     path: "components/vue",
     ext: "vue",
   },
+  solid: {
+    name: "SolidJS",
+    path: "components/solid",
+    ext: "tsx",
+  },
   svelte: {
     name: "Svelte",
     path: "components/svelte",
@@ -179,34 +184,102 @@ type Story = StoryObj<typeof ${pascalName}>;
 export const Default: Story = {
   args: {
     variant: "default",
-    default: "${pascalName} Component",
   },
 };
 
 export const Outline: Story = {
   args: {
     variant: "outline",
-    default: "${pascalName} Component",
+  },
+};
+`;
+
+// SolidJS templates
+const getSolidTemplate = (
+  pascalName,
+  componentName,
+) => `import { splitProps, JSX, Component, mergeProps } from "solid-js";
+import { cn } from "@repo/utils";
+
+export interface ${pascalName}Props extends JSX.HTMLAttributes<HTMLDivElement> {
+  /**
+   * The variant of the component
+   */
+  variant?: "default" | "outline";
+}
+
+export const ${pascalName}: Component<${pascalName}Props> = (props) => {
+  const merged = mergeProps({ variant: "default" as const }, props);
+  const [local, others] = splitProps(merged, ["variant", "class", "children"]);
+
+  return (
+    <div
+      class={cn("${componentName}", local.class)}
+      data-variant={local.variant}
+      {...others}
+    >
+      {local.children}
+    </div>
+  );
+};
+`;
+
+const getSolidStoryTemplate = (
+  pascalName,
+  componentName,
+) => `import type { Meta, StoryObj } from "storybook-solidjs";
+import { ${pascalName} } from "./${componentName}";
+
+const meta: Meta<typeof ${pascalName}> = {
+  title: "Solid/${pascalName}",
+  component: ${pascalName},
+  tags: ["autodocs", "solid"],
+  parameters: {
+    layout: "centered",
+  },
+  argTypes: {
+    variant: {
+      control: "select",
+      options: ["default", "outline"],
+      description: "The variant of the component",
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof ${pascalName}>;
+
+export const Default: Story = {
+  args: {
+    variant: "default",
+    children: "${pascalName} Component",
+  },
+};
+
+export const Outline: Story = {
+  args: {
+    variant: "outline",
+    children: "${pascalName} Component",
   },
 };
 `;
 
 const getSvelteTemplate = (pascalName, componentName) => `<script lang="ts">
+  import { cn } from "@repo/utils";
+
   export let variant: 'default' | 'outline' = 'default'
   let className = ''
   export { className as class }
+
+  $: classes = cn("${componentName}", className);
 </script>
 
 <div 
-  class="${componentName} {className}" 
+  class={classes}
   data-variant={variant}
 >
   <slot />
 </div>
-
-<style>
-  /* Add your styles here */
-</style>
 `;
 
 const getSvelteStoryTemplate = (
@@ -283,6 +356,12 @@ const createComponent = (componentName, framework) => {
       componentFile = `${pascalName}.${fw.ext}`;
       storyFile = `${pascalName}.stories.ts`;
       break;
+    case "solid":
+      componentContent = getSolidTemplate(pascalName, kebabName);
+      storyContent = getSolidStoryTemplate(pascalName, kebabName);
+      componentFile = `${kebabName}.${fw.ext}`;
+      storyFile = `${kebabName}.stories.${fw.ext}`;
+      break;
   }
 
   // Write component file
@@ -316,14 +395,15 @@ const askFramework = (callback) => {
   console.log("\n🎨 Select a framework:");
   console.log("1. React");
   console.log("2. Vue");
-  console.log("3. Svelte");
+  console.log("3. SolidJS");
+  console.log("4. Svelte");
 
-  rl.question("\nEnter your choice (1-3): ", (choice) => {
-    const frameworks = ["react", "vue", "svelte"];
+  rl.question("\nEnter your choice (1-4): ", (choice) => {
+    const frameworks = ["react", "vue", "solid", "svelte"];
     const selectedFramework = frameworks[parseInt(choice) - 1];
 
     if (!selectedFramework) {
-      console.error("❌ Invalid choice. Please select 1, 2, or 3.");
+      console.error("❌ Invalid choice. Please select 1, 2, 3, or 4.");
       process.exit(1);
     }
 

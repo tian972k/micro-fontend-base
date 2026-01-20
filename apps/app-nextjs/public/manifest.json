@@ -1,6 +1,7 @@
 {
   "index.html": {
-    "file": "assets/entry-mfe.js",
-    "css": []
+    "file": "assets/main.js",
+    "css": [],
+    "assets": []
   }
 }

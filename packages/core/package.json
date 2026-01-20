@@ -1,21 +1,39 @@
 {
   "name": "@repo/core",
   "version": "0.1.0",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./shared": "./src/shared.ts",
-    "./react": "./src/mfe/react/mfe-host.tsx",
-    "./store/react": "./src/state/react/use-user-store.ts",
+    ".": {
+      "types": "./src/index.ts",
+      "development": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./shared": {
+      "types": "./src/shared.ts",
+      "development": "./src/shared.ts",
+      "import": "./dist/shared.js"
+    },
+    "./react": {
+      "types": "./src/mfe/react/mfe-host.tsx",
+      "development": "./src/mfe/react/mfe-host.tsx",
+      "import": "./dist/mfe/react/mfe-host.js"
+    },
+    "./store/react": {
+      "types": "./src/state/react/use-user-store.ts",
+      "development": "./src/state/react/use-user-store.ts",
+      "import": "./dist/state/react/use-user-store.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
+    "build": "tsc",
     "lint": "eslint \"**/*.ts*\"",
     "clean": "rm -rf node_modules dist .turbo"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
+    "@types/node": "^20.0.0",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "eslint": "^8.0.0",
@@ -25,6 +43,14 @@
   "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@repo/ui": "workspace:*",

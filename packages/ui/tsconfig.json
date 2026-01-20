@@ -3,7 +3,23 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "#variants/*": ["./src/shared/variants/*"],
+      "#shared/*": ["./src/shared/*"],
+      "#components/*": ["./src/components/*"]
+    }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/components/vue/**/*",
+    "src/components/svelte/**/*",
+    "src/components/solid/**/*",
+    "src/vue.ts",
+    "src/svelte.ts",
+    "src/solid.ts"
+  ]
 }

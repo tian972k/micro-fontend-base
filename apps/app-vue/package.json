@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build && node ../../scripts/generate-manifest.mjs $PWD",
-    "build:mfe": "vite build && node ../../scripts/generate-manifest.mjs $PWD",
+    "build": "vite build && node ../../scripts/generate-manifest.mjs $PWD",
+    "build:mfe": "MFE_MODE=true vite build && node ../../scripts/generate-manifest.mjs $PWD",
+    "build:standalone": "vite build",
+    "type-check": "vue-tsc",
     "preview": "vite preview",
     "start": "vite preview"
   },
   "dependencies": {
+    "@repo/config": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:^",
