@@ -98,14 +98,18 @@ jobs:
           fi
 
   # ========================================
-  # STEP 2: Lint & Type Check (always runs)
+  # STEP 2: Lint & Type Check (only if code changed)
   # ========================================
   lint-and-typecheck:
     name: 🔬 Lint & Type Check
     runs-on: ubuntu-latest
     needs: detect-changes
+    # Skip if only workflow/docs changed, no code changes
+    if: needs.detect-changes.outputs.any_changed == 'true' || needs.detect-changes.outputs.root_config_changed == 'true'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed for --affected to compare with base
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -130,11 +134,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm lint
+      - name: Lint (affected only)
+        run: pnpm turbo run lint --affected
 
-      - name: Type check
-        run: pnpm type-check || echo "Type check completed"
+      - name: Type check (affected only)
+        run: pnpm turbo run type-check --affected || echo "Type check completed"
 
   # ========================================
   # STEP 3: Build Packages (if packages changed)
@@ -191,7 +195,7 @@ jobs:
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
       always() &&
-      needs.lint-and-typecheck.result == 'success' &&
+      (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped') &&
       (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
       (needs.detect-changes.outputs.shell_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true')
     steps:
@@ -243,7 +247,7 @@ jobs:
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
       always() &&
-      needs.lint-and-typecheck.result == 'success' &&
+      (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped') &&
       (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
       (needs.detect-changes.outputs.app_react_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true')
     steps:
@@ -295,7 +299,7 @@ jobs:
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
       always() &&
-      needs.lint-and-typecheck.result == 'success' &&
+      (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped') &&
       (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
       (needs.detect-changes.outputs.app_nextjs_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true')
     steps:
@@ -347,7 +351,7 @@ jobs:
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
       always() &&
-      needs.lint-and-typecheck.result == 'success' &&
+      (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped') &&
       (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
       (needs.detect-changes.outputs.app_vue_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true')
     steps:
@@ -399,7 +403,7 @@ jobs:
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
       always() &&
-      needs.lint-and-typecheck.result == 'success' &&
+      (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped') &&
       (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
       (needs.detect-changes.outputs.app_svelte_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true')
     steps:
@@ -451,7 +455,7 @@ jobs:
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
       always() &&
-      needs.lint-and-typecheck.result == 'success' &&
+      (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped') &&
       (needs.build-packages.result == 'success' || needs.build-packages.result == 'skipped') &&
       (needs.detect-changes.outputs.app_solidjs_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true')
     steps:
