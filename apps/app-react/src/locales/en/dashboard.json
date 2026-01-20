@@ -1,0 +1,5 @@
+{
+  "title": "React Dashboard",
+  "welcome_message": "Welcome to the React Micro-Frontend",
+  "only_in_react": "This text is defined only in the React App"
+}

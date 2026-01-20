@@ -5,6 +5,7 @@
 
 export const EVENT_KEYS = {
   APP_COUNTER: "APP_COUNTER",
+  LOCALE_CHANGE: "LOCALE_CHANGE",
   // Add more global event keys here
 } as const;
 

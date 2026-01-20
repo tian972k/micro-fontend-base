@@ -1,5 +1,7 @@
 import { createStore } from "zustand/vanilla";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { globalEventBus } from "../../events/event-bus";
+import { EVENT_KEYS } from "../../constants/keys";
 
 export type Locale = "en" | "vi";
 
@@ -17,7 +19,10 @@ const createLocaleStore = () =>
     persist(
       (set) => ({
         locale: "en",
-        setLocale: (locale) => set({ locale }),
+        setLocale: (locale) => {
+          set({ locale });
+          globalEventBus.emit(EVENT_KEYS.LOCALE_CHANGE, { locale });
+        },
       }),
       {
         name: "mfe-locale",

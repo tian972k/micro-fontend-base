@@ -1,0 +1,10 @@
+{
+  "increment": "Increment",
+  "decrement": "Decrement",
+  "count": "Count",
+  "loading": "Loading...",
+  "error": "Error",
+  "retry": "Retry",
+  "welcome": "Welcome",
+  "language": "Language"
+}
