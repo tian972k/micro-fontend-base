@@ -22,7 +22,7 @@ jobs:
   # STEP 0: Check if Docker secrets are configured
   # ========================================
   check-docker-secrets:
-    name: 🔐 Check Docker Secrets
+    name: Check Docker Secrets
     runs-on: ubuntu-latest
     outputs:
       has_docker_secrets: ${{ steps.check.outputs.has_secrets }}
@@ -34,14 +34,14 @@ jobs:
             echo "has_secrets=true" >> $GITHUB_OUTPUT
           else
             echo "has_secrets=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Docker secrets not configured. Docker jobs will be skipped."
+            echo "Docker secrets not configured. Docker jobs will be skipped."
           fi
 
   # ========================================
   # STEP 1: Detect what changed
   # ========================================
   detect-changes:
-    name: 🔍 Detect Changes
+    name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
       packages_changed: ${{ steps.changes.outputs.packages }}
@@ -101,7 +101,7 @@ jobs:
   # STEP 2: Lint & Type Check (only if code changed)
   # ========================================
   lint-and-typecheck:
-    name: 🔬 Lint & Type Check
+    name: Lint & Type Check
     runs-on: ubuntu-latest
     needs: detect-changes
     # Skip if only workflow/docs changed, no code changes
@@ -144,7 +144,7 @@ jobs:
   # STEP 3: Build Packages (if packages changed)
   # ========================================
   build-packages:
-    name: 📦 Build Packages
+    name: Build Packages
     runs-on: ubuntu-latest
     needs: [detect-changes, lint-and-typecheck]
     if: needs.detect-changes.outputs.packages_changed == 'true' || needs.detect-changes.outputs.root_config_changed == 'true'
@@ -190,7 +190,7 @@ jobs:
   # STEP 4: Build Individual Apps (Smart - only if changed)
   # ========================================
   build-shell:
-    name: 🐚 Build Shell
+    name: Build Shell
     runs-on: ubuntu-latest
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
@@ -242,7 +242,7 @@ jobs:
           retention-days: 1
 
   build-app-react:
-    name: ⚛️ Build App React
+    name: Build App React
     runs-on: ubuntu-latest
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
@@ -294,7 +294,7 @@ jobs:
           retention-days: 1
 
   build-app-nextjs:
-    name: ▲ Build App Next.js
+    name: Build App Next.js
     runs-on: ubuntu-latest
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
@@ -346,7 +346,7 @@ jobs:
           retention-days: 1
 
   build-app-vue:
-    name: 💚 Build App Vue
+    name: Build App Vue
     runs-on: ubuntu-latest
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
@@ -398,7 +398,7 @@ jobs:
           retention-days: 1
 
   build-app-svelte:
-    name: 🔥 Build App Svelte
+    name: Build App Svelte
     runs-on: ubuntu-latest
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
@@ -450,7 +450,7 @@ jobs:
           retention-days: 1
 
   build-app-solidjs:
-    name: 💠 Build App SolidJS
+    name: Build App SolidJS
     runs-on: ubuntu-latest
     needs: [detect-changes, lint-and-typecheck, build-packages]
     if: |
@@ -505,7 +505,7 @@ jobs:
   # STEP 5: Docker Build (Smart - only changed apps)
   # ========================================
   docker-shell:
-    name: 🐳 Docker Shell
+    name: Docker Shell
     runs-on: ubuntu-latest
     needs: [detect-changes, build-shell, check-docker-secrets]
     if: |
@@ -552,7 +552,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   docker-app-react:
-    name: 🐳 Docker App React
+    name: Docker App React
     runs-on: ubuntu-latest
     needs: [detect-changes, build-app-react, check-docker-secrets]
     if: |
@@ -601,7 +601,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   docker-app-nextjs:
-    name: 🐳 Docker App Next.js
+    name: Docker App Next.js
     runs-on: ubuntu-latest
     needs: [detect-changes, build-app-nextjs, check-docker-secrets]
     if: |
@@ -651,7 +651,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   docker-app-vue:
-    name: 🐳 Docker App Vue
+    name: Docker App Vue
     runs-on: ubuntu-latest
     needs: [detect-changes, build-app-vue, check-docker-secrets]
     if: |
@@ -700,7 +700,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   docker-app-svelte:
-    name: 🐳 Docker App Svelte
+    name: Docker App Svelte
     runs-on: ubuntu-latest
     needs: [detect-changes, build-app-svelte, check-docker-secrets]
     if: |
@@ -749,7 +749,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   docker-app-solidjs:
-    name: 🐳 Docker App SolidJS
+    name: Docker App SolidJS
     runs-on: ubuntu-latest
     needs: [detect-changes, build-app-solidjs, check-docker-secrets]
     if: |
@@ -801,7 +801,7 @@ jobs:
   # STEP 6: Summary
   # ========================================
   summary:
-    name: 📊 Pipeline Summary
+    name: Pipeline Summary
     runs-on: ubuntu-latest
     needs: 
       - detect-changes
@@ -817,9 +817,9 @@ jobs:
     steps:
       - name: Generate Summary
         run: |
-          echo "## 📊 CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔍 Changes Detected" >> $GITHUB_STEP_SUMMARY
+          echo "### Changes Detected" >> $GITHUB_STEP_SUMMARY
           echo "| Component | Changed |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|---------|" >> $GITHUB_STEP_SUMMARY
           echo "| Packages | ${{ needs.detect-changes.outputs.packages_changed }} |" >> $GITHUB_STEP_SUMMARY
@@ -830,7 +830,7 @@ jobs:
           echo "| App Svelte | ${{ needs.detect-changes.outputs.app_svelte_changed }} |" >> $GITHUB_STEP_SUMMARY
           echo "| App SolidJS | ${{ needs.detect-changes.outputs.app_solidjs_changed }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ✅ Build Results" >> $GITHUB_STEP_SUMMARY
+          echo "### Build Results" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Lint & Typecheck | ${{ needs.lint-and-typecheck.result }} |" >> $GITHUB_STEP_SUMMARY

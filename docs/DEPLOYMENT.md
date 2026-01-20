@@ -128,19 +128,42 @@ pnpm type-check
 
 ---
 
-## 3. Docker Deployment
+## 3. Local Development & Docker
 
-### Docker Compose (Development)
+### Local Development (Recommended)
+
+For day-to-day development with Hot Module Replacement (HMR) and Turbo caching:
 
 ```bash
-# Start all services
-docker-compose up
+# Start all apps in development mode
+pnpm dev
 
-# Start with rebuild
+# Start specific apps
+pnpm dev --filter=shell --filter=app-react
+
+# Start Shell + specific MFEs (others will be loaded from dev manifest)
+pnpm dev:mfes
+```
+
+This runs:
+
+- **Shell (Remix):** `http://localhost:8000`
+- **App React:** `http://localhost:8001`
+- **App Next.js:** `http://localhost:8002`
+- **App Vue:** `http://localhost:8003`
+- **App Svelte:** `http://localhost:8004`
+- **App SolidJS:** `http://localhost:8005`
+
+### Docker Production Preview
+
+Use Docker Compose to simulate the production environment locally. This builds optimized artifacts and serves them via Nginx/Node.js.
+
+```bash
+# Start all services (Builds production images)
 docker-compose up --build
 
-# Start specific services
-docker-compose up shell app-react app-vue
+# Run in detached mode
+docker-compose up -d
 
 # View logs
 docker-compose logs -f shell
@@ -149,18 +172,7 @@ docker-compose logs -f shell
 docker-compose down
 ```
 
-### Docker Compose (Production)
-
-```bash
-# Build production images
-docker-compose -f docker-compose.yml build
-
-# Run in detached mode
-docker-compose up -d
-
-# Scale specific service
-docker-compose up -d --scale app-react=3
-```
+> **Note:** This is NOT a development environment. It runs `production` builds. Changes require a rebuild.
 
 ### Individual Docker Builds
 
@@ -230,102 +242,61 @@ orbit-app-react:1.2.3
 
 ### Pipeline Overview
 
+The CI/CD pipeline is designed to be smart and efficient, only building and deploying what has changed.
+
 ```mermaid
-flowchart LR
-    subgraph "CI Stage"
-        Lint["Lint"]
-        TypeCheck["Type Check"]
-        Test["Unit Tests"]
-        Build["Build"]
+flowchart TD
+    Start([Push / PR]) --> Secrets{Check Secrets}
+    Secrets --> Detect[Detect Changes]
+
+    subgraph Quality_Gate [Quality Gate]
+        Detect --> Lint[Lint & Typecheck]
     end
 
-    subgraph "CD Stage"
-        DockerBuild["Docker Build"]
-        Push["Push to Registry"]
-        Deploy["Deploy"]
+    subgraph Build_Core [Core Build]
+        Lint --> BuildPkg[Build Packages]
     end
 
-    Lint --> TypeCheck --> Test --> Build
-    Build --> DockerBuild --> Push --> Deploy
+    subgraph Build_Apps [Build Applications]
+        BuildPkg --> BuildShell[Build Shell]
+        BuildPkg --> BuildReact[Build React]
+        BuildPkg --> BuildNext[Build Next.js]
+        BuildPkg --> BuildVue[Build Vue]
+        BuildPkg --> BuildSvelte[Build Svelte]
+        BuildPkg --> BuildSolid[Build SolidJS]
+    end
+
+    subgraph Docker_Publish [Docker Publish]
+        BuildShell --> DockerShell[Docker Build Shell]
+        BuildReact --> DockerReact[Docker Build React]
+        BuildNext --> DockerNext[Docker Build Next.js]
+        BuildVue --> DockerVue[Docker Build Vue]
+        BuildSvelte --> DockerSvelte[Docker Build Svelte]
+        BuildSolid --> DockerSolid[Docker Build SolidJS]
+    end
+
+    DockerShell --> Summary[Pipeline Summary]
+    DockerReact --> Summary
+    DockerNext --> Summary
+    DockerVue --> Summary
+    DockerSvelte --> Summary
+    DockerSolid --> Summary
+
+    Detect -.->|Skip if no changes| Summary
 ```
 
 ### GitHub Actions Workflow
 
-```yaml
-# .github/workflows/ci-cd.yml
-name: CI/CD Pipeline
+Our pipeline is optimized for performance using `dorny/paths-filter` for change detection and `turborepo` for caching.
 
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
+[View complete workflow configuration](../.github/workflows/ci-cd.yml)
 
-jobs:
-  lint-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+### Key Features
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Type check
-        run: pnpm type-check
-
-      - name: Test
-        run: pnpm test
-
-  build:
-    needs: lint-and-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build packages
-        run: pnpm build:packages
-
-      - name: Build MFEs
-        run: pnpm build:mfes:prod
-
-  docker:
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Build and push images
-        run: |
-          EXECUTE=true node scripts/smart-docker-build.js
-```
-
-### Smart Build Detection
-
-Only build what changed:
-
-```yaml
-- name: Get changed files
-  id: changed-files
-  uses: tj-actions/changed-files@v40
-
-- name: Build affected apps
-  run: |
-    if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "apps/app-react"; then
-      docker build -t orbit-app-react -f Dockerfile.mfe .
-    fi
-```
+1. **Change Detection**: Using `dorny/paths-filter` to determine exactly which apps or packages have changed.
+2. **Affected Builds**: `pnpm turbo run ... --affected` ensures we only lint/test changed code.
+3. **Smart Docker**: We only build and push Docker images for apps that actually changed, saving massive amounts of CI time and bandwidth.
+4. **Artifact Sharing**: Build artifacts from `build-packages` are passed to app build jobs to avoid recompilation.
 
 ---
 
@@ -378,10 +349,15 @@ VITE_PUBLIC_URL=https://cdn.example.com/app-react
 # docker-compose.yml
 services:
   shell:
+    ports:
+      - "8000:3000" # Host 8000 -> Container 3000
     environment:
       - NODE_ENV=production
-      - SESSION_SECRET=${SESSION_SECRET}
-      - REMOTE_MANIFEST_URLS=${REMOTE_MANIFEST_URLS}
+      # - MFE_APP_REACT_PUBLIC_URL=https://app-react.example.com
+    depends_on:
+      - app-react
+      - app-nextjs
+      # ...
 ```
 
 ---
@@ -504,8 +480,12 @@ docker push 123456789.dkr.ecr.us-east-1.amazonaws.com/orbit-app-react:latest
 
 ### Kubernetes Deployment
 
+This is a reference configuration for deploying to Kubernetes.
+
+**Shell (Remix) Deployment:**
+
 ```yaml
-# kubernetes/shell-deployment.yaml
+# kubernetes/shell.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -524,24 +504,18 @@ spec:
     spec:
       containers:
         - name: shell
-          image: orbit-shell:latest
+          image: myregistry/orbit-shell:latest
           ports:
-            - containerPort: 3000
+            - containerPort: 3000 # Shell runs on port 3000
           env:
             - name: NODE_ENV
-              value: production
-            - name: SESSION_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: orbit-secrets
-                  key: session-secret
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "250m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
+              value: "production"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -552,39 +526,66 @@ spec:
     app: orbit-shell
   ports:
     - port: 80
-      targetPort: 3000
+      targetPort: 3000 # Map Service port 80 to Container port 3000
   type: ClusterIP
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+```
+
+**MFE (Nginx) Deployment:**
+
+```yaml
+# kubernetes/app-react.yaml
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: orbit-ingress
+  name: orbit-app-react
 spec:
-  rules:
-    - host: orbit.example.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: orbit-shell
-                port:
-                  number: 80
+  replicas: 2
+  selector:
+    matchLabels:
+      app: orbit-app-react
+  template:
+    metadata:
+      labels:
+        app: orbit-app-react
+    spec:
+      containers:
+        - name: app-react
+          image: myregistry/orbit-app-react:latest
+          ports:
+            - containerPort: 80 # Nginx runs on port 80
+          readinessProbe:
+            httpGet:
+              path: /health.json
+              port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orbit-app-react
+spec:
+  selector:
+    app: orbit-app-react
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
 ```
 
 ### AWS ECS / Fargate
+
+Reference Task Definition for AWS ECS.
 
 ```json
 {
   "family": "orbit-shell",
   "containerDefinitions": [
     {
-      "name": "shell",
+      "name": "orbit-shell",
       "image": "123456789.dkr.ecr.us-east-1.amazonaws.com/orbit-shell:latest",
       "portMappings": [
         {
           "containerPort": 3000,
+          "hostPort": 3000,
           "protocol": "tcp"
         }
       ],
@@ -594,23 +595,20 @@ spec:
           "value": "production"
         }
       ],
-      "secrets": [
-        {
-          "name": "SESSION_SECRET",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:123456789:secret:orbit/session-secret"
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/orbit-shell",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
         }
-      ],
-      "healthCheck": {
-        "command": [
-          "CMD-SHELL",
-          "curl -f http://localhost:3000/health || exit 1"
-        ],
-        "interval": 30,
-        "timeout": 5,
-        "retries": 3
       }
     }
-  ]
+  ],
+  "cpu": "256",
+  "memory": "512",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc"
 }
 ```
 
