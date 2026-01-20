@@ -10,7 +10,8 @@
     "build:standalone": "vite build",
     "type-check": "vue-tsc",
     "preview": "vite preview",
-    "start": "vite preview"
+    "start": "vite preview",
+    "clean": "rm -rf node_modules dist .cache .turbo .vite"
   },
   "dependencies": {
     "@repo/config": "workspace:*",

@@ -10,7 +10,8 @@
     "build:standalone": "vite build",
     "preview": "vite preview",
     "start": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "clean": "rm -rf node_modules dist .cache .turbo .vite"
   },
   "dependencies": {
     "@repo/config": "workspace:*",
