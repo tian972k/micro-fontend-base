@@ -621,7 +621,8 @@ spec:
 ### Logging Strategy
 
 ```typescript
-import { Logger } from "@repo/core";
+// Logger is available from any framework-specific entry or shared
+import { Logger } from "@repo/core/shared"; // or @repo/core/react, etc.
 
 // Structured logging
 Logger.info("Request processed", {

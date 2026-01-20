@@ -250,10 +250,12 @@ Each MFE manages its own UI state using framework-native tools:
 
 ### Global State (`@repo/core`)
 
-For cross-MFE state, use the shared stores:
+For cross-MFE state, use the shared stores via **framework-specific imports**:
 
 ```typescript
-import { useUserStore, useThemeStore, useLocaleStore } from "@repo/core";
+// React/Next.js
+import { useUserStore, useThemeStore, useLocaleStore } from "@repo/core/react";
+// Vue: @repo/core/vue, SolidJS: @repo/core/solid, Svelte: @repo/core/svelte
 
 // Get current state
 const user = useUserStore.getState().user;
@@ -273,7 +275,8 @@ useUserStore.subscribe((state) => {
 Framework-agnostic pub/sub for cross-app communication:
 
 ```typescript
-import { EventBus } from "@repo/core";
+// Use framework-specific import
+import { EventBus } from "@repo/core/react"; // or /vue, /solid, /svelte
 
 // Publish
 EventBus.emit("user:login", { userId: "123" });

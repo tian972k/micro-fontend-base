@@ -29,14 +29,28 @@ The **nervous system** of the Micro-Frontend platform. This package contains sha
 - **📝 Logger**: Standardized logging
 - **🌍 I18n**: Internationalization support
 
-### Framework Agnostic
+### Framework-Specific Entry Points
 
-All utilities work with any framework:
+For **type safety** and **better tree-shaking**, use framework-specific imports:
 
 ```typescript
-// Works in React, Vue, Svelte, SolidJS
-import { EventBus, useUserStore, Logger } from "@repo/core";
+// ✅ React/Next.js apps
+import { EventBus, useUserStore, createReactMfeEntry } from "@repo/core/react";
+
+// ✅ Vue apps
+import { EventBus, syncStore, createVueMfeEntry } from "@repo/core/vue";
+
+// ✅ SolidJS apps
+import { EventBus, syncStore, createSolidMfeEntry } from "@repo/core/solid";
+
+// ✅ Svelte apps
+import { EventBus, syncStore, createSvelteMfeEntry } from "@repo/core/svelte";
+
+// ✅ Framework-agnostic utilities only
+import { EventBus, Logger, syncStore } from "@repo/core/shared";
 ```
+
+> **Note**: The main entry `@repo/core` exports everything (React-focused) for backward compatibility, but framework-specific imports are recommended.
 
 ---
 
@@ -412,24 +426,24 @@ export const { mount, unmount } = createMfeEntry({
 
 ### Framework-Specific Entry Examples
 
-#### React
+Each framework has a dedicated factory function for cleaner code:
+
+#### React / Next.js
 
 ```typescript
 // entry-mfe.tsx
-import { createMfeEntry } from '@repo/core';
-import { createRoot } from 'react-dom/client';
-import App from './App';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { createReactMfeEntry, AppRegistry } from "@repo/core/react";
+import { APP_IDS } from "@repo/config";
+import App from "./App";
 
-export const { mount, unmount } = createMfeEntry({
-  appId: 'app-react',
-  mount: (container, props) => {
-    const root = createRoot(container);
-    root.render(<App {...props} />);
-    container._reactRoot = root;
-  },
-  unmount: (container) => {
-    container._reactRoot?.unmount();
-  },
+export const { mount, unmount } = createReactMfeEntry({
+  AppComponent: App,
+  appId: APP_IDS.REACT,
+  registry: AppRegistry,
+  StrictMode: React.StrictMode,
+  createRoot: ReactDOM.createRoot,
 });
 ```
 
@@ -437,20 +451,16 @@ export const { mount, unmount } = createMfeEntry({
 
 ```typescript
 // entry-mfe.ts
-import { createMfeEntry } from "@repo/core";
 import { createApp } from "vue";
+import { createVueMfeEntry, AppRegistry } from "@repo/core/vue";
+import { APP_IDS } from "@repo/config";
 import App from "./App.vue";
 
-export const { mount, unmount } = createMfeEntry({
-  appId: "app-vue",
-  mount: (container, props) => {
-    const app = createApp(App, props);
-    app.mount(container);
-    container._vueApp = app;
-  },
-  unmount: (container) => {
-    container._vueApp?.unmount();
-  },
+export const { mount, unmount } = createVueMfeEntry({
+  AppComponent: App,
+  appId: APP_IDS.VUE,
+  registry: AppRegistry,
+  createApp,
 });
 ```
 
@@ -458,18 +468,14 @@ export const { mount, unmount } = createMfeEntry({
 
 ```typescript
 // entry-mfe.ts
-import { createMfeEntry } from "@repo/core";
+import { createSvelteMfeEntry, AppRegistry } from "@repo/core/svelte";
+import { APP_IDS } from "@repo/config";
 import App from "./App.svelte";
 
-export const { mount, unmount } = createMfeEntry({
-  appId: "app-svelte",
-  mount: (container, props) => {
-    const app = new App({ target: container, props });
-    container._svelteApp = app;
-  },
-  unmount: (container) => {
-    container._svelteApp?.$destroy();
-  },
+export const { mount, unmount } = createSvelteMfeEntry({
+  AppComponent: App,
+  appId: APP_IDS.SVELTE,
+  registry: AppRegistry,
 });
 ```
 
@@ -477,13 +483,17 @@ export const { mount, unmount } = createMfeEntry({
 
 ```typescript
 // entry-mfe.tsx
-import { createMfeEntry } from '@repo/core';
-import { render } from 'solid-js/web';
-import App from './App';
+import { render } from "solid-js/web";
+import { createSolidMfeEntry, AppRegistry } from "@repo/core/solid";
+import { APP_IDS } from "@repo/config";
+import App from "./App";
 
-export const { mount, unmount } = createMfeEntry({
-  appId: 'app-solidjs',
-  mount: (container, props) => {
+export const { mount, unmount } = createSolidMfeEntry({
+  AppComponent: App,
+  appId: APP_IDS.SOLIDJS,
+  registry: AppRegistry,
+  render,
+});
     const dispose = render(() => <App {...props} />, container);
     container._solidDispose = dispose;
   },

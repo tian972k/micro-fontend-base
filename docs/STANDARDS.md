@@ -64,7 +64,7 @@ import { cn } from "@repo/utils";
 
 // 2. Internal packages
 import { Button } from "@repo/ui/react";
-import { EventBus } from "@repo/core";
+import { EventBus } from "@repo/core/react"; // Use framework-specific: /react, /vue, /solid, /svelte
 
 // 3. Relative imports
 import { useLocalState } from "./hooks";
@@ -178,7 +178,7 @@ import { ShellHeader } from "../../shell/app/components";
 import { useVueStore } from "../../app-vue/src/stores";
 
 // ✅ CORRECT - Use shared packages
-import { EventBus, useUserStore } from "@repo/core";
+import { EventBus, useUserStore } from "@repo/core/react"; // Framework-specific
 import { Button } from "@repo/ui/react";
 ```
 
@@ -188,7 +188,7 @@ MFEs communicate through the EventBus, not direct method calls:
 
 ```typescript
 // ✅ CORRECT - Event-based communication
-import { EventBus } from "@repo/core";
+import { EventBus } from "@repo/core/react"; // Use /vue, /solid, /svelte for other frameworks
 
 // Request navigation
 EventBus.emit("nav:navigate", { path: "/settings" });
@@ -390,20 +390,40 @@ import { buttonVariants, cardVariants } from "@repo/ui/shared";
 
 ### @repo/core
 
-State management and MFE utilities:
+State management and MFE utilities. **Always use framework-specific entry points:**
 
 ```typescript
-// EventBus
-import { EventBus } from "@repo/core";
+// ⚠️ IMPORTANT: Use framework-specific imports to avoid type conflicts
 
-// Stores
-import { useUserStore, useThemeStore, useLocaleStore } from "@repo/core";
+// React/Next.js apps
+import {
+  EventBus,
+  useUserStore,
+  createReactMfeEntry,
+  Logger,
+} from "@repo/core/react";
 
-// MFE utilities
-import { createMfeEntry, AppRegistry } from "@repo/core";
+// Vue apps
+import {
+  EventBus,
+  useThemeStore,
+  createVueMfeEntry,
+  Logger,
+} from "@repo/core/vue";
 
-// Logger
-import { Logger } from "@repo/core";
+// SolidJS apps
+import {
+  EventBus,
+  AppRegistry,
+  createSolidMfeEntry,
+  Logger,
+} from "@repo/core/solid";
+
+// Svelte apps
+import { EventBus, createSvelteMfeEntry, Logger } from "@repo/core/svelte";
+
+// Shared utilities (framework-agnostic)
+import { EventBus, Logger, AppRegistry } from "@repo/core/shared";
 ```
 
 ### @repo/utils

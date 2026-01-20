@@ -126,29 +126,36 @@ apps/my-dashboard/
 
 ### Step 5: The Entry Point
 
-Every MFE needs an entry point that exports `mount` and `unmount` functions:
+Every MFE needs an entry point that exports `mount` and `unmount` functions. Use the framework-specific factory:
 
 ```tsx
-// src/entry-mfe.tsx
-import { createRoot } from "react-dom/client";
-import { createMfeEntry } from "@repo/core";
+// src/entry-mfe.tsx (React)
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { createReactMfeEntry, AppRegistry } from "@repo/core/react";
+import { APP_IDS } from "@repo/config";
 import App from "./App";
 
-// Create the MFE entry with lifecycle hooks
-export const { mount, unmount } = createMfeEntry({
-  appId: "my-dashboard",
-
-  mount: (container, props) => {
-    const root = createRoot(container);
-    root.render(<App {...props} />);
-    container._reactRoot = root;
-    return root;
-  },
-
-  unmount: (container) => {
-    container._reactRoot?.unmount();
-  },
+export const { mount, unmount } = createReactMfeEntry({
+  AppComponent: App,
+  appId: APP_IDS.MY_DASHBOARD, // Define in @repo/config
+  registry: AppRegistry,
+  StrictMode: React.StrictMode,
+  createRoot: ReactDOM.createRoot,
 });
+```
+
+For other frameworks:
+
+```typescript
+// Vue - use @repo/core/vue
+import { createVueMfeEntry, AppRegistry } from "@repo/core/vue";
+
+// SolidJS - use @repo/core/solid
+import { createSolidMfeEntry, AppRegistry } from "@repo/core/solid";
+
+// Svelte - use @repo/core/svelte
+import { createSvelteMfeEntry, AppRegistry } from "@repo/core/svelte";
 ```
 
 ---
@@ -293,12 +300,23 @@ const outlineCard = cn(cardVariants({ variant: 'outline' }));
 
 MFEs communicate via the **EventBus** - a pub/sub system provided by `@repo/core`.
 
+> **Import Tip**: Use framework-specific imports:
+>
+> - React: `@repo/core/react`
+> - Vue: `@repo/core/vue`
+> - Solid: `@repo/core/solid`
+> - Svelte: `@repo/core/svelte`
+
 ### Publishing Events
 
 ```typescript
-import { EventBus } from "@repo/core";
+// React app
+import { EventBus } from "@repo/core/react";
 
-// Emit an event
+// Vue app
+import { EventBus } from "@repo/core/vue";
+
+// Emit an event (same API for all frameworks)
 EventBus.emit("user:login", { userId: "123", name: "John" });
 
 // Emit navigation request
@@ -314,7 +332,7 @@ EventBus.emit("notification:show", {
 ### Subscribing to Events
 
 ```typescript
-import { EventBus } from "@repo/core";
+import { EventBus } from "@repo/core/react"; // or /vue, /solid, /svelte
 
 // Subscribe to events
 const unsubscribe = EventBus.on("user:login", (data) => {
@@ -331,7 +349,7 @@ onUnmount(() => {
 
 ```tsx
 import { useEffect } from "react";
-import { EventBus } from "@repo/core";
+import { EventBus } from "@repo/core/react";
 
 function MyComponent() {
   useEffect(() => {
@@ -384,7 +402,11 @@ Each MFE manages its own state using framework-native tools:
 For truly global state (user session, theme, locale), use the shared stores:
 
 ```typescript
-import { useUserStore, useThemeStore, useLocaleStore } from "@repo/core";
+// React apps
+import { useUserStore, useThemeStore, useLocaleStore } from "@repo/core/react";
+
+// Vue/Solid/Svelte apps - use syncStore for cross-framework sync
+import { syncStore, useThemeStore } from "@repo/core/vue"; // or /solid, /svelte
 
 // Get current user
 const user = useUserStore.getState().user;
@@ -401,7 +423,7 @@ useUserStore.getState().setUser({ id: "123", name: "John" });
 ### React Integration
 
 ```tsx
-import { useUserStore } from "@repo/core";
+import { useUserStore } from "@repo/core/react";
 
 function Profile() {
   // This component re-renders when user changes
@@ -422,15 +444,15 @@ function Profile() {
 ```vue
 <script setup lang="ts">
 import { computed, watchEffect } from "vue";
-import { useUserStore } from "@repo/core";
+import { useThemeStore } from "@repo/core/vue";
 
-const userStore = useUserStore;
-const user = computed(() => userStore.getState().user);
+const themeStore = useThemeStore;
+const theme = computed(() => themeStore.getState().theme);
 
 // Watch for changes
 watchEffect(() => {
-  userStore.subscribe((state) => {
-    console.log("User updated:", state.user);
+  themeStore.subscribe((state) => {
+    console.log("Theme updated:", state.theme);
   });
 });
 </script>
@@ -821,7 +843,8 @@ function App({ session, theme, locale }) {
 ### Recipe 3: Navigate via Shell
 
 ```typescript
-import { EventBus } from '@repo/core';
+// Use framework-specific import: @repo/core/react, @repo/core/vue, etc.
+import { EventBus } from '@repo/core/react';
 
 function navigateToRoute(path: string) {
   // Request Shell to navigate
@@ -837,7 +860,8 @@ function navigateToRoute(path: string) {
 ### Recipe 4: Show Notification
 
 ```typescript
-import { EventBus } from "@repo/core";
+// Use framework-specific import: @repo/core/react, @repo/core/vue, etc.
+import { EventBus } from "@repo/core/react";
 
 function showNotification(
   message: string,
@@ -858,7 +882,7 @@ try {
 ### Recipe 5: Theme-Aware Component
 
 ```tsx
-import { useThemeStore } from "@repo/core";
+import { useThemeStore } from "@repo/core/react";
 import { cn } from "@repo/utils";
 
 function ThemeAwareCard({ children }) {
@@ -881,7 +905,7 @@ function ThemeAwareCard({ children }) {
 
 ```tsx
 import { useEffect } from "react";
-import { EventBus } from "@repo/core";
+import { EventBus } from "@repo/core/react";
 
 function CleanupExample() {
   useEffect(() => {
