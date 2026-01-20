@@ -13,21 +13,21 @@
 
 ```mermaid
 graph TB
-    subgraph "Browser Runtime"
-        Shell["🏠 Shell (Remix SSR)<br/>:8000"]:::shell
+    subgraph Runtime ["Browser Runtime"]
+        Shell["Shell<br/>Remix SSR :8000"]:::shell
 
         subgraph MFEs ["Micro-Frontends"]
-            React["⚛️ React<br/>:8001"]:::react
-            Next["▲ Next.js<br/>:8002"]:::next
-            Vue["💚 Vue 3<br/>:8003"]:::vue
-            Svelte["🔥 Svelte<br/>:8004"]:::svelte
-            Solid["💎 SolidJS<br/>:8005"]:::solid
+            React["React :8001"]:::mfe
+            Next["Next.js :8002"]:::mfe
+            Vue["Vue 3 :8003"]:::mfe
+            Svelte["Svelte :8004"]:::mfe
+            Solid["SolidJS :8005"]:::mfe
         end
 
         subgraph Shared ["Shared Layer"]
-            Core["📦 @repo/core<br/>(State & Events)"]:::pkg
-            UI["🎨 @repo/ui<br/>(Components)"]:::pkg
-            Utils["🔧 @repo/utils<br/>(Helpers)"]:::pkg
+            Core["core<br/>State & Events"]:::pkg
+            UI["ui<br/>Components"]:::pkg
+            Utils["utils<br/>Helpers"]:::pkg
         end
     end
 
@@ -48,13 +48,9 @@ graph TB
     Solid -.->|"imports"| Core
     Solid -.->|"imports"| UI
 
-    classDef shell fill:#22c55e,stroke:#16a34a,color:#fff
-    classDef react fill:#61dafb,stroke:#0088cc,color:#000
-    classDef next fill:#000,stroke:#333,color:#fff
-    classDef vue fill:#42b883,stroke:#35495e,color:#fff
-    classDef svelte fill:#ff3e00,stroke:#cc3200,color:#fff
-    classDef solid fill:#2c4f7c,stroke:#1e3552,color:#fff
-    classDef pkg fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    classDef shell fill:#10b981,stroke:#059669,color:#fff
+    classDef mfe fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef pkg fill:#8b5cf6,stroke:#7c3aed,color:#fff
 ```
 
 ---
@@ -133,15 +129,15 @@ Build with **React, Vue, Svelte, SolidJS, or Next.js**. Each micro-frontend can 
 
 ```mermaid
 flowchart LR
-    A[📥 Clone Repo] --> B[📦 pnpm install]
-    B --> C[⚙️ Setup .env]
-    C --> D[🚀 pnpm dev]
-    D --> E[🌐 localhost:8000]
+    A[Clone Repo] --> B[pnpm install]
+    B --> C[Setup .env]
+    C --> D[pnpm dev]
+    D --> E[localhost:8000]
 
     style A fill:#3b82f6,stroke:#2563eb,color:#fff
-    style B fill:#8b5cf6,stroke:#6d28d9,color:#fff
-    style C fill:#eab308,stroke:#ca8a04,color:#000
-    style D fill:#22c55e,stroke:#16a34a,color:#fff
+    style B fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style C fill:#f59e0b,stroke:#d97706,color:#fff
+    style D fill:#10b981,stroke:#059669,color:#fff
     style E fill:#ec4899,stroke:#db2777,color:#fff
 ```
 
@@ -178,27 +174,27 @@ pnpm dev
 
 ```mermaid
 graph TB
-    subgraph Monorepo ["🌟 Orbit Monorepo"]
+    subgraph Monorepo ["Orbit Monorepo"]
         subgraph Apps ["apps/ - Applications"]
-            Shell[🏠 shell<br/>Remix SSR]:::app
-            React[⚛️ app-react<br/>Vite + React]:::app
-            Next["▲ app-nextjs<br/>Next.js"]:::app
-            Vue["💚 app-vue<br/>Vite + Vue 3"]:::app
-            Svelte["🔥 app-svelte<br/>Vite + Svelte"]:::app
-            Solid["💎 app-solidjs<br/>Vite + Solid"]:::app
+            Shell[shell<br/>Remix SSR]:::app
+            React[app-react<br/>Vite + React]:::app
+            Next["app-nextjs<br/>Next.js"]:::app
+            Vue["app-vue<br/>Vite + Vue 3"]:::app
+            Svelte["app-svelte<br/>Vite + Svelte"]:::app
+            Solid["app-solidjs<br/>Vite + Solid"]:::app
         end
 
         subgraph Packages ["packages/ - Shared Code"]
-            Core[💡 core<br/>State & Events]:::pkg
-            UI[🎨 ui<br/>Components]:::pkg
-            Utils[🔧 utils<br/>Helpers]:::pkg
-            Config[⚙️ config<br/>Configs]:::pkg
+            Core[core<br/>State & Events]:::pkg
+            UI[ui<br/>Components]:::pkg
+            Utils[utils<br/>Helpers]:::pkg
+            Config[config<br/>Configs]:::pkg
         end
 
         subgraph Tooling ["Infrastructure"]
-            Scripts[📦 scripts/<br/>Automation]:::tool
-            Docs[📝 docs/<br/>Documentation]:::tool
-            CI[🔄 .github/<br/>CI/CD]:::tool
+            Scripts[scripts/<br/>Automation]:::tool
+            Docs[docs/<br/>Documentation]:::tool
+            CI[.github/<br/>CI/CD]:::tool
         end
     end
 
@@ -208,8 +204,8 @@ graph TB
     Scripts -.->|"builds"| Packages
     CI -.->|"automates"| Scripts
 
-    classDef app fill:#22c55e,stroke:#16a34a,color:#fff
-    classDef pkg fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    classDef app fill:#10b981,stroke:#059669,color:#fff
+    classDef pkg fill:#8b5cf6,stroke:#7c3aed,color:#fff
     classDef tool fill:#3b82f6,stroke:#2563eb,color:#fff
 ```
 
@@ -218,26 +214,39 @@ graph TB
 ## Development Workflow
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Setup: "pnpm install"
-    Setup --> Dev: "pnpm dev"
+flowchart TB
+    Start([Start]) --> Setup[Setup: pnpm install]
+    Setup --> Dev[Development: pnpm dev]
 
-    state Dev {
-        [*] --> EditCode
-        EditCode --> HMR: "Save File"
-        HMR --> Preview: "Hot Reload"
-        Preview --> EditCode: Continue
-    }
+    Dev --> EditCode[Edit Code]
+    EditCode --> Save[Save File]
+    Save --> HMR[Hot Module Reload]
+    HMR --> Preview[Preview Changes]
+    Preview --> Continue{Continue?}
+    Continue -->|Yes| EditCode
+    Continue -->|No| Test
 
-    Dev --> Test: "pnpm test"
-    Test --> Lint: "pnpm lint"
-    Lint --> Build: "pnpm build"
-    Build --> Deploy: "pnpm docker:build:smart"
-    Deploy --> [*]
+    Test[Test: pnpm test] --> TestPass{Pass?}
+    TestPass -->|No| Dev
+    TestPass -->|Yes| Lint[Lint: pnpm lint]
 
-    Test --> Dev: "Fix Issues"
-    Lint --> Dev: "Fix Issues"
-    Build --> Dev: "Fix Issues"
+    Lint --> LintPass{Pass?}
+    LintPass -->|No| Dev
+    LintPass -->|Yes| Build[Build: pnpm build]
+
+    Build --> BuildPass{Pass?}
+    BuildPass -->|No| Dev
+    BuildPass -->|Yes| Deploy[Deploy: pnpm docker:build:smart]
+
+    Deploy --> End([End])
+
+    style Start fill:#3b82f6,stroke:#2563eb,color:#fff
+    style Dev fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style Test fill:#f59e0b,stroke:#d97706,color:#fff
+    style Lint fill:#f59e0b,stroke:#d97706,color:#fff
+    style Build fill:#10b981,stroke:#059669,color:#fff
+    style Deploy fill:#ec4899,stroke:#db2777,color:#fff
+    style End fill:#3b82f6,stroke:#2563eb,color:#fff
 ```
 
 ---
@@ -425,22 +434,31 @@ FORCE_ALL=true EXECUTE=true node scripts/smart-docker-build.js
 
 ```mermaid
 flowchart TD
-    User["End User"] -->|Request| Shell["Shell (Remix SSR)"]
+    User[End User] -->|Request| Shell[Shell: Remix SSR]
 
-    subgraph "Browser Runtime"
-        Shell -->|Mount| React["React MFE"]
-        Shell -->|Mount| Vue["Vue MFE"]
-        Shell -->|Mount| Svelte["Svelte MFE"]
-        Shell -->|Mount| Solid["Solid MFE"]
+    subgraph Runtime ["Browser Runtime"]
+        Shell -->|Mount| React[React MFE]
+        Shell -->|Mount| Vue[Vue MFE]
+        Shell -->|Mount| Svelte[Svelte MFE]
+        Shell -->|Mount| Solid[Solid MFE]
     end
 
-    subgraph "Shared Layer"
-        Core["@repo/core"]
-        UI["@repo/ui"]
+    subgraph Shared ["Shared Layer"]
+        Core[core]
+        UI[ui]
     end
 
     React & Vue & Svelte & Solid --> Core
     React --> UI
+
+    style User fill:#3b82f6,stroke:#2563eb,color:#fff
+    style Shell fill:#10b981,stroke:#059669,color:#fff
+    style React fill:#3b82f6,stroke:#2563eb,color:#fff
+    style Vue fill:#3b82f6,stroke:#2563eb,color:#fff
+    style Svelte fill:#3b82f6,stroke:#2563eb,color:#fff
+    style Solid fill:#3b82f6,stroke:#2563eb,color:#fff
+    style Core fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style UI fill:#8b5cf6,stroke:#7c3aed,color:#fff
 ```
 
 See [Architecture Guide](./docs/ARCHITECTURE.md) for detailed documentation.
