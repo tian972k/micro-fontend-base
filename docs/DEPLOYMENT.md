@@ -20,6 +20,8 @@ This guide covers deployment strategies, CI/CD pipelines, and production setup f
 
 ## 1. Architecture Overview
 
+> **Note**: For a detailed deep-dive into the system architecture, component roles, and design principles, please refer to [ARCHITECTURE.md](./ARCHITECTURE.md).
+
 ### Deployment Topology
 
 ```mermaid
@@ -63,20 +65,9 @@ flowchart TD
 
 ### Central MFE Configuration
 
-All MFE apps are configured in `scripts/mfe.config.mjs`:
+All MFE apps are configured in `scripts/mfe.config.mjs`. This configuration drives the build process, port assignment, and federation setup.
 
-```javascript
-export const MFE_APPS = [
-  {
-    name: "app-react",
-    framework: "react",
-    port: 8001,
-    entryFile: "entry-mfe.tsx",
-    outputDir: "dist",
-  },
-  // ... more apps
-];
-```
+> See [ARCHITECTURE.md - MFE Configuration](./ARCHITECTURE.md#5-mfe-configuration) for the complete schema and configuration details.
 
 ### Build Commands
 

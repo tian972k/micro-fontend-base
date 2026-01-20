@@ -130,6 +130,8 @@ pnpm dev
 
 ### Understanding the Architecture
 
+> **Note**: For a comprehensive guide on the system architecture, loading strategies, and state management, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+
 ```mermaid
 graph TD
     User((Developer)) -->|Opens Browser| Shell["Shell App :8000"]

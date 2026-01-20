@@ -116,6 +116,8 @@ function Card({ data }: CardProps) {}
 
 We follow a **Feature-Based** architecture. Group files by business logic rather than technical type.
 
+> See [ARCHITECTURE.md - Directory Structure](./ARCHITECTURE.md#7-directory-structure) for the high-level project layout.
+
 ### MFE Structure
 
 ```text
@@ -185,6 +187,8 @@ import { Button } from "@repo/ui/react";
 ### Rule 2: Communication via Events
 
 MFEs communicate through the EventBus, not direct method calls:
+
+> See [ARCHITECTURE.md - Communication Patterns](./ARCHITECTURE.md#6-communication-patterns) for the complete event list and naming conventions.
 
 ```typescript
 // ✅ CORRECT - Event-based communication

@@ -74,7 +74,9 @@ Your choice (1-4): 1
 
 ### Step 2: Register in MFE Config
 
-After creation, add your app to the central config:
+After creation, add your app to the central config.
+
+> For more details on MFE configuration options, see [ARCHITECTURE.md - MFE Configuration](./ARCHITECTURE.md#5-mfe-configuration).
 
 ```javascript
 // scripts/mfe.config.mjs
@@ -109,6 +111,8 @@ Your app will be available at:
 - **In Shell**: `http://localhost:8000/dashboard/my-dashboard`
 
 ### Step 4: Understanding the Structure
+
+> For a complete overview of the monorepo directory structure, see [ARCHITECTURE.md - Directory Structure](./ARCHITECTURE.md#7-directory-structure).
 
 ```text
 apps/my-dashboard/
@@ -387,6 +391,8 @@ Use a `namespace:action` pattern:
 ---
 
 ## State Management
+
+> This section covers practical usage. For the architectural design and singleton pattern details, see [ARCHITECTURE.md - State Management](./ARCHITECTURE.md#3-state-management).
 
 ### Local State
 
