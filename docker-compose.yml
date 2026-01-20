@@ -9,11 +9,9 @@ services:
       - "8000:3000"
     environment:
       - NODE_ENV=production
-      - MFE_APP_REACT_URL=http://app-react
-      - MFE_APP_NEXTJS_URL=http://app-nextjs
-      - MFE_APP_VUE_URL=http://app-vue
-      - MFE_APP_SVELTE_URL=http://app-svelte
-      - MFE_APP_SOLIDJS_URL=http://app-solidjs
+      # Optional: Override MFE URLs for cloud deployment
+      # - MFE_APP_REACT_PUBLIC_URL=https://app-react.example.com
+      # - MFE_APP_NEXTJS_PUBLIC_URL=https://app-nextjs.example.com
     depends_on:
       - app-react
       - app-nextjs

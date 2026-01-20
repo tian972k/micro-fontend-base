@@ -18,11 +18,7 @@
     "name": "__federation_shared_@repo/core",
     "src": "../../packages/core/src/index.ts",
     "isEntry": true,
-    "imports": [
-      "virtual:__federation_fn_import",
-      "_jsx-runtime.js",
-      "_createLucideIcon.js"
-    ]
+    "imports": ["_user-profile-feature.js", "_createLucideIcon.js"]
   },
   "../../packages/ui/dist/index.js": {
     "file": "assets/__federation_shared_@repo/ui.js",
@@ -31,7 +27,6 @@
     "isEntry": true,
     "imports": [
       "virtual:__federation_fn_import",
-      "_jsx-runtime.js",
       "_createLucideIcon.js",
       "_index.js"
     ]
@@ -39,7 +34,7 @@
   "_createLucideIcon.js": {
     "file": "assets/createLucideIcon.js",
     "name": "createLucideIcon",
-    "imports": ["virtual:__federation_fn_import"]
+    "imports": ["_index.js", "virtual:__federation_fn_import"]
   },
   "_index.js": {
     "file": "assets/index.js",
@@ -50,17 +45,21 @@
     "name": "index",
     "imports": ["_index.js"]
   },
-  "_jsx-runtime.js": {
-    "file": "assets/jsx-runtime.js",
-    "name": "jsx-runtime",
-    "imports": ["_index.js"]
+  "_user-profile-feature.js": {
+    "file": "assets/user-profile-feature.js",
+    "name": "user-profile-feature",
+    "imports": ["_createLucideIcon.js", "virtual:__federation_fn_import"]
   },
   "src/entry-mfe.tsx": {
     "file": "assets/main.js",
     "name": "main",
     "src": "src/entry-mfe.tsx",
     "isEntry": true,
-    "imports": ["virtual:__federation_fn_import", "src/entry-mfe.tsx"]
+    "imports": [
+      "virtual:__federation_fn_import",
+      "src/entry-mfe.tsx",
+      "_user-profile-feature.js"
+    ]
   },
   "style.css": {
     "file": "assets/style.css",

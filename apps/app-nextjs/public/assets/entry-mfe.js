@@ -1,6 +1,7 @@
 import { importShared } from './__federation_fn_import.js';
 import { r as reactDomExports } from './index2.js';
-import { j as jsxRuntimeExports } from './jsx-runtime.js';
+import { j as jsxRuntimeExports } from './createLucideIcon.js';
+import { s as syncStore, x as createReactMfeEntry, A as AppRegistry } from './user-profile-feature.js';
 
 var client = {};
 
@@ -52,8 +53,6 @@ const EVENT_KEYS = {
 };
 
 const {Button} = await importShared('@repo/ui');
-
-const {syncStore} = await importShared('@repo/core');
 const {useEffect,useState} = await importShared('react');
 
 function CounterWidget() {
@@ -135,8 +134,11 @@ function MfeComponent(_props) {
 }
 
 const React = await importShared('react');
-const {AppRegistry,createReactMfeEntry} = await importShared('@repo/core');
-const { mount, unmount, default: microApp } = createReactMfeEntry({
+const {
+  mount,
+  unmount,
+  default: microApp
+} = createReactMfeEntry({
   AppComponent: MfeComponent,
   appId: APP_IDS.NEXTJS,
   registry: AppRegistry,
