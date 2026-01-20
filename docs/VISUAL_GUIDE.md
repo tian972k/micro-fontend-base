@@ -290,20 +290,20 @@ sequenceDiagram
 
 ```mermaid
 graph TB
-    subgraph Shell ["🏠 Shell"]
+    subgraph Shell ["Shell"]
         S_React[React 18.2]
-        S_Core[@repo/core]
-        S_UI[@repo/ui]
+        S_Core["@repo/core"]
+        S_UI["@repo/ui"]
     end
 
-    subgraph MFE1 ["⚛️ React MFE"]
-        M1_React[React 18.2<br/>singleton ✅]
-        M1_Core[@repo/core<br/>singleton ✅]
+    subgraph MFE1 ["React MFE"]
+        M1_React["React 18.2<br/>singleton"]
+        M1_Core["@repo/core<br/>singleton"]
     end
 
-    subgraph MFE2 ["💚 Vue MFE"]
+    subgraph MFE2 ["Vue MFE"]
         M2_Vue[Vue 3.3]
-        M2_Core[@repo/core<br/>singleton ✅]
+        M2_Core["@repo/core<br/>singleton"]
     end
 
     S_React -.->|shared| M1_React
@@ -323,14 +323,14 @@ graph TB
 
 ```mermaid
 graph TB
-    User[🧑 User Request] --> L1[🛡️ Layer 1: WAF]
-    L1 --> L2[🔐 Layer 2: HTTPS/TLS]
-    L2 --> L3[✅ Layer 3: Input Validation]
-    L3 --> L4[🔑 Layer 4: Authentication]
-    L4 --> L5[🚪 Layer 5: Authorization]
-    L5 --> L6[📋 Layer 6: Rate Limiting]
-    L6 --> App[🏠 Application]
-    App --> L7[📊 Layer 7: Monitoring]
+    User[User Request] --> L1[Layer 1: WAF]
+    L1 --> L2[Layer 2: HTTPS/TLS]
+    L2 --> L3[Layer 3: Input Validation]
+    L3 --> L4[Layer 4: Authentication]
+    L4 --> L5[Layer 5: Authorization]
+    L5 --> L6[Layer 6: Rate Limiting]
+    L6 --> App[Application]
+    App --> L7[Layer 7: Monitoring]
 
     style User fill:#3b82f6,stroke:#2563eb,color:#fff
     style App fill:#22c55e,stroke:#16a34a,color:#fff

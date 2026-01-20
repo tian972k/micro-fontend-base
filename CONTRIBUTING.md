@@ -4,19 +4,19 @@ Thank you for your interest in contributing to the Orbit Micro-Frontend Platform
 
 ```mermaid
 flowchart LR
-    A[🍴 Fork Repo] --> B[💻 Clone Locally]
-    B --> C[🌱 Create Branch]
-    C --> D[✍️ Make Changes]
-    D --> E[✔️ Test & Lint]
+    A[Fork Repo] --> B[Clone Locally]
+    B --> C[Create Branch]
+    C --> D[Make Changes]
+    D --> E[Test & Lint]
     E --> F{Pass?}
     F -->|No| D
-    F -->|Yes| G[📤 Commit]
-    G --> H[🚀 Push]
-    H --> I[📨 Create PR]
-    I --> J[👀 Code Review]
+    F -->|Yes| G[Commit]
+    G --> H[Push]
+    H --> I[Create PR]
+    I --> J[Code Review]
     J --> K{Approved?}
     K -->|Changes Needed| D
-    K -->|Yes| L[✅ Merge!]
+    K -->|Yes| L[Merge!]
 
     style A fill:#3b82f6,stroke:#2563eb,color:#fff
     style L fill:#22c55e,stroke:#16a34a,color:#fff

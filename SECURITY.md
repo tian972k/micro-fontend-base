@@ -5,11 +5,11 @@ Security guidelines and vulnerability reporting for the Orbit Micro-Frontend Pla
 ```mermaid
 graph TB
     subgraph Defense ["Defense in Depth"]
-        L1[🔒 Layer 1: Input Validation]:::layer
-        L2[🔐 Layer 2: Authentication]:::layer
-        L3[🚪 Layer 3: Authorization]:::layer
-        L4[🛡️ Layer 4: Security Headers]:::layer
-        L5[📊 Layer 5: Monitoring]:::layer
+        L1[Layer 1: Input Validation]:::layer
+        L2[Layer 2: Authentication]:::layer
+        L3[Layer 3: Authorization]:::layer
+        L4[Layer 4: Security Headers]:::layer
+        L5[Layer 5: Monitoring]:::layer
     end
 
     Request[User Request] --> L1
@@ -19,7 +19,7 @@ graph TB
     L4 --> App[Application]
     App --> L5
 
-    L5 -.->|Alerts| Admin[👨‍💻 Admin]
+    L5 -.->|Alerts| Admin[Admin]
 
     classDef layer fill:#8b5cf6,stroke:#6d28d9,color:#fff
     style Request fill:#3b82f6,stroke:#2563eb,color:#fff
@@ -63,12 +63,12 @@ We release security updates for the following versions:
 
 ```mermaid
 flowchart LR
-    A[🔍 Find Vulnerability] --> B[📧 Email Security Team]
-    B --> C[⏱️ Wait 48h]
-    C --> D[💬 Acknowledgment]
-    D --> E[🔧 Fix Development]
-    E --> F[✅ Patch Released]
-    F --> G[📢 Public Disclosure]
+    A[Find Vulnerability] --> B[Email Security Team]
+    B --> C[Wait 48h]
+    C --> D[Acknowledgment]
+    D --> E[Fix Development]
+    E --> F[Patch Released]
+    F --> G[Public Disclosure]
 
     style A fill:#ef4444,stroke:#dc2626,color:#fff
     style B fill:#eab308,stroke:#ca8a04,color:#000
