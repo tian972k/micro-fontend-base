@@ -1,7 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/svelte-vite";
 import Button from "./Button.svelte";
+import type {
+  ButtonVariant,
+  ButtonSize,
+} from "../../../shared/variants/button";
 
-const meta: Meta<typeof Button> = {
+interface ButtonProps {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  disabled?: boolean;
+  class?: string;
+  type?: "button" | "submit" | "reset";
+}
+
+const meta: Meta<ButtonProps> = {
   title: "Svelte/Button",
   component: Button,
   tags: ["autodocs", "svelte"],
@@ -34,7 +46,7 @@ const meta: Meta<typeof Button> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof Button>;
+type Story = StoryObj<ButtonProps>;
 
 export const Default: Story = {
   args: {

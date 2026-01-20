@@ -16,8 +16,10 @@
     "node_modules",
     "dist",
     "src/components/vue/**/*",
-    "src/components/svelte/**/*",
     "src/components/solid/**/*",
+    "src/components/svelte/**/*",
+    "src/**/*.stories.ts",
+    "src/**/*.stories.tsx",
     "src/vue.ts",
     "src/svelte.ts",
     "src/solid.ts"
