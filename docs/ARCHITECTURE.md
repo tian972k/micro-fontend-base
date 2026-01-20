@@ -14,6 +14,7 @@ This document outlines the core technical decisions, patterns, and optimization 
 6. [Communication Patterns](#6-communication-patterns)
 7. [Directory Structure](#7-directory-structure)
 8. [Security Considerations](#8-security-considerations)
+9. [Mobile & WebView Support](#9-mobile--webview-support)
 
 ---
 
@@ -43,11 +44,15 @@ flowchart TD
         Utils["@repo/utils"]:::shared
     end
 
-    React --> Core & UI
-    Next --> Core & UI
-    Vue --> Core & UI
-    Svelte --> Core & UI
-    Solid --> Core & UI
+    React --> Core & UI & Utils
+    Next --> Core & UI & Utils
+    Vue --> Core & UI & Utils
+    Svelte --> Core & UI & Utils
+    Solid --> Core & UI & Utils
+
+    Core -.->|Uses| Config
+    UI -.->|Uses| Config
+    Utils -.->|Uses| Config
 
     classDef react fill:#61dafb,color:#000,stroke:#2da6cc
     classDef next fill:#000000,color:#fff,stroke:#333
@@ -65,8 +70,8 @@ flowchart TD
 | **MFEs**         | Feature-specific applications                | React/Vue/Svelte/Solid              |
 | **@repo/core**   | Framework-agnostic State, Events, Strategies | TypeScript + Zustand (Vanilla)      |
 | **@repo/ui**     | Multi-framework Design System                | Tailwind + CVA + Framework Adapters |
-| **@repo/config** | Centralized configurations                   | TypeScript                          |
-| **@repo/utils**  | Shared utilities                             | TypeScript                          |
+| **@repo/utils**  | Shared utilities (Dates, Validations, etc.)  | TypeScript                          |
+| **@repo/config** | Configurations (Vite, Tailwind, ESLint)      | TypeScript                          |
 
 ### Key Design Principles
 
@@ -341,3 +346,42 @@ micro-frontend-base/
 1. **CORS**: Localhost ports need CORS configuration for Dev.
 2. **Content Security Policy (CSP)**: Shell must allow loading scripts from allowed CDN domains.
 3. **Isolation**: CSS is isolated via Scoped Styles or Tailwind prefixing/bundling to prevent leakage (though global utility classes share the same definition in `@repo/ui`).
+
+---
+
+## 9. Mobile & WebView Support
+
+The architecture supports **Hybrid Mobile Applications** (iOS/Android) via WebView wrappers (e.g., Capacitor, Ionic, or Native WebViews).
+
+### Strategy: Remote Web App
+
+By default, the Native App acts as a thin shell loading the deployed Shell URL.
+
+### Native Bridge Pattern
+
+To communicate between MFEs and Native Code, we use the **Bridge Pattern** integrated into `@repo/core`.
+
+```mermaid
+flowchart LR
+    MFE["Micro-Frontend"] -- "Call" --> Core["@repo/core (Bridge)"]
+    Core -- "PostMessage / JS Injection" --> Native["Native App (iOS/Android)"]
+    Native -- "Callback" --> Core
+    Core -- "EventBus" --> MFE
+```
+
+### Implementation Guideline
+
+1. **Detection**: Check `window.Capacitor` or Custom User Agent.
+2. **Abstraction**: MFEs should **never** call native code directly. Use `@repo/core` adapters.
+
+```typescript
+// @repo/core/src/bridge/camera.ts
+export const openCamera = async () => {
+  if (isNative) {
+    return NativeBridge.postMessage("openCamera");
+  } else {
+    // Fallback for Web
+    return navigator.mediaDevices.getUserMedia({ video: true });
+  }
+};
+```
