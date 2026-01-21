@@ -34,14 +34,49 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download ${{ inputs.app }} build artifact
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download packages build
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.app }}-build
-          path: apps/${{ inputs.app }}/.vercel/output
+          name: packages-build
+          path: packages
 
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment
+        working-directory: apps/${{ inputs.app }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ "${{ inputs.is_production }}" == "true" ]; then
+            vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          else
+            vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+          fi
+
+      - name: Build with Vercel
+        working-directory: apps/${{ inputs.app }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ "${{ inputs.is_production }}" == "true" ]; then
+            vercel build --prod --token=$VERCEL_TOKEN
+          else
+            vercel build --token=$VERCEL_TOKEN
+          fi
 
       - name: Deploy to Vercel
         working-directory: apps/${{ inputs.app }}
