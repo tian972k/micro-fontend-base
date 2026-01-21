@@ -2,10 +2,11 @@
   "git": {
     "deploymentEnabled": false
   },
-  "buildCommand": "cd ../.. && pnpm install && pnpm turbo run build --filter=shell",
   "installCommand": "echo 'Skipping install, using buildCommand instead'",
+  "buildCommand": "cd ../.. && pnpm install && VERCEL=1 pnpm turbo run build --filter=shell",
   "env": {
-    "AVAILABLE_APPS": "react,vue,svelte,solid,nextjs"
+    "AVAILABLE_APPS": "react,vue,svelte,solid,nextjs",
+    "VERCEL": "1"
   },
   "headers": [
     {

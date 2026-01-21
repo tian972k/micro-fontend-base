@@ -103,32 +103,41 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   const hostUrl = MFE_HOSTS[app as keyof typeof MFE_HOSTS];
 
-  // Check MFE health before proxying
-  const isHealthy = await checkMfeHealth(app, hostUrl);
-  if (!isHealthy) {
-    return json(
-      {
-        error: `App "${app}" is currently unavailable. Please try again later.`,
-      },
-      {
-        status: 503,
-        headers: { "Retry-After": "60" },
-      },
+  // Skip health check for static assets (JS, CSS, fonts, images) to improve performance
+  const isStaticAsset =
+    /\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|ico|json)(\?.*)?$/i.test(
+      path,
     );
+
+  if (!isStaticAsset) {
+    // Only check health for non-static requests
+    const isHealthy = await checkMfeHealth(app, hostUrl);
+    if (!isHealthy) {
+      return json(
+        {
+          error: `App "${app}" is currently unavailable. Please try again later.`,
+        },
+        {
+          status: 503,
+          headers: { "Retry-After": "60" },
+        },
+      );
+    }
   }
 
   try {
     // Build target URL
     const targetUrl = new URL(`${hostUrl}/${path}${url.search}`);
 
-    // Forward request to MFE
+    // Forward request to MFE with shorter timeout for static assets
+    const timeout = isStaticAsset ? 5000 : 10000;
     const response = await fetch(targetUrl.toString(), {
       method: request.method,
       headers: new Headers(request.headers),
       body: ["GET", "HEAD"].includes(request.method)
         ? undefined
         : await request.text(),
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(timeout),
       redirect: "follow",
     });
 
@@ -186,6 +195,24 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       "Content-Type,Authorization",
     );
     cleanHeaders.set("X-Proxy-For", app);
+
+    // Add aggressive caching for static assets (JS, CSS with hashes are immutable)
+    if (isStaticAsset) {
+      // Check if filename has hash (e.g., entry-mfe-abc123.js)
+      const hasHash =
+        /\.[a-f0-9]{8,}\.(js|css)$/i.test(path) ||
+        /-([\w]{8,})\.(js|css)$/i.test(path);
+      if (hasHash) {
+        // Immutable files with hash - cache for 1 year
+        cleanHeaders.set(
+          "Cache-Control",
+          "public, max-age=31536000, immutable",
+        );
+      } else {
+        // Other static files - cache for 1 hour
+        cleanHeaders.set("Cache-Control", "public, max-age=3600");
+      }
+    }
 
     // For binary content (images, fonts, etc.), pass through as-is
     if (
