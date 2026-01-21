@@ -31,12 +31,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Download packages (if available)
+      - name: Download packages build
         uses: actions/download-artifact@v4
         with:
           name: packages-build
           path: packages
-        continue-on-error: true
 
       - name: Build ${{ inputs.app }}
         run: |
