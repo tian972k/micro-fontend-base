@@ -49,12 +49,12 @@ jobs:
       - name: Check Vercel project ids
         id: project_ids
         env:
-          SHELL_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          APP_REACT_ID: ${{ secrets.VERCEL_PROJECT_ID_APP_REACT }}
-          APP_NEXTJS_ID: ${{ secrets.VERCEL_PROJECT_ID_APP_NEXTJS }}
-          APP_VUE_ID: ${{ secrets.VERCEL_PROJECT_ID_APP_VUE }}
-          APP_SVELTE_ID: ${{ secrets.VERCEL_PROJECT_ID_APP_SVELTE }}
-          APP_SOLIDJS_ID: ${{ secrets.VERCEL_PROJECT_ID_APP_SOLIDJS }}
+          SHELL_ID: ${{ secrets.VERCEL_PROJECT_ID_SHELL }}
+          APP_REACT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT }}
+          APP_NEXTJS_ID: ${{ secrets.VERCEL_PROJECT_ID_NEXTJS }}
+          APP_VUE_ID: ${{ secrets.VERCEL_PROJECT_ID_VUE }}
+          APP_SVELTE_ID: ${{ secrets.VERCEL_PROJECT_ID_SVELTE }}
+          APP_SOLIDJS_ID: ${{ secrets.VERCEL_PROJECT_ID_SOLIDJS }}
         run: |
           [[ -n "$SHELL_ID" ]] && echo "shell_id_set=true" >> $GITHUB_OUTPUT || echo "shell_id_set=false" >> $GITHUB_OUTPUT
           [[ -n "$APP_REACT_ID" ]] && echo "app_react_id_set=true" >> $GITHUB_OUTPUT || echo "app_react_id_set=false" >> $GITHUB_OUTPUT
@@ -203,7 +203,10 @@ jobs:
       app: shell
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_shell == 'true' }}
-    secrets: inherit
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SHELL }}
 
   deploy-app-react:
     needs: [check-secrets, build-app-react]
@@ -213,7 +216,10 @@ jobs:
       app: app-react
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_app_react == 'true' }}
-    secrets: inherit
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT }}
 
   deploy-app-nextjs:
     needs: [check-secrets, build-app-nextjs]
@@ -223,7 +229,10 @@ jobs:
       app: app-nextjs
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_app_nextjs == 'true' }}
-    secrets: inherit
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_NEXTJS }}
 
   deploy-app-vue:
     needs: [check-secrets, build-app-vue]
@@ -233,7 +242,10 @@ jobs:
       app: app-vue
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_app_vue == 'true' }}
-    secrets: inherit
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_VUE }}
 
   deploy-app-svelte:
     needs: [check-secrets, build-app-svelte]
@@ -243,7 +255,10 @@ jobs:
       app: app-svelte
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_app_svelte == 'true' }}
-    secrets: inherit
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SVELTE }}
 
   deploy-app-solidjs:
     needs: [check-secrets, build-app-solidjs]
@@ -253,7 +268,10 @@ jobs:
       app: app-solidjs
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_app_solidjs == 'true' }}
-    secrets: inherit
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SOLIDJS }}
 
   summary:
     name: Pipeline Summary

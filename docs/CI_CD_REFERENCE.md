@@ -81,9 +81,38 @@ The CI/CD pipeline for Orbit is designed for maximum efficiency using intelligen
 
 ### Secrets & Variables (Actions)
 
-- **Required secrets:** `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, and the per-app IDs: `VERCEL_PROJECT_ID_APP_REACT`, `VERCEL_PROJECT_ID_APP_NEXTJS`, `VERCEL_PROJECT_ID_APP_VUE`, `VERCEL_PROJECT_ID_APP_SVELTE`, `VERCEL_PROJECT_ID_APP_SOLIDJS`.
-- **Optional Docker secrets:** `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` (enables docker-\* jobs).
-- **Optional repo variables:** `TURBO_TEAM`, `TURBO_REMOTE_ONLY` (Turbo remote cache control).
+- Required Vercel secrets:
+  - `VERCEL_TOKEN`
+  - `VERCEL_ORG_ID`
+  - `VERCEL_PROJECT_ID_SHELL`
+  - `VERCEL_PROJECT_ID_REACT`
+  - `VERCEL_PROJECT_ID_NEXTJS`
+  - `VERCEL_PROJECT_ID_VUE`
+  - `VERCEL_PROJECT_ID_SVELTE`
+  - `VERCEL_PROJECT_ID_SOLIDJS`
+- Optional Docker secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` (enables docker-\* jobs).
+- Optional repo variables: `TURBO_TEAM`, `TURBO_REMOTE_ONLY` (Turbo remote cache control).
+
+> Add secrets in GitHub: Settings → Secrets and variables → Actions (not Environments).
+
+---
+
+## Build vs Deploy Behavior
+
+The orchestrator always performs builds for changed apps to validate code. Deploy jobs are gated by secrets and branch rules.
+
+- Build phase:
+  - Runs for apps detected by `detect-changes` or when root configs/packages change
+  - Produces artifacts for reuse by deploy jobs (`--prebuilt`)
+- Deploy phase (per app):
+  - Runs only on branch `main`
+  - Requires `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and the app's `VERCEL_PROJECT_ID_*`
+  - Skips if the app wasn't built (no changes and no full rebuild)
+
+Examples:
+
+- Only `VERCEL_PROJECT_ID_SHELL` set → only `deploy-shell` runs; other deploy jobs are skipped
+- No Vercel secrets set → all deploy jobs are skipped, but builds still run for validation
 
 ---
 

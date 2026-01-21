@@ -331,17 +331,36 @@ curl https://app-react.vercel.app
 
 ### Deploy fails with "Missing PROJECT_ID"
 
-**Fix:** Set `VERCEL_PROJECT_ID_APP_*` in GitHub secrets.
+**Fix:** Ensure the correct secret name for each app exists in GitHub Actions secrets:
+
+- Shell: `VERCEL_PROJECT_ID_SHELL`
+- React: `VERCEL_PROJECT_ID_REACT`
+- Next.js: `VERCEL_PROJECT_ID_NEXTJS`
+- Vue: `VERCEL_PROJECT_ID_VUE`
+- Svelte: `VERCEL_PROJECT_ID_SVELTE`
+- SolidJS: `VERCEL_PROJECT_ID_SOLIDJS`
 
 ### Build succeeds but deploy skipped
 
 **Reason:**
 
 - Branch is not `main`
-- Vercel secrets missing
-- Build failed
+- Missing Vercel secrets (`VERCEL_TOKEN`, `VERCEL_ORG_ID`, or the app's `VERCEL_PROJECT_ID_*`)
+- The app didn't build (no changes and not part of a full rebuild)
 
-**Check:** GitHub Actions > ci-cd > see "if:" condition in logs
+**Check:**
+
+- GitHub Actions → Run → Job → expand `if:` evaluation to see why it skipped
+- `check-secrets` job outputs:
+  - `has_token`, `has_org_id`, `has_project_id_shell` (and others) should be `true`
+- `detect-changes` job outputs:
+  - `shell_changed` (or the app's changed flag) should be `true` OR `needs_full_rebuild=true`
+
+**Deploy only Shell:**
+
+1. Add only `VERCEL_PROJECT_ID_SHELL`
+2. Push to `main`
+3. Expect: `deploy-shell` runs; others skipped
 
 ### CORS errors in browser
 
