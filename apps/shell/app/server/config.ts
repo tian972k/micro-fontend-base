@@ -18,25 +18,33 @@ const MFE_PORTS: Record<string, number> = {
  * Options:
  * 1. Development: http://localhost:{PORTS[appId]} (Vite dev server ports)
  * 2. Production (Docker): http://localhost:{MFE_PORTS[appId]} (exposed Docker ports)
- * 3. Production (Cloud): Use public URLs from environment variables
+ * 3. Production (Vercel): Relative paths like /react/, /vue/ (shell's vercel.json proxies these)
  */
 export function getAppConfig() {
   const isDevelopment = process.env.NODE_ENV !== "production";
 
   const getAppUrl = (appId: string) => {
-    // Check for explicit public URL from environment (e.g., Kubernetes, Cloud)
-    const envKey = `MFE_${appId.toUpperCase().replace(/-/g, "_")}_PUBLIC_URL`;
-    const publicUrl = process.env[envKey];
-    if (publicUrl) {
-      return publicUrl;
-    }
-
     if (isDevelopment) {
       // Development: use Vite dev server ports
       return `http://localhost:${(PORTS as any)[appId]}`;
     }
 
-    // Production (Docker Compose): use exposed ports
+    // Production: determine deployment target
+    if (process.env.VERCEL) {
+      // Vercel deployment: use relative paths (shell's vercel.json will proxy)
+      // /react/ → https://app-react.vercel.app/
+      // /vue/  → https://app-vue.vercel.app/
+      const pathMap: Record<string, string> = {
+        [APP_IDS.REACT]: "/react/",
+        [APP_IDS.NEXTJS]: "/next/",
+        [APP_IDS.VUE]: "/vue/",
+        [APP_IDS.SVELTE]: "/svelte/",
+        [APP_IDS.SOLIDJS]: "/solid/",
+      };
+      return pathMap[appId] || `/${appId}/`;
+    }
+
+    // Docker Compose: use exposed ports
     // Browser accesses localhost:{exposed_port} which maps to container:80
     const mfePort = MFE_PORTS[appId];
     if (mfePort) {
@@ -44,7 +52,7 @@ export function getAppConfig() {
     }
 
     // Fallback: should not reach here
-    console.warn(`No public URL configured for ${appId}`);
+    console.warn(`No URL configured for ${appId}`);
     return `http://localhost:${(PORTS as any)[appId]}`;
   };
 

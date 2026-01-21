@@ -8,7 +8,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://example.com"
+          "value": "https://micro-fontend-base-shell.vercel.app"
         },
         { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,POST" },
         {

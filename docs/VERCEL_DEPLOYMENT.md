@@ -168,16 +168,40 @@ export default createMfeConfig({
 
 Set in GitHub repo > Settings > Secrets and variables > Actions:
 
-| Secret                          | Value      | Source                      |
-| ------------------------------- | ---------- | --------------------------- |
-| `VERCEL_TOKEN`                  | Your token | Vercel > Settings > Tokens  |
-| `VERCEL_ORG_ID`                 | Team ID    | Vercel > Settings > Account |
-| `VERCEL_PROJECT_ID`             | Project ID | Shell project > Settings    |
-| `VERCEL_PROJECT_ID_APP_REACT`   | Project ID | App React > Settings        |
-| `VERCEL_PROJECT_ID_APP_NEXTJS`  | Project ID | App Next.js > Settings      |
-| `VERCEL_PROJECT_ID_APP_VUE`     | Project ID | App Vue > Settings          |
-| `VERCEL_PROJECT_ID_APP_SVELTE`  | Project ID | App Svelte > Settings       |
-| `VERCEL_PROJECT_ID_APP_SOLIDJS` | Project ID | App SolidJS > Settings      |
+**Required Vercel Secrets (CI/CD Deployment):**
+
+| Secret Name                 | Value                | How to Get                              |
+| --------------------------- | -------------------- | --------------------------------------- |
+| `VERCEL_TOKEN`              | Authentication token | Vercel > Account > Tokens > Create      |
+| `VERCEL_ORG_ID`             | Account/Team ID      | Vercel > Account > Team ID              |
+| `VERCEL_PROJECT_ID_SHELL`   | Shell project ID     | Vercel > shell project > Settings       |
+| `VERCEL_PROJECT_ID_REACT`   | React app ID         | Vercel > app-react project > Settings   |
+| `VERCEL_PROJECT_ID_NEXTJS`  | Next.js app ID       | Vercel > app-nextjs project > Settings  |
+| `VERCEL_PROJECT_ID_VUE`     | Vue app ID           | Vercel > app-vue project > Settings     |
+| `VERCEL_PROJECT_ID_SVELTE`  | Svelte app ID        | Vercel > app-svelte project > Settings  |
+| `VERCEL_PROJECT_ID_SOLIDJS` | SolidJS app ID       | Vercel > app-solidjs project > Settings |
+
+**Setup Steps:**
+
+1. Go to [Vercel Account Settings > Tokens](https://vercel.com/account/tokens)
+2. Create new token → Copy
+3. Go to GitHub repo > Settings > Secrets and variables > Actions
+4. Click **New repository secret** → Add each secret above
+5. Workflow will auto-detect and deploy apps with valid secrets
+
+**Optional Variables (for Turbo remote cache):**
+
+| Variable            | Value             | Notes                  |
+| ------------------- | ----------------- | ---------------------- |
+| `TURBO_TEAM`        | Turbo team slug   | Needed if remote cache |
+| `TURBO_REMOTE_ONLY` | `true` or `false` | Default `false`        |
+
+**Optional Docker secrets (if pushing images):**
+
+| Secret               | Value           |
+| -------------------- | --------------- |
+| `DOCKERHUB_USERNAME` | Docker Hub user |
+| `DOCKERHUB_TOKEN`    | Access token    |
 
 **Repository variables (optional, for Turbo remote cache):**
 
@@ -364,6 +388,91 @@ Each PR triggers Vercel preview:
 ### Environment Variables per App
 
 Set in Vercel Project > Settings > Environment Variables, or via `.env.production`.
+
+---
+
+## Testing Production Deployment Locally
+
+### Using `.env.production` for Local Testing
+
+Vite automatically loads `.env.production` when `NODE_ENV=production`. This allows you to test the Vercel deployment strategy locally without pushing to the cloud.
+
+**File: `apps/shell/.env.production`**
+
+```bash
+# Local production testing - simulates Vercel deployment
+VERCEL=1
+VITE_GATEWAY_DOMAIN=https://micro-fontend-base-shell.vercel.app
+MFE_LOADING_MODE=manifest
+```
+
+### Local Production Testing Steps
+
+1. **Build production bundle:**
+
+   ```bash
+   # From root
+   cd apps/shell
+   NODE_ENV=production pnpm build
+   ```
+
+2. **Start production server:**
+
+   ```bash
+   # Uses .env.production (auto-loaded by Vite)
+   NODE_ENV=production pnpm start
+   ```
+
+3. **Expected behavior:**
+   - Shell server starts on <http://localhost:8000>
+   - App URLs resolve as relative paths: `/react/`, `/vue/`, etc.
+   - Server-side proxy in `app/server/config.ts` will:
+     - Check `process.env.VERCEL` flag (=1)
+     - Return relative paths for Vercel deployment
+     - MFE loads from gateway via rewrite rules
+
+4. **Differences from actual Vercel deployment:**
+   - Local: Shell runs on `http://localhost:8000` (not HTTPS)
+   - Local: MFE rewrites are server-side only
+   - Vercel: HTTPS enabled, Vercel edge middleware handles rewrites
+   - **Behavior is identical** - both use relative paths and gateway proxy pattern
+
+### Environment Variable Loading Order
+
+Vite loads environment files in this order (later files override earlier):
+
+1. `.env` - Default for all environments
+2. `.env.development` - When `NODE_ENV=development`
+3. `.env.production` - When `NODE_ENV=production`
+4. `.env.local` - Local overrides (gitignored)
+
+**In this project:**
+
+- **Development** (`pnpm dev`): Uses `.env` + `.env.development` → localhost URLs
+- **Production local** (`NODE_ENV=production pnpm build && pnpm start`): Uses `.env` + `.env.production` → relative paths + VERCEL flag
+- **Vercel**: Uses `.env` + `.env.production` + Vercel Platform settings → relative paths + VERCEL=1 auto-set
+
+### Key Flag: `VERCEL=1`
+
+The `process.env.VERCEL` flag in `app/server/config.ts` determines MFE URL resolution:
+
+```typescript
+// From apps/shell/app/server/config.ts
+const getAppUrl = (appId: string) => {
+  // Development: localhost
+  if (isDevelopment) return `http://localhost:${PORT}`;
+
+  // Production: Vercel deployment or local .env.production
+  if (process.env.VERCEL) return "/react/"; // Relative path
+
+  // Docker: exposed ports
+  if (isDocker) return `http://localhost:${DOCKER_PORT}`;
+};
+```
+
+- `process.env.VERCEL`: Set by Vercel platform OR `.env.production`
+- When true: Returns relative paths (`/react/`, `/vue/`, etc.)
+- When false: Falls back to Docker or localhost ports
 
 ---
 

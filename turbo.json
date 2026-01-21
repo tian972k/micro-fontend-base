@@ -1,6 +1,24 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local", ".env"],
+  "globalEnv": [
+    "SHELL_PORT",
+    "APP_REACT_PORT",
+    "APP_NEXTJS_PORT",
+    "APP_VUE_PORT",
+    "APP_SVELTE_PORT",
+    "APP_SOLIDJS_PORT",
+    "VITE_CJS_IGNORE_WARNING",
+    "MFE_LOADING_MODE",
+    "VITE_GATEWAY_DOMAIN",
+    "VITE_APP_REACT_HOST",
+    "VITE_APP_NEXTJS_HOST",
+    "VITE_APP_VUE_HOST",
+    "VITE_APP_SVELTE_HOST",
+    "VITE_APP_SOLIDJS_HOST",
+    "VITE_ENABLE_ANALYTICS",
+    "VITE_ENABLE_DEBUG_MODE"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

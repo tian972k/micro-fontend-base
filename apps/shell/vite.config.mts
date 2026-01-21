@@ -5,6 +5,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
 import * as fs from "fs";
 import { getRouteManifest } from "remix-custom-routes";
+import { vercelPreset } from '@vercel/remix/vite';
 
 import { federationShared, PORTS, APP_IDS } from "@repo/config/vite";
 
@@ -38,6 +39,7 @@ export default defineConfig(({ mode, isSsrBuild }) => {
     plugins: [
       mfeLoaderPlugin(mode, isSsrBuild),
       remix({
+        ...(process.env.VERCEL ? { presets: [vercelPreset()] } : {}),
         future: {
           v3_fetcherPersist: true,
           v3_relativeSplatPath: true,
