@@ -13,6 +13,11 @@ on:
       vercel_has_project_id:
         required: true
         type: boolean
+      is_production:
+        required: false
+        type: boolean
+        default: false
+        description: 'Deploy to production (true) or preview (false)'
     secrets:
       VERCEL_TOKEN:
         required: true
@@ -23,7 +28,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy ${{ inputs.app }} to Vercel
+    name: Deploy ${{ inputs.app }} to Vercel (${{ inputs.is_production && 'production' || 'preview' }})
     runs-on: ubuntu-latest
     if: ${{ inputs.vercel_has_secrets && inputs.vercel_has_project_id }}
     steps:
@@ -42,4 +47,4 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: apps/${{ inputs.app }}
-          vercel-args: ${{ inputs.app == 'shell' && '--prod' || '--prebuilt --prod' }}
+          vercel-args: ${{ inputs.is_production && '--prod' || '' }}
