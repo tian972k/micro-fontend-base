@@ -169,11 +169,16 @@ jobs:
           restore-keys: |
             turbo-packages-${{ runner.os }}-
 
-      - name: Build packages
+      - name: Build packages (with Turbo remote cache)
+        if: steps.turbo-env.outputs.has_remote_cache == 'true'
         run: pnpm turbo run build --filter='./packages/*'
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+      - name: Build packages (local cache only)
+        if: steps.turbo-env.outputs.has_remote_cache == 'false'
+        run: pnpm turbo run build --filter='./packages/*'
 
       - uses: actions/upload-artifact@v4
         with:
