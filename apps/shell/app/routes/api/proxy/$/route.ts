@@ -1,4 +1,8 @@
-import { type LoaderFunction, json } from "@remix-run/node";
+import {
+  type LoaderFunction,
+  type ActionFunction,
+  json,
+} from "@remix-run/node";
 
 /**
  * Load MFE hosts from environment variables
@@ -19,21 +23,6 @@ function getMfeHosts(): Record<string, string> {
   }
 
   return hosts;
-}
-
-/**
- * Get client-facing proxy URLs for MFE apps
- * Used by frontend to load MFE via shell proxy
- */
-function getMfeProxyUrls(): Record<string, string> {
-  const appNames = ["react", "vue", "svelte", "solid", "nextjs"];
-  const proxyUrls: Record<string, string> = {};
-
-  for (const app of appNames) {
-    proxyUrls[app] = `/api/proxy/${app}`;
-  }
-
-  return proxyUrls;
 }
 
 // Health check cache: { app: { timestamp, isHealthy } }
@@ -71,29 +60,10 @@ async function checkMfeHealth(app: string, hostUrl: string): Promise<boolean> {
 }
 
 /**
- * GET /api/proxy - Returns available proxy URLs for MFE apps
- */
-export const action: LoaderFunction = async ({ request }) => {
-  if (request.method !== "GET") {
-    return json({ error: "Method not allowed" }, { status: 405 });
-  }
-
-  // Only in production
-  if (!process.env.VERCEL) {
-    return json(
-      { error: "Not available in this environment" },
-      { status: 403 },
-    );
-  }
-
-  const proxyUrls = getMfeProxyUrls();
-  return json({ apps: proxyUrls });
-};
-
-/**
  * Proxy requests to MFE apps (production only)
+ * Handles: /api/proxy/:app/:path*
  */
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({ request, params }) => {
   // Only enable proxy in production (VERCEL env var set by Vercel)
   if (!process.env.VERCEL) {
     return json(
@@ -112,19 +82,14 @@ export const loader: LoaderFunction = async ({ request }) => {
   }
 
   const url = new URL(request.url);
-  const pathParts = url.pathname.split("/").filter(Boolean);
 
-  // Path format: /api/proxy/[app]/[...path]
-  if (
-    pathParts.length < 2 ||
-    pathParts[0] !== "api" ||
-    pathParts[1] !== "proxy"
-  ) {
-    return json({ error: "Invalid proxy path" }, { status: 400 });
-  }
+  // Extract app and path from the splat param
+  // params["*"] contains everything after /api/proxy/
+  const splatPath = params["*"] || "";
+  const pathParts = splatPath.split("/").filter(Boolean);
 
-  const app = pathParts[2];
-  const path = pathParts.slice(3).join("/");
+  const app = pathParts[0];
+  const path = pathParts.slice(1).join("/");
 
   // Validate app name
   if (!app || !(app in MFE_HOSTS)) {
@@ -192,7 +157,31 @@ export const loader: LoaderFunction = async ({ request }) => {
       }
     }
 
-    // Clone response and add CORS headers
+    // Get content type to handle binary vs text responses
+    const contentType = response.headers.get("content-type") || "";
+
+    // For binary content (images, fonts, etc.), pass through as-is
+    if (
+      contentType.includes("image/") ||
+      contentType.includes("font/") ||
+      contentType.includes("application/octet-stream")
+    ) {
+      const responseBody = await response.arrayBuffer();
+      return new Response(responseBody, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: new Headers({
+          ...Object.fromEntries(response.headers.entries()),
+          "Access-Control-Allow-Origin":
+            "https://micro-fontend-base-shell.vercel.app",
+          "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type,Authorization",
+          "X-Proxy-For": app,
+        }),
+      });
+    }
+
+    // For text content
     const responseBody = await response.text();
     return new Response(responseBody, {
       status: response.status,
@@ -231,21 +220,8 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 /**
- * OPTIONS request for CORS preflight
+ * Handle POST requests
  */
-export const options: LoaderFunction = async () => {
-  if (!process.env.VERCEL) {
-    return json({ error: "Not available" }, { status: 403 });
-  }
-
-  return new Response(null, {
-    status: 200,
-    headers: {
-      "Access-Control-Allow-Origin":
-        "https://micro-fontend-base-shell.vercel.app",
-      "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type,Authorization",
-      "Access-Control-Max-Age": "86400",
-    },
-  });
+export const action: ActionFunction = async (args) => {
+  return loader(args);
 };
