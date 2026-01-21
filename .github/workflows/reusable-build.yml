@@ -7,9 +7,6 @@ on:
         required: true
         type: string
         description: 'App name (shell, app-react, app-nextjs, app-vue, app-svelte, app-solidjs)'
-      should_build:
-        required: true
-        type: boolean
     secrets:
       TURBO_TOKEN:
         required: false
@@ -20,7 +17,6 @@ jobs:
   build:
     name: Build ${{ inputs.app }}
     runs-on: ubuntu-latest
-    if: ${{ inputs.should_build }}
     steps:
       - uses: actions/checkout@v4
 
