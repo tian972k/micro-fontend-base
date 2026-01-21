@@ -154,6 +154,9 @@ export default defineConfig(({ mode, isSsrBuild }) => {
       target: isSsrBuild ? "modules" : "esnext",
       sourcemap: mode === "development",
     },
+    ssr: {
+      noExternal: ["isbot"],
+    },
   };
 });// Disable federation - use manifest-based loading instead
       // !isSsrBuild &&
