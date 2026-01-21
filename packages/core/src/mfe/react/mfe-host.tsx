@@ -79,10 +79,16 @@ export function MfeHost({
           return;
         }
 
+        // 0.5. Handle proxy URLs - append health check path if not already there
+        let healthCheckUrl = `${host}`;
+        if (!healthCheckUrl.includes("health.json")) {
+          healthCheckUrl = `${host}${host.endsWith("/") ? "" : "/"}health.json?t=${Date.now()}`;
+        }
+
         // 1. Health Check
         let healthRes;
         try {
-          healthRes = await fetch(`${host}/health.json?t=${Date.now()}`);
+          healthRes = await fetch(healthCheckUrl);
         } catch {
           throw new Error("CORE_CONNECTION_REFUSED");
         }

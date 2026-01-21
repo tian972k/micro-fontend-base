@@ -148,56 +148,79 @@ jobs:
           retention-days: 1
 
   build-shell:
-    needs: [detect-changes, lint, build-packages]
+    needs: [detect-changes, lint, build-packages, check-secrets]
+    if: |
+      (needs.detect-changes.outputs.shell_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
+      needs.check-secrets.outputs.has_project_id_shell == 'true'
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: shell
-      should_build: ${{ needs.detect-changes.outputs.shell_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true' }}
+      should_build: true
     secrets: inherit
 
   build-app-react:
-    needs: [detect-changes, lint, build-packages]
+    needs: [detect-changes, lint, build-packages, check-secrets]
+    if: |
+      (needs.detect-changes.outputs.app_react_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
+      needs.check-secrets.outputs.has_project_id_app_react == 'true'
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-react
-      should_build: ${{ needs.detect-changes.outputs.app_react_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true' }}
+      should_build: true
     secrets: inherit
 
   build-app-nextjs:
-    needs: [detect-changes, lint, build-packages]
+    needs: [detect-changes, lint, build-packages, check-secrets]
+    if: |
+      (needs.detect-changes.outputs.app_nextjs_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
+      needs.check-secrets.outputs.has_project_id_app_nextjs == 'true'
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-nextjs
-      should_build: ${{ needs.detect-changes.outputs.app_nextjs_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true' }}
+      should_build: true
     secrets: inherit
 
   build-app-vue:
-    needs: [detect-changes, lint, build-packages]
+    needs: [detect-changes, lint, build-packages, check-secrets]
+    if: |
+      (needs.detect-changes.outputs.app_vue_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
+      needs.check-secrets.outputs.has_project_id_app_vue == 'true'
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-vue
-      should_build: ${{ needs.detect-changes.outputs.app_vue_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true' }}
+      should_build: true
     secrets: inherit
 
   build-app-svelte:
-    needs: [detect-changes, lint, build-packages]
+    needs: [detect-changes, lint, build-packages, check-secrets]
+    if: |
+      (needs.detect-changes.outputs.app_svelte_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
+      needs.check-secrets.outputs.has_project_id_app_svelte == 'true'
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-svelte
-      should_build: ${{ needs.detect-changes.outputs.app_svelte_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true' }}
+      should_build: true
     secrets: inherit
 
   build-app-solidjs:
-    needs: [detect-changes, lint, build-packages]
+    needs: [detect-changes, lint, build-packages, check-secrets]
+    if: |
+      (needs.detect-changes.outputs.app_solidjs_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
+      needs.check-secrets.outputs.has_project_id_app_solidjs == 'true'
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-solidjs
-      should_build: ${{ needs.detect-changes.outputs.app_solidjs_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true' }}
+      should_build: true
     secrets: inherit
 
   deploy-shell:
     needs: [check-secrets, build-shell]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build-shell.result == 'success'
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' && 
+      needs.build-shell.result == 'success' &&
+      needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
+      needs.check-secrets.outputs.has_project_id_shell == 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       app: shell
@@ -210,7 +233,12 @@ jobs:
 
   deploy-app-react:
     needs: [check-secrets, build-app-react]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build-app-react.result == 'success'
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' && 
+      needs.build-app-react.result == 'success' &&
+      needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
+      needs.check-secrets.outputs.has_project_id_app_react == 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       app: app-react
@@ -223,7 +251,12 @@ jobs:
 
   deploy-app-nextjs:
     needs: [check-secrets, build-app-nextjs]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build-app-nextjs.result == 'success'
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' && 
+      needs.build-app-nextjs.result == 'success' &&
+      needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
+      needs.check-secrets.outputs.has_project_id_app_nextjs == 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       app: app-nextjs
@@ -236,7 +269,12 @@ jobs:
 
   deploy-app-vue:
     needs: [check-secrets, build-app-vue]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build-app-vue.result == 'success'
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' && 
+      needs.build-app-vue.result == 'success' &&
+      needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
+      needs.check-secrets.outputs.has_project_id_app_vue == 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       app: app-vue
@@ -249,7 +287,12 @@ jobs:
 
   deploy-app-svelte:
     needs: [check-secrets, build-app-svelte]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build-app-svelte.result == 'success'
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' && 
+      needs.build-app-svelte.result == 'success' &&
+      needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
+      needs.check-secrets.outputs.has_project_id_app_svelte == 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       app: app-svelte
@@ -262,7 +305,12 @@ jobs:
 
   deploy-app-solidjs:
     needs: [check-secrets, build-app-solidjs]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build-app-solidjs.result == 'success'
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' && 
+      needs.build-app-solidjs.result == 'success' &&
+      needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
+      needs.check-secrets.outputs.has_project_id_app_solidjs == 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       app: app-solidjs

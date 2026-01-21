@@ -31,17 +31,17 @@ export function getAppConfig() {
 
     // Production: determine deployment target
     if (process.env.VERCEL) {
-      // Vercel deployment: use relative paths (shell's vercel.json will proxy)
-      // /react/ → https://app-react.vercel.app/
-      // /vue/  → https://app-vue.vercel.app/
+      // Vercel deployment: use proxy paths via /api/proxy/[app]
+      // This ensures proper error handling and health checks
+      // /api/proxy/react/ → health check → https://app-react.vercel.app/
       const pathMap: Record<string, string> = {
-        [APP_IDS.REACT]: "/react/",
-        [APP_IDS.NEXTJS]: "/next/",
-        [APP_IDS.VUE]: "/vue/",
-        [APP_IDS.SVELTE]: "/svelte/",
-        [APP_IDS.SOLIDJS]: "/solid/",
+        [APP_IDS.REACT]: "/api/proxy/react/",
+        [APP_IDS.NEXTJS]: "/api/proxy/nextjs/",
+        [APP_IDS.VUE]: "/api/proxy/vue/",
+        [APP_IDS.SVELTE]: "/api/proxy/svelte/",
+        [APP_IDS.SOLIDJS]: "/api/proxy/solid/",
       };
-      return pathMap[appId] || `/${appId}/`;
+      return pathMap[appId] || `/api/proxy/${appId}/`;
     }
 
     // Docker Compose: use exposed ports

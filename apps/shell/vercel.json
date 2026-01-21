@@ -2,26 +2,75 @@
   "git": {
     "deploymentEnabled": false
   },
+  "env": {
+    "AVAILABLE_APPS": "react,vue,svelte,solid,nextjs"
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://micro-fontend-base-shell.vercel.app"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET,OPTIONS,POST"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type,Authorization"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     {
       "source": "/react/:path*",
-      "destination": "https://app-react.vercel.app/:path*"
+      "destination": "/api/proxy/react/:path*"
     },
     {
       "source": "/vue/:path*",
-      "destination": "https://app-vue.vercel.app/:path*"
+      "destination": "/api/proxy/vue/:path*"
     },
     {
       "source": "/svelte/:path*",
-      "destination": "https://app-svelte.vercel.app/:path*"
+      "destination": "/api/proxy/svelte/:path*"
     },
     {
       "source": "/solid/:path*",
-      "destination": "https://app-solidjs.vercel.app/:path*"
+      "destination": "/api/proxy/solid/:path*"
     },
     {
       "source": "/next/:path*",
-      "destination": "https://app-nextjs.vercel.app/:path*"
+      "destination": "/api/proxy/nextjs/:path*"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/react",
+      "destination": "/react/",
+      "permanent": true
+    },
+    {
+      "source": "/vue",
+      "destination": "/vue/",
+      "permanent": true
+    },
+    {
+      "source": "/svelte",
+      "destination": "/svelte/",
+      "permanent": true
+    },
+    {
+      "source": "/solid",
+      "destination": "/solid/",
+      "permanent": true
+    },
+    {
+      "source": "/next",
+      "destination": "/next/",
+      "permanent": true
     }
   ]
 }
