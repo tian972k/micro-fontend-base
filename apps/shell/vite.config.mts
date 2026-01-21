@@ -152,6 +152,7 @@ export default defineConfig(({ mode, isSsrBuild }) => {
     },
     build: {
       target: isSsrBuild ? "modules" : "esnext",
+      sourcemap: mode === "development",
     },
   };
 });// Disable federation - use manifest-based loading instead
