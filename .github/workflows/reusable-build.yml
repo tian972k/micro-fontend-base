@@ -1,0 +1,60 @@
+name: Reusable Build Apps
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        required: true
+        type: string
+        description: 'App name (shell, app-react, app-nextjs, app-vue, app-svelte, app-solidjs)'
+      should_build:
+        required: true
+        type: boolean
+    secrets:
+      TURBO_TOKEN:
+        required: false
+      TURBO_TEAM:
+        required: false
+
+jobs:
+  build:
+    name: Build ${{ inputs.app }}
+    runs-on: ubuntu-latest
+    if: ${{ inputs.should_build }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download packages (if available)
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-build
+          path: packages
+        continue-on-error: true
+
+      - name: Build ${{ inputs.app }}
+        run: |
+          if [ "${{ inputs.app }}" = "shell" ]; then
+            pnpm turbo run build --filter=shell
+          else
+            pnpm turbo run build:mfe --filter=${{ inputs.app }}
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-build
+          path: |
+            apps/${{ inputs.app }}/build
+            apps/${{ inputs.app }}/dist
+          retention-days: 1

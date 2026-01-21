@@ -1,0 +1,24 @@
+{
+  "rewrites": [
+    {
+      "source": "/react/:path*",
+      "destination": "https://app-react.vercel.app/:path*"
+    },
+    {
+      "source": "/vue/:path*",
+      "destination": "https://app-vue.vercel.app/:path*"
+    },
+    {
+      "source": "/svelte/:path*",
+      "destination": "https://app-svelte.vercel.app/:path*"
+    },
+    {
+      "source": "/solid/:path*",
+      "destination": "https://app-solidjs.vercel.app/:path*"
+    },
+    {
+      "source": "/next/:path*",
+      "destination": "https://app-nextjs.vercel.app/:path*"
+    }
+  ]
+}

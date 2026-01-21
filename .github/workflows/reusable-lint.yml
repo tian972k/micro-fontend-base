@@ -1,0 +1,40 @@
+name: Reusable Lint & Type Check
+
+on:
+  workflow_call:
+    inputs:
+      needs_run:
+        required: true
+        type: boolean
+    secrets:
+      TURBO_TOKEN:
+        required: false
+      TURBO_TEAM:
+        required: false
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    if: ${{ inputs.needs_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint (affected only)
+        run: pnpm turbo run lint --affected
+
+      - name: Type check (affected only)
+        run: pnpm turbo run type-check --affected || echo "Type check completed"

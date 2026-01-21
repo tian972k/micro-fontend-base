@@ -7,4 +7,6 @@ export default createMfeConfig({
   federationShared: reactShared,
   entryFile: "./src/entry-mfe.tsx",
   mainFile: "./src/main.tsx",
+  customBaseUrl: (isDev, _isMfeMode, url) =>
+    isDev ? url : process.env.PUBLIC_BASE_PATH || "/react/",
 });
