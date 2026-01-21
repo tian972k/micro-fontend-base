@@ -71,6 +71,14 @@ The CI/CD pipeline for Orbit is designed for maximum efficiency using intelligen
 | **GitHub Actions**     | CI/CD automation                | [GitHub Docs](https://docs.github.com/actions)  |
 | **Docker**             | Containerization                | [docker.com](https://docker.com/)               |
 
+### Workflow Layout
+
+- `.github/workflows/ci-cd.yml` is a slim orchestrator that wires jobs and conditions.
+- Core logic lives in reusable workflows:
+  - `reusable-lint.yml` for lint/typecheck
+  - `reusable-build.yml` for per-app builds
+  - `reusable-deploy-vercel.yml` for Vercel deploys using prebuilt artifacts
+
 ---
 
 ## Change Detection
@@ -120,38 +128,46 @@ We use `dorny/paths-filter` to detect which files changed in commits/PRs, avoidi
 
 **Location:** `.github/workflows/ci-cd.yml` - `detect-changes` job
 
-**Configuration:**
+**Configuration (matches current ci-cd.yml):**
 
 ```yaml
-- uses: dorny/paths-filter@v2
-  id: filter
+- uses: dorny/paths-filter@v3
+  id: changes
   with:
     filters: |
       packages:
         - 'packages/**'
-      shell:
-        - 'apps/shell/**'
-      app_react:
-        - 'apps/app-react/**'
-      app_vue:
-        - 'apps/app-vue/**'
       root_config:
         - 'package.json'
         - 'pnpm-lock.yaml'
         - 'turbo.json'
         - 'tsconfig.json'
-      docs:
-        - 'docs/**'
-        - '**.md'
+      shell:
+        - 'apps/shell/**'
+      app_react:
+        - 'apps/app-react/**'
+      app_nextjs:
+        - 'apps/app-nextjs/**'
+      app_vue:
+        - 'apps/app-vue/**'
+      app_svelte:
+        - 'apps/app-svelte/**'
+      app_solidjs:
+        - 'apps/app-solidjs/**'
+      any:
+        - 'apps/**'
+        - 'packages/**'
 ```
 
 **Output Variables:**
 
 ```yaml
 # Access in subsequent jobs
-needs.detect-changes.outputs.packages     # 'true' or 'false'
-needs.detect-changes.outputs.shell        # 'true' or 'false'
-needs.detect-changes.outputs.app_react    # 'true' or 'false'
+needs.detect-changes.outputs.packages_changed   # 'true' or 'false'
+needs.detect-changes.outputs.shell_changed      # 'true' or 'false'
+needs.detect-changes.outputs.app_react_changed  # 'true' or 'false'
+# ...same pattern for other apps
+needs.detect-changes.outputs.needs_full_rebuild # computed if packages/root configs changed
 ```
 
 ### Change Detection Logic
