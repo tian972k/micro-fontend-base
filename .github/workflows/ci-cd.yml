@@ -264,8 +264,6 @@ jobs:
   deploy-shell:
     needs: [check-secrets, build-shell]
     if: |
-      github.event_name == 'push' && 
-      github.ref == 'refs/heads/main' && 
       needs.build-shell.result == 'success' &&
       needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
       needs.check-secrets.outputs.has_project_id_shell == 'true'
@@ -274,6 +272,7 @@ jobs:
       app: shell
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_shell == 'true' }}
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -282,8 +281,6 @@ jobs:
   deploy-app-react:
     needs: [check-secrets, build-app-react]
     if: |
-      github.event_name == 'push' && 
-      github.ref == 'refs/heads/main' && 
       needs.build-app-react.result == 'success' &&
       needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
       needs.check-secrets.outputs.has_project_id_app_react == 'true'
@@ -292,6 +289,7 @@ jobs:
       app: app-react
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_app_react == 'true' }}
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -300,8 +298,6 @@ jobs:
   deploy-app-nextjs:
     needs: [check-secrets, build-app-nextjs]
     if: |
-      github.event_name == 'push' && 
-      github.ref == 'refs/heads/main' && 
       needs.build-app-nextjs.result == 'success' &&
       needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
       needs.check-secrets.outputs.has_project_id_app_nextjs == 'true'
@@ -310,6 +306,7 @@ jobs:
       app: app-nextjs
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_app_nextjs == 'true' }}
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -318,8 +315,6 @@ jobs:
   deploy-app-vue:
     needs: [check-secrets, build-app-vue]
     if: |
-      github.event_name == 'push' && 
-      github.ref == 'refs/heads/main' && 
       needs.build-app-vue.result == 'success' &&
       needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
       needs.check-secrets.outputs.has_project_id_app_vue == 'true'
@@ -328,6 +323,7 @@ jobs:
       app: app-vue
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_app_vue == 'true' }}
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -336,8 +332,6 @@ jobs:
   deploy-app-svelte:
     needs: [check-secrets, build-app-svelte]
     if: |
-      github.event_name == 'push' && 
-      github.ref == 'refs/heads/main' && 
       needs.build-app-svelte.result == 'success' &&
       needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
       needs.check-secrets.outputs.has_project_id_app_svelte == 'true'
@@ -346,6 +340,7 @@ jobs:
       app: app-svelte
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_app_svelte == 'true' }}
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -354,8 +349,6 @@ jobs:
   deploy-app-solidjs:
     needs: [check-secrets, build-app-solidjs]
     if: |
-      github.event_name == 'push' && 
-      github.ref == 'refs/heads/main' && 
       needs.build-app-solidjs.result == 'success' &&
       needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
       needs.check-secrets.outputs.has_project_id_app_solidjs == 'true'
@@ -364,6 +357,7 @@ jobs:
       app: app-solidjs
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
       vercel_has_project_id: ${{ needs.check-secrets.outputs.has_project_id_app_solidjs == 'true' }}
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
