@@ -199,7 +199,12 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: shell
-    secrets: inherit
+    secrets:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SHELL }}
 
   build-app-react:
     needs: [detect-changes, lint, build-packages, check-secrets]
@@ -212,7 +217,12 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-react
-    secrets: inherit
+    secrets:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT }}
 
   build-app-nextjs:
     needs: [detect-changes, lint, build-packages, check-secrets]
@@ -225,7 +235,12 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-nextjs
-    secrets: inherit
+    secrets:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_NEXTJS }}
 
   build-app-vue:
     needs: [detect-changes, lint, build-packages, check-secrets]
@@ -238,7 +253,12 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-vue
-    secrets: inherit
+    secrets:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_VUE }}
 
   build-app-svelte:
     needs: [detect-changes, lint, build-packages, check-secrets]
@@ -251,7 +271,12 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-svelte
-    secrets: inherit
+    secrets:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SVELTE }}
 
   build-app-solidjs:
     needs: [detect-changes, lint, build-packages, check-secrets]
@@ -264,7 +289,12 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-solidjs
-    secrets: inherit
+    secrets:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SOLIDJS }}
 
   deploy-shell:
     needs: [check-secrets, build-shell]

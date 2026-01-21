@@ -12,6 +12,12 @@ on:
         required: false
       TURBO_TEAM:
         required: false
+      VERCEL_TOKEN:
+        required: false
+      VERCEL_ORG_ID:
+        required: false
+      VERCEL_PROJECT_ID:
+        required: false
 
 jobs:
   build:
@@ -37,19 +43,27 @@ jobs:
           name: packages-build
           path: packages
 
-      - name: Build ${{ inputs.app }}
-        run: |
-          if [ "${{ inputs.app }}" = "shell" ]; then
-            pnpm turbo run build --filter=shell
-          else
-            pnpm turbo run build:mfe --filter=${{ inputs.app }}
-          fi
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment
+        working-directory: apps/${{ inputs.app }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+
+      - name: Build with Vercel
+        working-directory: apps/${{ inputs.app }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token=$VERCEL_TOKEN
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.app }}-build
           path: |
-            apps/${{ inputs.app }}/build
-            apps/${{ inputs.app }}/dist
+            apps/${{ inputs.app }}/.vercel/output
           retention-days: 1

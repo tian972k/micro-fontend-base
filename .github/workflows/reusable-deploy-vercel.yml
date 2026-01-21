@@ -38,7 +38,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.app }}-build
-          path: apps/${{ inputs.app }}
+          path: apps/${{ inputs.app }}/.vercel/output
 
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
