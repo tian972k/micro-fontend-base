@@ -160,40 +160,54 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     // Get content type to handle binary vs text responses
     const contentType = response.headers.get("content-type") || "";
 
+    // Build clean headers - remove encoding headers since fetch already decoded
+    const cleanHeaders = new Headers();
+    for (const [key, value] of response.headers.entries()) {
+      // Skip encoding-related headers that cause issues after decoding
+      const lowerKey = key.toLowerCase();
+      if (
+        lowerKey === "content-encoding" ||
+        lowerKey === "content-length" ||
+        lowerKey === "transfer-encoding"
+      ) {
+        continue;
+      }
+      cleanHeaders.set(key, value);
+    }
+
+    // Add CORS and proxy headers
+    cleanHeaders.set(
+      "Access-Control-Allow-Origin",
+      "https://micro-fontend-base-shell.vercel.app",
+    );
+    cleanHeaders.set("Access-Control-Allow-Methods", "GET,HEAD,POST,OPTIONS");
+    cleanHeaders.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type,Authorization",
+    );
+    cleanHeaders.set("X-Proxy-For", app);
+
     // For binary content (images, fonts, etc.), pass through as-is
     if (
       contentType.includes("image/") ||
       contentType.includes("font/") ||
-      contentType.includes("application/octet-stream")
+      contentType.includes("application/octet-stream") ||
+      contentType.includes("application/wasm")
     ) {
       const responseBody = await response.arrayBuffer();
       return new Response(responseBody, {
         status: response.status,
         statusText: response.statusText,
-        headers: new Headers({
-          ...Object.fromEntries(response.headers.entries()),
-          "Access-Control-Allow-Origin":
-            "https://micro-fontend-base-shell.vercel.app",
-          "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type,Authorization",
-          "X-Proxy-For": app,
-        }),
+        headers: cleanHeaders,
       });
     }
 
-    // For text content
+    // For text content (JS, CSS, JSON, HTML, etc.)
     const responseBody = await response.text();
     return new Response(responseBody, {
       status: response.status,
       statusText: response.statusText,
-      headers: new Headers({
-        ...Object.fromEntries(response.headers.entries()),
-        "Access-Control-Allow-Origin":
-          "https://micro-fontend-base-shell.vercel.app",
-        "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type,Authorization",
-        "X-Proxy-For": app,
-      }),
+      headers: cleanHeaders,
     });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
