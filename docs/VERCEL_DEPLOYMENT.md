@@ -17,25 +17,26 @@ Quick guide để deploy Orbit micro-frontend trên Vercel với gateway pattern
 
 ## Architecture
 
-**Mô hình Gateway Proxy:**
+**Mô hình API Proxy:**
 
 ```
-User Domain: example.com
+User Domain: micro-fontend-base-shell.vercel.app
     ↓
 Shell Project (Gateway) - Remix
-  ├─ /react/     → Proxy to app-react.vercel.app
-  ├─ /vue/       → Proxy to app-vue.vercel.app
-  ├─ /svelte/    → Proxy to app-svelte.vercel.app
-  ├─ /solid/     → Proxy to app-solidjs.vercel.app
-  └─ /next/      → Proxy to app-nextjs.vercel.app
+  ├─ /api/proxy/react/*   → Proxy to micro-fontend-base-app-react.vercel.app
+  ├─ /api/proxy/vue/*     → Proxy to micro-fontend-base-app-vue.vercel.app
+  ├─ /api/proxy/svelte/*  → Proxy to micro-fontend-base-app-svelte.vercel.app
+  ├─ /api/proxy/solid/*   → Proxy to micro-fontend-base-app-solidjs.vercel.app
+  └─ /api/proxy/nextjs/*  → Proxy to micro-fontend-base-app-nextjs.vercel.app
 ```
 
 **Ưu điểm:**
 
-- Một domain chính (`example.com`)
-- Mỗi MFE deploy độc lập trên Vercel
-- CORS không cần (proxy server-side)
-- Path-based routing tập trung ở shell
+- Một domain chính cho tất cả MFE
+- Server-side proxy - không có CORS issues
+- Health check với caching (5 phút)
+- Performance optimization cho static assets
+- Independent deployment cho mỗi MFE
 
 ---
 
@@ -45,12 +46,12 @@ Shell Project (Gateway) - Remix
 
 Tạo 6 projects trên [vercel.com](https://vercel.com):
 
-- `orbit-shell` (gateway)
-- `orbit-app-react`
-- `orbit-app-nextjs`
-- `orbit-app-vue`
-- `orbit-app-svelte`
-- `orbit-app-solidjs`
+- `micro-fontend-base-shell` (gateway)
+- `micro-fontend-base-app-react`
+- `micro-fontend-base-app-nextjs`
+- `micro-fontend-base-app-vue`
+- `micro-fontend-base-app-svelte`
+- `micro-fontend-base-app-solidjs`
 
 Mỗi project:
 
@@ -81,84 +82,81 @@ Mỗi project:
 
 ## Configuration
 
-### 1. Shell (Gateway) Config
+### 1. Shell Environment Variables (Vercel Dashboard)
+
+Đặt các biến môi trường này trong Vercel Project Settings > Environment Variables:
+
+| Variable               | Value                                               | Description        |
+| ---------------------- | --------------------------------------------------- | ------------------ |
+| `VERCEL`               | `1`                                                 | Auto-set by Vercel |
+| `VITE_APP_REACT_HOST`  | `https://micro-fontend-base-app-react.vercel.app`   | React MFE host     |
+| `VITE_APP_NEXTJS_HOST` | `https://micro-fontend-base-app-nextjs.vercel.app`  | Next.js MFE host   |
+| `VITE_APP_VUE_HOST`    | `https://micro-fontend-base-app-vue.vercel.app`     | Vue MFE host       |
+| `VITE_APP_SVELTE_HOST` | `https://micro-fontend-base-app-svelte.vercel.app`  | Svelte MFE host    |
+| `VITE_APP_SOLID_HOST`  | `https://micro-fontend-base-app-solidjs.vercel.app` | SolidJS MFE host   |
+
+### 2. Shell vercel.json
 
 File: `apps/shell/vercel.json`
 
 ```json
 {
-  "rewrites": [
-    {
-      "source": "/react/:path*",
-      "destination": "https://app-react.vercel.app/:path*"
-    },
-    {
-      "source": "/vue/:path*",
-      "destination": "https://app-vue.vercel.app/:path*"
-    },
-    {
-      "source": "/svelte/:path*",
-      "destination": "https://app-svelte.vercel.app/:path*"
-    },
-    {
-      "source": "/solid/:path*",
-      "destination": "https://app-solidjs.vercel.app/:path*"
-    },
-    {
-      "source": "/next/:path*",
-      "destination": "https://app-nextjs.vercel.app/:path*"
-    }
-  ]
-}
-```
-
-Build command:
-
-```bash
-pnpm install --frozen-lockfile && pnpm turbo run build --filter shell
-```
-
-### 2. MFE Apps Config
-
-Mỗi app có:
-
-**File: `apps/app-{name}/.env`**
-
-```
-VITE_PUBLIC_BASE_PATH=/react/      # for react, adjust for others
-```
-
-**File: `apps/app-{name}/vite.config.mts`**
-
-```typescript
-export default createMfeConfig({
-  appId: APP_IDS.REACT,
-  // ...
-  customBaseUrl: (isDev) =>
-    isDev ? url : process.env.PUBLIC_BASE_PATH || "/react/",
-});
-```
-
-**File: `apps/app-{name}/vercel.json`** (optional CORS)
-
-```json
-{
+  "git": {
+    "deploymentEnabled": false
+  },
+  "buildCommand": "cd ../.. && pnpm install && VERCEL=1 pnpm turbo run build --filter=shell",
+  "env": {
+    "VERCEL": "1"
+  },
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://example.com"
+          "value": "https://micro-fontend-base-shell.vercel.app"
         },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,POST" },
         {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type,Authorization"
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET,OPTIONS,POST"
         }
       ]
     }
   ]
+}
+```
+
+### 3. API Proxy Route Structure
+
+Shell sử dụng Remix route để proxy requests tới MFE apps:
+
+```
+apps/shell/app/routes/api/
+└── proxy/
+    ├── route.ts          → GET /api/proxy (list available apps)
+    └── $/
+        └── route.ts      → GET /api/proxy/:app/* (proxy to MFE)
+```
+
+**Proxy Features:**
+
+- Health check caching (5 phút TTL)
+- Skip health check cho static assets (JS, CSS, fonts, images)
+- Aggressive caching cho hashed files (1 năm)
+- Automatic content-encoding handling
+- CORS headers injection
+
+### 4. MFE Apps Config
+
+Mỗi MFE app cần có `health.json` trong `public/`:
+
+**File: `apps/app-react/public/health.json`**
+
+```json
+{
+  "status": "available",
+  "version": "1.0.0",
+  "message": "React MFE is healthy"
 }
 ```
 
@@ -329,6 +327,42 @@ curl https://app-react.vercel.app
 
 ## Troubleshooting
 
+### CORE_NOT_FOUND Error
+
+**Problem:** Browser console shows `Error: CORE_NOT_FOUND`
+
+**Causes:**
+
+1. MFE health.json returns 404
+2. Wrong `VITE_APP_*_HOST` environment variable
+3. MFE app not deployed
+
+**Solutions:**
+
+```bash
+# 1. Test MFE health directly
+curl https://micro-fontend-base-app-react.vercel.app/health.json
+
+# 2. Check environment variables in Vercel Dashboard
+# Shell Project > Settings > Environment Variables
+# Ensure VITE_APP_REACT_HOST is set correctly
+
+# 3. Verify MFE is deployed
+curl -I https://micro-fontend-base-app-react.vercel.app/
+```
+
+### ERR_CONTENT_DECODING_FAILED
+
+**Problem:** Browser fails to decode proxy response
+
+**Cause:** Proxy forwards `content-encoding` header but body is already decoded
+
+**Solution:** Already fixed in proxy route - removes encoding headers:
+
+- `content-encoding`
+- `content-length`
+- `transfer-encoding`
+
 ### Deploy fails with "Missing PROJECT_ID"
 
 **Fix:** Ensure the correct secret name for each app exists in GitHub Actions secrets:
@@ -361,6 +395,22 @@ curl https://app-react.vercel.app
 1. Add only `VERCEL_PROJECT_ID_SHELL`
 2. Push to `main`
 3. Expect: `deploy-shell` runs; others skipped
+
+### Slow MFE Loading
+
+**Problem:** MFE takes long time to load
+
+**Causes:**
+
+1. Health check running on every request
+2. No caching headers
+
+**Solutions (already implemented):**
+
+- Static assets skip health check (JS, CSS, fonts, images)
+- Hashed files cached for 1 year (`Cache-Control: immutable`)
+- Other static files cached for 1 hour
+- Health check results cached for 5 minutes
 
 ### CORS errors in browser
 

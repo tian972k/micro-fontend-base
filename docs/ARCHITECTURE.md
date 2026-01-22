@@ -104,34 +104,53 @@ sequenceDiagram
 - **Mechanism**: Vite Plugin Federation
 - **Benefit**: Hot Module Replacement (HMR) and instant updates
 
-### Production: Manifest-based Loading
+### Production: Manifest-based Loading with API Proxy
 
 ```mermaid
 sequenceDiagram
     participant Browser
     participant Shell
-    participant CDN
-    participant Health as Health Check
+    participant Proxy as API Proxy Route
+    participant MFE as MFE Server (Vercel)
 
     Browser->>Shell: Visit /dashboard/react
-    Shell->>Health: GET /health.json [Pre-flight]
+    Shell->>Proxy: GET /api/proxy/react/health.json
 
-    alt is Healthy
-        Health-->>Shell: 200 OK (status: "up")
-        Shell->>CDN: Fetch manifest.json
-        CDN-->>Shell: Return manifest
-        Shell->>CDN: Fetch entry bundle
-        Shell->>Shell: Mount MFE
-    else is Maintenance
-        Health-->>Shell: 200 OK (status: "maintenance")
-        Shell->>Browser: Render Maintenance Banner
-    else is Down
-        Health-->>Shell: 500 / Timeout
-        Shell->>Browser: Render "App Unavailable"
+    alt Static Asset (cached)
+        Note over Proxy: Skip health check for .js, .css
+    else Non-static
+        Proxy->>MFE: HEAD request (health check)
+        MFE-->>Proxy: 200 OK
+        Note over Proxy: Cache result (5 min TTL)
     end
+
+    Proxy->>MFE: GET /health.json
+    MFE-->>Proxy: { status: "available" }
+    Proxy-->>Shell: Forward response (clean headers)
+
+    Shell->>Proxy: GET /api/proxy/react/manifest.json
+    Proxy->>MFE: GET /manifest.json
+    MFE-->>Proxy: Return manifest
+    Proxy-->>Shell: Forward (+ cache headers)
+
+    Shell->>Proxy: GET /api/proxy/react/assets/entry-mfe.js
+    Note over Proxy: Skip health check (static asset)
+    Proxy->>MFE: GET /assets/entry-mfe.js
+    MFE-->>Proxy: Return JS bundle
+    Proxy-->>Shell: Forward (immutable cache 1 year)
+
+    Shell->>Shell: Mount MFE
 ```
 
-- **Mechanism**: Native Fetch + Dynamic Import per Manifest
+**API Proxy Features:**
+
+- Server-side proxy eliminates CORS issues
+- Health check caching (5 minute TTL)
+- Skip health check for static assets (JS, CSS, fonts, images)
+- Aggressive caching for hashed files (1 year, immutable)
+- Automatic content-encoding header cleanup
+
+- **Mechanism**: Remix API Routes + Native Fetch
 - **Benefit**: Stability, Cacheability, Independent Deployments
 
 ### MFE Mounting Strategy
@@ -300,8 +319,25 @@ Used for data synchronization:
 ```text
 micro-frontend-base/
 ├── apps/
-│   ├── shell/                 # Remix Host
+│   ├── shell/                 # Remix Host (Gateway)
+│   │   ├── app/
+│   │   │   ├── routes/
+│   │   │   │   ├── api/
+│   │   │   │   │   └── proxy/           # API Proxy for MFE loading
+│   │   │   │   │       ├── route.ts     # GET /api/proxy
+│   │   │   │   │       └── $/route.ts   # GET /api/proxy/:app/*
+│   │   │   │   └── dashboard/           # MFE pages
+│   │   │   ├── components/
+│   │   │   ├── server/
+│   │   │   │   └── config.ts            # MFE URL configuration
+│   │   │   └── ...
+│   │   └── ...
 │   ├── app-react/             # React MFE
+│   │   ├── public/
+│   │   │   └── health.json    # Health check endpoint
+│   │   ├── src/
+│   │   │   └── entry-mfe.tsx  # MFE entry point
+│   │   └── ...
 │   ├── app-vue/               # Vue MFE
 │   ├── app-svelte/            # Svelte MFE
 │   ├── app-solidjs/           # SolidJS MFE

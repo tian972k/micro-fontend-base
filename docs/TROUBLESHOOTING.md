@@ -525,6 +525,82 @@ git diff --name-only origin/main
 
 ## Runtime Issues
 
+### CORE_NOT_FOUND Error
+
+**Problem:** Browser console shows `Error: CORE_NOT_FOUND` or `Failed to execute MFE entry script`
+
+```mermaid
+flowchart TD
+    Problem[CORE_NOT_FOUND Error] --> Check1{health.json<br/>accessible?}
+    Check1 -->|No 404| Fix1[MFE not deployed<br/>or wrong URL]
+    Check1 -->|Yes| Check2{Manifest.json<br/>exists?}
+
+    Check2 -->|No| Fix2[Build MFE first<br/>pnpm build:mfes]
+    Check2 -->|Yes| Check3{Entry file<br/>in manifest?}
+
+    Check3 -->|No| Fix3[Check vite.config<br/>entry points]
+    Check3 -->|Yes| Check4{Script<br/>loads OK?}
+
+    Check4 -->|No| Fix4[Check CORS<br/>or network]
+    Check4 -->|Yes| Fix5[Check MFE<br/>registration]
+
+    Fix1 --> Solved[✅ Solved!]
+    Fix2 --> Solved
+    Fix3 --> Solved
+    Fix4 --> Solved
+    Fix5 --> Solved
+
+    style Problem fill:#ef4444,stroke:#dc2626,color:#fff
+    style Solved fill:#22c55e,stroke:#16a34a,color:#fff
+```
+
+**Solutions:**
+
+```bash
+# 1. Test health.json directly
+curl https://micro-fontend-base-app-react.vercel.app/health.json
+
+# 2. Test manifest.json
+curl https://micro-fontend-base-app-react.vercel.app/manifest.json
+
+# 3. Check environment variables (Vercel)
+# Shell Project > Settings > Environment Variables
+# Verify: VITE_APP_REACT_HOST=https://micro-fontend-base-app-react.vercel.app
+
+# 4. Local development - ensure MFE is running
+pnpm dev --filter=app-react
+```
+
+### ERR_CONTENT_DECODING_FAILED
+
+**Problem:** Browser fails to decode response from proxy
+
+**Cause:** Proxy forwards compressed headers but body is already decompressed by fetch
+
+**Solution:** Proxy route đã fix - removes encoding headers automatically
+
+### React Hydration Error (#418)
+
+**Problem:** `Minified React error #418` - Hydration mismatch
+
+**Causes:**
+
+1. Server HTML differs from client render
+2. Browser extensions injecting content
+3. Date/time rendering differences
+
+**Solutions:**
+
+```tsx
+// Use suppressHydrationWarning for dynamic content
+<div suppressHydrationWarning>{new Date().toLocaleString()}</div>;
+
+// Or use useEffect for client-only content
+const [mounted, setMounted] = useState(false);
+useEffect(() => setMounted(true), []);
+if (!mounted) return null;
+```
+
 ### State not syncing across MFEs
 
 **Problem:** Changes in one MFE don't reflect in others

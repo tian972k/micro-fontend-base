@@ -486,7 +486,42 @@ spec:
 
 ## 7. Cloud Deployment
 
-### Vercel / Netlify (Static Apps)
+### Vercel Deployment
+
+> **Detailed Guide**: See [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) for complete Vercel setup.
+
+**Architecture: API Proxy Pattern**
+
+```
+Shell (Gateway): micro-fontend-base-shell.vercel.app
+    ├─ /api/proxy/react/*   → micro-fontend-base-app-react.vercel.app
+    ├─ /api/proxy/vue/*     → micro-fontend-base-app-vue.vercel.app
+    ├─ /api/proxy/svelte/*  → micro-fontend-base-app-svelte.vercel.app
+    ├─ /api/proxy/solid/*   → micro-fontend-base-app-solidjs.vercel.app
+    └─ /api/proxy/nextjs/*  → micro-fontend-base-app-nextjs.vercel.app
+```
+
+**Shell Environment Variables (Vercel Dashboard):**
+
+| Variable               | Value                                               |
+| ---------------------- | --------------------------------------------------- |
+| `VITE_APP_REACT_HOST`  | `https://micro-fontend-base-app-react.vercel.app`   |
+| `VITE_APP_NEXTJS_HOST` | `https://micro-fontend-base-app-nextjs.vercel.app`  |
+| `VITE_APP_VUE_HOST`    | `https://micro-fontend-base-app-vue.vercel.app`     |
+| `VITE_APP_SVELTE_HOST` | `https://micro-fontend-base-app-svelte.vercel.app`  |
+| `VITE_APP_SOLID_HOST`  | `https://micro-fontend-base-app-solidjs.vercel.app` |
+
+**Deploy Commands:**
+
+```bash
+# Deploy Shell
+cd apps/shell && npx vercel --prod
+
+# Deploy MFE
+cd apps/app-react && npx vercel --prod
+```
+
+### Netlify / Other Static Hosting
 
 For static MFE apps:
 
@@ -495,16 +530,6 @@ For static MFE apps:
 pnpm turbo run build --filter=app-react
 
 # Output: apps/app-react/dist/
-```
-
-**Vercel Configuration:**
-
-```json
-{
-  "buildCommand": "cd ../.. && pnpm turbo run build --filter=app-react",
-  "outputDirectory": "dist",
-  "framework": null
-}
 ```
 
 ### Docker Registries
