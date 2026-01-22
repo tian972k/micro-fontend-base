@@ -5,6 +5,7 @@ import path from "path";
 import {
   createVirtualManifestPlugin,
   createDevEntryRedirectPlugin,
+  createHealthPlugin,
   commonMfeBuildOptions,
   commonMfeRollupOutput,
   createCommonOnWarn,
@@ -92,6 +93,7 @@ export function createMfeConfig(options: MfeConfigOptions) {
         shared: federationShared,
       }),
       createVirtualManifestPlugin(entryFile),
+      createHealthPlugin(appId),
     ];
 
     // Add dev entry redirect plugin if not skipped

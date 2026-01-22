@@ -7,7 +7,10 @@ import { MfeLoading } from "./mfe-host-states/mfe-loading";
 import { MfeStrategyFactory } from "../strategy/factory";
 import { type MicroAppType, MfeStatus } from "../../types";
 
+// Cache for manifest file names
 const manifestCache: Record<string, string> = {};
+// Cache for MFE versions - used to detect when to reload
+const versionCache: Record<string, string> = {};
 
 export interface MfeHostProps {
   name: string;
@@ -75,32 +78,13 @@ export function MfeHost({
     const loadMfe = async () => {
       if (!mounted) return;
 
-      // --- CHECK IF ALREADY LOADED ---
-      // If MFE is already registered in window.MFE, just mount it directly
-      // This prevents re-fetching manifest and re-loading script on route changes
-      if (window.MFE?.[name]) {
-        console.log(`[MfeHost] ${name} already loaded, mounting directly`);
-        if (mounted) await mountMicroApp();
-        return;
-      }
-
-      setStatus(MfeStatus.CHECKING);
-      try {
-        // 0. Federation / Direct Import Mode
-        if (remoteLoader) {
-          if (mounted) setStatus(MfeStatus.LOADING);
-          await remoteLoader();
-          if (mounted) await mountMicroApp();
-          return;
-        }
-
-        // 0.5. Handle proxy URLs - append health check path if not already there
+      // Helper to fetch health.json
+      const fetchHealth = async (): Promise<HealthCheckResponse> => {
         let healthCheckUrl = `${host}`;
         if (!healthCheckUrl.includes("health.json")) {
           healthCheckUrl = `${host}${host.endsWith("/") ? "" : "/"}health.json?t=${Date.now()}`;
         }
 
-        // 1. Health Check
         let healthRes;
         try {
           healthRes = await fetch(healthCheckUrl);
@@ -114,10 +98,69 @@ export function MfeHost({
           throw new Error(`Health check failed: ${healthRes.statusText}`);
         }
 
-        const health: HealthCheckResponse = await healthRes.json();
+        return healthRes.json();
+      };
+
+      // --- CHECK IF ALREADY LOADED ---
+      // If MFE is already registered in window.MFE, check version before mounting
+      // This prevents re-fetching manifest and re-loading script on route changes
+      // BUT ensures we reload when a new version is deployed
+      if (window.MFE?.[name]) {
+        try {
+          const health = await fetchHealth();
+
+          // Check if version changed (means new deployment)
+          if (
+            health.version &&
+            versionCache[name] &&
+            health.version !== versionCache[name]
+          ) {
+            console.log(
+              `[MfeHost] ${name} version changed: ${versionCache[name]} → ${health.version}, reloading...`,
+            );
+            // Clear cached MFE to force reload
+            delete window.MFE[name];
+            delete manifestCache[name];
+            // Fall through to full load
+          } else {
+            // Same version, mount directly
+            console.log(
+              `[MfeHost] ${name} already loaded (v${health.version || "unknown"}), mounting directly`,
+            );
+            if (health.version) versionCache[name] = health.version;
+            if (mounted) await mountMicroApp();
+            return;
+          }
+        } catch (error) {
+          // Health check failed, try mounting cached version anyway
+          console.warn(
+            `[MfeHost] ${name} health check failed, using cached version`,
+          );
+          if (mounted) await mountMicroApp();
+          return;
+        }
+      }
+
+      setStatus(MfeStatus.CHECKING);
+      try {
+        // 0. Federation / Direct Import Mode
+        if (remoteLoader) {
+          if (mounted) setStatus(MfeStatus.LOADING);
+          await remoteLoader();
+          if (mounted) await mountMicroApp();
+          return;
+        }
+
+        // 1. Health Check
+        const health = await fetchHealth();
         if (health.status === "maintenance") {
           if (mounted) setStatus(MfeStatus.MAINTENANCE);
           return;
+        }
+
+        // Cache version for future comparisons
+        if (health.version) {
+          versionCache[name] = health.version;
         }
 
         // 2. Load Manifest
