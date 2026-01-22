@@ -43,6 +43,8 @@ export interface MfeConfigOptions {
   define?: Record<string, any>;
   /** Override or extend Vite config */
   viteConfigOverride?: UserConfig;
+  /** Skip HTML file in rollup input (for Next.js) */
+  skipHtmlInput?: boolean;
 }
 
 /**
@@ -66,6 +68,7 @@ export function createMfeConfig(options: MfeConfigOptions) {
     emptyOutDir = true,
     define,
     viteConfigOverride = {},
+    skipHtmlInput = false,
   } = options;
 
   return defineConfig(({ mode }) => {
@@ -118,10 +121,12 @@ export function createMfeConfig(options: MfeConfigOptions) {
         outDir,
         emptyOutDir,
         rollupOptions: {
-          input: {
-            index: htmlFile, // HTML for standalone mode
-            ...additionalInputs,
-          },
+          input: skipHtmlInput
+            ? { ...additionalInputs }
+            : {
+                index: htmlFile, // HTML for standalone mode
+                ...additionalInputs,
+              },
           output: commonMfeRollupOutput,
           external: [
             ...(additionalExternals || []),
