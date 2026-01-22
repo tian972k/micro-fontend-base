@@ -1,0 +1,70 @@
+name: Reusable Deploy Vercel SSR
+
+# For SSR apps (Shell/Remix, NextJS) that need Vercel cloud build
+# Cannot use --prebuilt because they need serverless functions
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        required: true
+        type: string
+        description: 'App name (shell or app-nextjs)'
+      vercel_has_secrets:
+        required: true
+        type: boolean
+      vercel_has_project_id:
+        required: true
+        type: boolean
+      is_production:
+        required: false
+        type: boolean
+        default: false
+        description: 'Deploy to production (true) or preview (false)'
+      root_directory:
+        required: false
+        type: string
+        default: ''
+        description: 'Root directory for Vercel project (e.g., apps/shell)'
+    secrets:
+      VERCEL_TOKEN:
+        required: true
+      VERCEL_ORG_ID:
+        required: true
+      VERCEL_PROJECT_ID:
+        required: false
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.app }} SSR to Vercel (${{ inputs.is_production && 'production' || 'preview' }})
+    runs-on: ubuntu-latest
+    if: ${{ inputs.vercel_has_secrets && inputs.vercel_has_project_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Link Vercel Project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          # Create .vercel directory with project link
+          mkdir -p .vercel
+          echo '{"orgId":"'$VERCEL_ORG_ID'","projectId":"'$VERCEL_PROJECT_ID'"}' > .vercel/project.json
+
+      - name: Deploy to Vercel (Cloud Build)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          # SSR apps need Vercel cloud build (no --prebuilt)
+          # This uploads source and lets Vercel build with serverless functions
+          if [ "${{ inputs.is_production }}" == "true" ]; then
+            vercel deploy --prod --yes --token=$VERCEL_TOKEN
+          else
+            vercel deploy --yes --token=$VERCEL_TOKEN
+          fi

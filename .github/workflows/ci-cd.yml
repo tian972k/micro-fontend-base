@@ -297,12 +297,12 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SOLIDJS }}
 
   deploy-shell:
-    needs: [check-secrets, build-shell]
+    needs: [check-secrets, detect-changes]
     if: |
-      needs.build-shell.result == 'success' &&
+      (needs.detect-changes.outputs.shell_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
       needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
       needs.check-secrets.outputs.has_project_id_shell == 'true'
-    uses: ./.github/workflows/reusable-deploy-vercel.yml
+    uses: ./.github/workflows/reusable-deploy-vercel-ssr.yml
     with:
       app: shell
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
@@ -331,12 +331,12 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT }}
 
   deploy-app-nextjs:
-    needs: [check-secrets, build-app-nextjs]
+    needs: [check-secrets, detect-changes]
     if: |
-      needs.build-app-nextjs.result == 'success' &&
+      (needs.detect-changes.outputs.app_nextjs_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
       needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
       needs.check-secrets.outputs.has_project_id_app_nextjs == 'true'
-    uses: ./.github/workflows/reusable-deploy-vercel.yml
+    uses: ./.github/workflows/reusable-deploy-vercel-ssr.yml
     with:
       app: app-nextjs
       vercel_has_secrets: ${{ needs.check-secrets.outputs.has_vercel_secrets == 'true' }}
