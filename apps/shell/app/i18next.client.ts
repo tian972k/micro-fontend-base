@@ -28,15 +28,24 @@ i18next
 
 // Subscribe to locale store changes from other MFEs
 localeStore.subscribe((state) => {
+  console.log(
+    "[Shell i18next] localeStore changed:",
+    state.locale,
+    "i18next.language:",
+    i18next.language,
+  );
   if (state.locale !== i18next.language) {
+    console.log("[Shell i18next] Changing language to:", state.locale);
     i18next.changeLanguage(state.locale);
   }
 });
 
 // Also sync back: when i18next changes (e.g., from LanguageDetector), update store
 i18next.on("languageChanged", (lng) => {
+  console.log("[Shell i18next] languageChanged event:", lng);
   const currentStoreLocale = localeStore.getState().locale;
   if (lng !== currentStoreLocale && (lng === "en" || lng === "vi")) {
+    console.log("[Shell i18next] Updating store from i18next:", lng);
     localeStore.getState().setLocale(lng);
   }
 });

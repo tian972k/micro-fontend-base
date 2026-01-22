@@ -24,6 +24,7 @@ const createLocaleStore = (): LocaleStoreApi => {
       (set): LocaleState => ({
         locale: "en",
         setLocale: (locale: Locale): void => {
+          console.log("[LocaleStore] setLocale called:", locale);
           set({ locale });
           globalEventBus.emit(EVENT_KEYS.LOCALE_CHANGE, { locale });
         },
@@ -46,11 +47,13 @@ const createLocaleStore = (): LocaleStoreApi => {
   // Listen for cross-MFE sync
   globalEventBus.on(EVENT_KEYS.LOCALE_CHANGE, (data: unknown) => {
     const payload = data as { locale: Locale };
+    console.log("[LocaleStore] EventBus received:", payload);
     if (
       payload &&
       payload.locale &&
       payload.locale !== store.getState().locale
     ) {
+      console.log("[LocaleStore] Updating from EventBus:", payload.locale);
       store.setState({ locale: payload.locale });
     }
   });

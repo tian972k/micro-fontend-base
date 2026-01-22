@@ -35,9 +35,18 @@ function setupLocaleSync(): void {
   if (isSubscribed) return;
   isSubscribed = true;
 
+  console.log("[i18n] Setting up locale sync");
+
   // Sync from locale store to i18n
   localeStore.subscribe((state: LocaleState) => {
+    console.log(
+      "[i18n] localeStore changed:",
+      state.locale,
+      "i18n.language:",
+      i18n.language,
+    );
     if (state.locale !== i18n.language) {
+      console.log("[i18n] Changing i18n language to:", state.locale);
       i18n.changeLanguage(state.locale);
     }
   });

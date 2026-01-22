@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,6 +20,9 @@ env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
   TURBO_REMOTE_ONLY: ${{ vars.TURBO_REMOTE_ONLY || 'false' }}
+  # Set IS_VERCEL_CLOUD=true in repo variables for Vercel (SSR deploy parallel with build)
+  # Set IS_VERCEL_CLOUD=false for other platforms (SSR deploy waits for build)
+  IS_VERCEL_CLOUD: ${{ vars.IS_VERCEL_CLOUD || 'true' }}
 
 jobs:
   check-secrets:
@@ -188,14 +192,25 @@ jobs:
             packages/*/build
           retention-days: 1
 
+  # ============================================
+  # BUILD JOBS
+  # ============================================
+  # Static apps: Always build (artifacts used by deploy)
+  # SSR apps (shell, nextjs): 
+  #   - IS_VERCEL_CLOUD=true: Skip build (Vercel builds in cloud)
+  #   - IS_VERCEL_CLOUD=false: Build normally (for Docker/other platforms)
+  # ============================================
+
   build-shell:
     needs: [detect-changes, lint, build-packages, check-secrets]
+    # Only build SSR apps when NOT using Vercel cloud build
     if: |
       always() &&
       (needs.lint.result == 'success') &&
       (needs.build-packages.result == 'success') &&
       (needs.detect-changes.outputs.shell_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
-      needs.check-secrets.outputs.has_project_id_shell == 'true'
+      needs.check-secrets.outputs.has_project_id_shell == 'true' &&
+      vars.IS_VERCEL_CLOUD != 'true'
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: shell
@@ -226,12 +241,14 @@ jobs:
 
   build-app-nextjs:
     needs: [detect-changes, lint, build-packages, check-secrets]
+    # Only build SSR apps when NOT using Vercel cloud build
     if: |
       always() &&
       (needs.lint.result == 'success') &&
       (needs.build-packages.result == 'success') &&
       (needs.detect-changes.outputs.app_nextjs_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
-      needs.check-secrets.outputs.has_project_id_app_nextjs == 'true'
+      needs.check-secrets.outputs.has_project_id_app_nextjs == 'true' &&
+      vars.IS_VERCEL_CLOUD != 'true'
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-nextjs
@@ -296,12 +313,28 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SOLIDJS }}
 
+  # ============================================
+  # DEPLOY JOBS
+  # ============================================
+  # Static apps: Wait for build, use --prebuilt
+  # SSR apps:
+  #   - IS_VERCEL_CLOUD=true: Deploy directly (Vercel cloud build)
+  #   - IS_VERCEL_CLOUD=false: Wait for build (Docker/other platforms)
+  # ============================================
+
   deploy-shell:
-    needs: [check-secrets, detect-changes]
+    needs: [check-secrets, detect-changes, lint, build-packages, build-shell]
     if: |
+      always() &&
+      (needs.lint.result == 'success') &&
+      (needs.build-packages.result == 'success') &&
       (needs.detect-changes.outputs.shell_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
       needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
-      needs.check-secrets.outputs.has_project_id_shell == 'true'
+      needs.check-secrets.outputs.has_project_id_shell == 'true' &&
+      (
+        vars.IS_VERCEL_CLOUD == 'true' ||
+        needs.build-shell.result == 'success'
+      )
     uses: ./.github/workflows/reusable-deploy-vercel-ssr.yml
     with:
       app: shell
@@ -331,11 +364,18 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT }}
 
   deploy-app-nextjs:
-    needs: [check-secrets, detect-changes]
+    needs: [check-secrets, detect-changes, lint, build-packages, build-app-nextjs]
     if: |
+      always() &&
+      (needs.lint.result == 'success') &&
+      (needs.build-packages.result == 'success') &&
       (needs.detect-changes.outputs.app_nextjs_changed == 'true' || needs.detect-changes.outputs.needs_full_rebuild == 'true') &&
       needs.check-secrets.outputs.has_vercel_secrets == 'true' &&
-      needs.check-secrets.outputs.has_project_id_app_nextjs == 'true'
+      needs.check-secrets.outputs.has_project_id_app_nextjs == 'true' &&
+      (
+        vars.IS_VERCEL_CLOUD == 'true' ||
+        needs.build-app-nextjs.result == 'success'
+      )
     uses: ./.github/workflows/reusable-deploy-vercel-ssr.yml
     with:
       app: app-nextjs
