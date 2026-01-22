@@ -3,7 +3,7 @@
     "deploymentEnabled": false
   },
   "buildCommand": "cd ../.. && pnpm install && pnpm turbo run build --filter=app-react",
-  "outputDirectory": "dist",
+  "outputDirectory": "apps/app-react/dist",
   "installCommand": "echo 'Skipping install, using buildCommand instead'",
   "rewrites": [
     {
