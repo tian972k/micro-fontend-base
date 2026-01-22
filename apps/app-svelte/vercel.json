@@ -2,6 +2,15 @@
   "git": {
     "deploymentEnabled": false
   },
+  "installCommand": "npm i -g pnpm@9",
+  "buildCommand": "cd ../.. && pnpm install && VERCEL=1 pnpm turbo run build --filter=app-svelte",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

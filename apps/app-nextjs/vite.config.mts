@@ -19,4 +19,8 @@ export default createMfeConfig({
   define: {
     "process.env": {}, // Polyfill process.env for Next.js compat
   },
+  customBaseUrl: (isDev, _isMfeMode, url) => {
+    if (isDev) return url;
+    return process.env.VERCEL === "1" ? "/" : "/nextjs/";
+  },
 });
