@@ -6,7 +6,7 @@
 [![Turborepo](https://img.shields.io/badge/Turborepo-Monorepo-EF4444.svg)](https://turbo.build/)
 [![Module Federation](https://img.shields.io/badge/Module_Federation-Vite-8B5CF6.svg)](https://github.com/originjs/vite-plugin-federation)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4.svg)](https://tailwindcss.com/)
-[![pnpm](https://img.shields.io/badge/pnpm-8.0-F69220.svg)](https://pnpm.io/)
+[![pnpm](https://img.shields.io/badge/pnpm-9.15.5-F69220.svg)](https://pnpm.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
 **Hub-and-Spoke Architecture:** Like planets orbiting a sun, your micro-frontends (React, Vue, Svelte, SolidJS) revolve around a central Remix Shell, working in perfect harmony while maintaining independence.
@@ -146,7 +146,7 @@ flowchart LR
 | Tool    | Version | Check           | Install                            |
 | ------- | ------- | --------------- | ---------------------------------- |
 | Node.js | v18+    | `node -v`       | [nodejs.org](https://nodejs.org)   |
-| pnpm    | v8+     | `pnpm -v`       | `npm i -g pnpm`                    |
+| pnpm    | v9+     | `pnpm -v`       | `npm i -g pnpm`                    |
 | Git     | Latest  | `git --version` | [git-scm.com](https://git-scm.com) |
 
 ### Installation
@@ -154,7 +154,7 @@ flowchart LR
 ```bash
 # 1️⃣ Clone repository
 git clone <repository-url>
-cd micro-frontend-base
+cd micro-fontend-base
 
 # 2️⃣ Install dependencies
 pnpm install
@@ -287,7 +287,7 @@ flowchart TB
 ## Detailed Directory Structure
 
 ```text
-micro-frontend-base/
+micro-fontend-base/
 ├── apps/
 │   ├── shell/           # Remix host application (SSR)
 │   ├── app-react/       # React micro-frontend

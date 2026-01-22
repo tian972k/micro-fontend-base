@@ -6,6 +6,7 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 
 echo -e "${BLUE}🚀 Starting Environment Verification...${NC}"
@@ -36,14 +37,29 @@ else
     echo -e "${GREEN}✅ Docker is installed.${NC}"
 fi
 
-# 4. Check .env file
-if [ ! -f "apps/shell/.env" ]; then
-    echo -e "${YELLOW}⚠️  apps/shell/.env missing. Creating from example...${NC}"
-    cp apps/shell/.env.example apps/shell/.env
-    echo -e "${GREEN}✅ .env file created.${NC}"
+# 4. Check root .env
+if [ ! -f ".env" ]; then
+    if [ -f ".env.example" ]; then
+        echo -e "${YELLOW}⚠️  .env missing. Creating from example...${NC}"
+        cp .env.example .env
+        echo -e "${GREEN}✅ .env file created.${NC}"
+    else
+        echo -e "${YELLOW}⚠️  .env missing and .env.example not found. Please add environment variables manually.${NC}"
+    fi
 fi
 
-# 5. Check dependencies
+# 5. Check shell .env
+if [ ! -f "apps/shell/.env" ]; then
+    if [ -f "apps/shell/.env.example" ]; then
+        echo -e "${YELLOW}⚠️  apps/shell/.env missing. Creating from example...${NC}"
+        cp apps/shell/.env.example apps/shell/.env
+        echo -e "${GREEN}✅ apps/shell/.env file created.${NC}"
+    else
+        echo -e "${YELLOW}⚠️  apps/shell/.env missing and apps/shell/.env.example not found. Please add environment variables manually.${NC}"
+    fi
+fi
+
+# 6. Check dependencies
 if [ ! -d "node_modules" ]; then
     echo -e "${BLUE}📦 node_modules missing. Recommended: Run 'pnpm install'${NC}"
 fi

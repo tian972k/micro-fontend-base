@@ -26,7 +26,7 @@ Before you start, make sure you have the following installed:
 | Tool        | Version | Installation                                        | Verify          |
 | ----------- | ------- | --------------------------------------------------- | --------------- |
 | **Node.js** | v18+    | [Download](https://nodejs.org/) or `nvm install 18` | `node -v`       |
-| **pnpm**    | v8+     | `npm install -g pnpm` or `corepack enable`          | `pnpm -v`       |
+| **pnpm**    | v9+     | `npm install -g pnpm` or `corepack enable`          | `pnpm -v`       |
 | **Git**     | Latest  | [Download](https://git-scm.com/)                    | `git --version` |
 
 ### Optional (Recommended)
@@ -52,7 +52,7 @@ Install these extensions for the best development experience:
 ```bash
 # Run this to check all prerequisites
 node -v    # Should be v18.x or higher
-pnpm -v    # Should be v8.x or higher
+pnpm -v    # Should be v9.x or higher
 git --version
 docker -v  # Optional - for production simulation
 ```
@@ -90,7 +90,7 @@ flowchart TD
 
 ```bash
 git clone <repository-url>
-cd micro-frontend-base
+cd micro-fontend-base
 ```
 
 ### Step 2: Install Dependencies
@@ -101,8 +101,7 @@ pnpm install
 
 **What happens:**
 
-- ✅ Installs all workspace dependencies
-- ✅ Builds shared packages (`@repo/config`, `@repo/utils`, `@repo/core`, `@repo/ui`)
+- ✅ Installs workspace dependencies
 - ✅ Sets up git hooks (husky) for linting and commit validation
 
 ### Step 3: Initialize Environment
@@ -116,7 +115,7 @@ bash scripts/onboard.sh
 This script:
 
 - ✅ Checks Node.js and pnpm versions
-- ✅ Copies `.env.example` to `.env`
+- ✅ Copies `.env.example` to `.env` (root)
 - ✅ Copies `apps/shell/.env.example` to `apps/shell/.env`
 - ✅ Verifies workspace structure
 - ✅ Runs initial validation
