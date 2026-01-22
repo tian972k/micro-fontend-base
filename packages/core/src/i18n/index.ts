@@ -27,6 +27,31 @@ export const sharedTranslations: Resource = {
 // Create a shared i18next instance (for non-React usage or direct access)
 export const i18n: I18nInstance = i18next.createInstance();
 
+// Track if we've already set up subscriptions
+let isSubscribed = false;
+
+// Setup bidirectional sync between i18n and locale store
+function setupLocaleSync(): void {
+  if (isSubscribed) return;
+  isSubscribed = true;
+
+  // Sync from locale store to i18n
+  localeStore.subscribe((state: LocaleState) => {
+    if (state.locale !== i18n.language) {
+      i18n.changeLanguage(state.locale);
+    }
+  });
+
+  // Sync from i18n to locale store (for consistency)
+  i18n.on("languageChanged", (lng: string) => {
+    const currentStoreLocale = localeStore.getState().locale;
+    if (lng !== currentStoreLocale && (lng === "en" || lng === "vi")) {
+      // Use setState directly to avoid re-emitting event
+      localeStore.setState({ locale: lng as "en" | "vi" });
+    }
+  });
+}
+
 // Initialize function - call this from each framework's entry
 export async function initI18n(
   resources: Resource = {},
@@ -39,6 +64,8 @@ export async function initI18n(
         i18n.addResourceBundle(lng, ns, resources[lng][ns], true, true);
       });
     });
+    // Ensure sync is set up even if already initialized
+    setupLocaleSync();
     return i18n;
   }
 
@@ -48,9 +75,6 @@ export async function initI18n(
   // Merge shared translations with app-specific resources
   const mergedResources: Resource = { ...sharedTranslations };
 
-  // deeply merge or just standard merge? i18next handles resources structure
-  // We'll simplisticly merge/add provided resources.
-  // Actually, we should iterate provided resources and merge them in.
   Object.keys(resources).forEach((lng) => {
     if (!mergedResources[lng]) {
       mergedResources[lng] = {};
@@ -66,12 +90,8 @@ export async function initI18n(
     fallbackNS: "common", // Always fallback to common
   });
 
-  // Subscribe to locale store changes to sync i18n
-  localeStore.subscribe((state: LocaleState) => {
-    if (state.locale !== i18n.language) {
-      i18n.changeLanguage(state.locale);
-    }
-  });
+  // Setup bidirectional sync
+  setupLocaleSync();
 
   return i18n;
 }

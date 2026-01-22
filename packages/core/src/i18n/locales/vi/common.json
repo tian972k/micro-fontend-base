@@ -6,5 +6,16 @@
   "error": "Lỗi",
   "retry": "Thử lại",
   "welcome": "Chào mừng",
-  "language": "Ngôn ngữ"
+  "language": "Ngôn ngữ",
+  "locale_sync": {
+    "title": "Đồng bộ Ngôn ngữ",
+    "current_locale": "Ngôn ngữ hiện tại",
+    "synced_across_mfes": "Đồng bộ trên tất cả MFEs",
+    "change_language": "Đổi Ngôn ngữ",
+    "user_profile": "Hồ sơ Người dùng",
+    "shared_component": "Component chia sẻ từ",
+    "shared_state_sync": "Đồng bộ Trạng thái",
+    "guest": "Khách",
+    "no_email": "Không có email"
+  }
 }

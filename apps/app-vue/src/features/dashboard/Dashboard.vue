@@ -1,12 +1,26 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { counterStore, incrementCounter, decrementCounter, userStore } from "@repo/core/vue";
+import {
+  counterStore,
+  incrementCounter,
+  decrementCounter,
+  userStore,
+  localeStore,
+  type Locale,
+} from "@repo/core/vue";
 
 const count = ref(counterStore.getState().count);
 const user = ref(userStore.getState().user);
+const locale = ref<Locale>(localeStore.getState().locale);
 
 let unsubCounter: (() => void) | undefined;
 let unsubUser: (() => void) | undefined;
+let unsubLocale: (() => void) | undefined;
+
+const toggleLocale = () => {
+  const newLocale: Locale = locale.value === "en" ? "vi" : "en";
+  localeStore.getState().setLocale(newLocale);
+};
 
 onMounted(() => {
   unsubCounter = counterStore.subscribe((state) => {
@@ -15,11 +29,15 @@ onMounted(() => {
   unsubUser = userStore.subscribe((state) => {
     user.value = state.user;
   });
+  unsubLocale = localeStore.subscribe((state) => {
+    locale.value = state.locale;
+  });
 });
 
 onUnmounted(() => {
   unsubCounter?.();
   unsubUser?.();
+  unsubLocale?.();
 });
 </script>
 
@@ -27,12 +45,42 @@ onUnmounted(() => {
   <div class="p-4 bg-background">
     <div class="border border-primary/20 shadow-sm overflow-hidden rounded-lg bg-card">
       <div class="bg-primary/[0.03] p-4 space-y-1">
-        <h2 class="text-xl font-semibold">User Profile</h2>
-        <p class="text-sm text-muted-foreground">
-          Shared Component from Vue
-        </p>
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-semibold">User Profile</h2>
+            <p class="text-sm text-muted-foreground">
+              Shared Component from Vue
+            </p>
+          </div>
+          <button
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+            @click="toggleLocale()"
+          >
+            {{ locale === 'en' ? '🇻🇳 Tiếng Việt' : '🇺🇸 English' }}
+          </button>
+        </div>
       </div>
       <div class="p-6 space-y-4">
+        <!-- Locale Sync Indicator -->
+        <div class="p-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+              <span class="text-sm font-medium text-green-700 dark:text-green-300">
+                {{ locale === 'en' ? 'Locale Synced' : 'Đồng bộ Ngôn ngữ' }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                {{ locale.toUpperCase() }}
+              </span>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300">
+                Vue
+              </span>
+            </div>
+          </div>
+        </div>
+
         <div class="flex items-center space-x-4 p-3 rounded-lg bg-muted/30 border border-border/50">
           <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
             {{ user?.name?.charAt(0) || "U" }}
