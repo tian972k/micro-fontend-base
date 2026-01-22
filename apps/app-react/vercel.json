@@ -3,8 +3,8 @@
     "deploymentEnabled": false
   },
   "installCommand": "npm i -g pnpm@9",
-  "buildCommand": "cd ../.. && pnpm install && pnpm turbo run build --filter=app-react",
-  "outputDirectory": "apps/app-react/dist",
+  "buildCommand": "cd ../.. && pnpm install && VERCEL=1 pnpm turbo run build --filter=app-react",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/(.*)",

@@ -7,6 +7,10 @@ export default createMfeConfig({
   federationShared: reactShared,
   entryFile: "./src/entry-mfe.tsx",
   mainFile: "./src/main.tsx",
-  customBaseUrl: (isDev, _isMfeMode, url) =>
-    isDev ? url : process.env.PUBLIC_BASE_PATH || "/react/",
+  customBaseUrl: (isDev, _isMfeMode, url) => {
+    if (isDev) return url;
+    // VERCEL=1 means standalone deploy, use root path
+    // Otherwise use /react/ for MFE mode in shell
+    return process.env.VERCEL === "1" ? "/" : process.env.PUBLIC_BASE_PATH || "/react/";
+  },
 });
