@@ -5,12 +5,6 @@
   "installCommand": "npm i -g pnpm@9",
   "buildCommand": "cd ../.. && pnpm install && VERCEL=1 pnpm turbo run build --filter=app-svelte",
   "outputDirectory": "dist",
-  "rewrites": [
-    {
-      "source": "/((?!.*\\.(js|css|map|json|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)).*)",
-      "destination": "/index.html"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
