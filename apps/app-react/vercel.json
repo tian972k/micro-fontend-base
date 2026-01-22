@@ -2,9 +2,9 @@
   "git": {
     "deploymentEnabled": false
   },
-  "buildCommand": "cd ../.. && npx pnpm@9 install && npx pnpm@9 turbo run build --filter=app-react",
+  "installCommand": "npm i -g pnpm@9",
+  "buildCommand": "cd ../.. && pnpm install && pnpm turbo run build --filter=app-react",
   "outputDirectory": "apps/app-react/dist",
-  "installCommand": "echo 'Skipping install, using buildCommand instead'",
   "rewrites": [
     {
       "source": "/(.*)",
