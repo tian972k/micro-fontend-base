@@ -69,6 +69,16 @@ export function MfeHost({
 
     const loadMfe = async () => {
       if (!mounted) return;
+
+      // --- CHECK IF ALREADY LOADED ---
+      // If MFE is already registered in window.MFE, just mount it directly
+      // This prevents re-fetching manifest and re-loading script on route changes
+      if (window.MFE?.[name]) {
+        console.log(`[MfeHost] ${name} already loaded, mounting directly`);
+        if (mounted) await mountMicroApp();
+        return;
+      }
+
       setStatus(MfeStatus.CHECKING);
       try {
         // 0. Federation / Direct Import Mode
