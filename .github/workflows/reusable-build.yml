@@ -44,7 +44,10 @@ jobs:
           path: packages
 
       - name: Install Vercel CLI
-        run: npm install -g vercel@latest
+        run: |
+          npm install -g vercel@latest
+          # Install pnpm globally so Vercel subprocess can find it
+          npm install -g pnpm@9
 
       - name: Pull Vercel Environment
         working-directory: apps/${{ inputs.app }}
@@ -58,7 +61,10 @@ jobs:
         working-directory: apps/${{ inputs.app }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel build --token=$VERCEL_TOKEN
+        run: |
+          # Ensure pnpm is available globally
+          which pnpm || npm install -g pnpm@9
+          vercel build --token=$VERCEL_TOKEN
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
