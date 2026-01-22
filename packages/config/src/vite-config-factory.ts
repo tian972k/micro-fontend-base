@@ -22,6 +22,8 @@ export interface MfeConfigOptions {
   entryFile: string;
   /** Main file path for standalone mode (e.g., "./src/main.tsx") */
   mainFile: string;
+  /** HTML file path for standalone mode (e.g., "./index.html") */
+  htmlFile?: string;
   /** Additional rollup input entries */
   additionalInputs?: Record<string, string>;
   /** Additional rollup externals (for SolidJS, etc.) */
@@ -53,6 +55,7 @@ export function createMfeConfig(options: MfeConfigOptions) {
     federationShared,
     entryFile,
     mainFile,
+    htmlFile = "./index.html",
     additionalInputs = {},
     additionalExternals = [],
     customBaseUrl,
@@ -114,8 +117,7 @@ export function createMfeConfig(options: MfeConfigOptions) {
         emptyOutDir,
         rollupOptions: {
           input: {
-            "entry-mfe": entryFile,
-            main: mainFile,
+            index: htmlFile, // HTML for standalone mode
             ...additionalInputs,
           },
           output: commonMfeRollupOutput,
