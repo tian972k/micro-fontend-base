@@ -240,6 +240,63 @@ federation({
 
 ## Loading Performance
 
+### MFE Caching & Version Check
+
+The `MfeHost` component implements intelligent caching to minimize network requests:
+
+```mermaid
+flowchart TB
+    A[Route Change] --> B{MFE cached in<br/>window.MFE?}
+    B -->|No| C[Full Load]
+    B -->|Yes| D{localStorage<br/>cache expired?}
+    D -->|No| E[Mount Directly ✨<br/>No network request]
+    D -->|Yes| F[Fetch health.json]
+    F --> G{Version<br/>changed?}
+    G -->|No| H[Update timestamp<br/>Mount directly]
+    G -->|Yes| I[Clear cache<br/>Reload MFE]
+
+    C --> J[Fetch health.json]
+    J --> K[Fetch manifest.json]
+    K --> L[Load script]
+    L --> M[Mount MFE]
+
+    style E fill:#22c55e,stroke:#16a34a,color:#fff
+    style I fill:#eab308,stroke:#ca8a04,color:#000
+```
+
+**Cache Configuration:**
+
+| Setting                  | Value               | Description                           |
+| ------------------------ | ------------------- | ------------------------------------- |
+| `VERSION_CHECK_INTERVAL` | 1 hour              | TTL for version cache in localStorage |
+| `VERSION_CACHE_KEY`      | `mfe_version_cache` | localStorage key                      |
+
+**localStorage Structure:**
+
+```json
+// localStorage.getItem('mfe_version_cache')
+{
+  "app-react": { "version": "a1b2c3d4", "checkedAt": 1737500000000 },
+  "app-vue": { "version": "b2c3d4e5", "checkedAt": 1737500000000 }
+}
+```
+
+**Benefits:**
+
+- ✅ **Fast route changes**: No network request when cache is valid
+- ✅ **Auto-update**: Detects new deployments via version hash
+- ✅ **User control**: Clear localStorage to force refresh
+
+**Force Reload:**
+
+```javascript
+// Clear version cache to force re-fetch
+localStorage.removeItem("mfe_version_cache");
+location.reload();
+```
+
+---
+
 ### Initial Load Optimization
 
 #### Preload Critical Resources

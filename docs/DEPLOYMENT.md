@@ -419,6 +419,20 @@ services:
 
 ### Health Response Schema
 
+**Static MFE Apps (`health.json`):**
+
+```json
+{
+  "status": "available",
+  "version": "a1b2c3d4", // Auto-generated MD5 hash (8 chars) for cache invalidation
+  "app": "app-react",
+  "environment": "production",
+  "buildTime": "2024-01-20T12:00:00.000Z"
+}
+```
+
+**Shell (`/health` endpoint):**
+
 ```json
 {
   "status": "up",

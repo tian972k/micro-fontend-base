@@ -167,6 +167,36 @@ interface MfeStrategy {
 
 The `MfeHost` component in the Shell determines which MFE to load and uses the appropriate strategy (React, Vue, etc.) to mount it into a DOM container.
 
+### MfeHost Caching Strategy
+
+The `MfeHost` implements smart caching to optimize performance:
+
+1. **In-memory cache**: `window.MFE[name]` stores loaded MFE instances
+2. **Version cache**: localStorage stores version + timestamp for each MFE
+3. **TTL**: Version check interval is 1 hour (configurable via `VERSION_CHECK_INTERVAL`)
+
+**Loading Flow:**
+
+```mermaid
+flowchart LR
+    A[Route Change] --> B{window.MFE<br/>cached?}
+    B -->|No| C[Full Load]
+    B -->|Yes| D{Cache<br/>< 1 hour?}
+    D -->|Yes| E[Mount ✨]
+    D -->|No| F[Check version]
+    F -->|Same| E
+    F -->|Changed| C
+```
+
+**Version Detection:**
+
+Each MFE build generates a unique `version` hash in `health.json`. When the cache expires:
+
+- Fetch `health.json` to get current version
+- Compare with cached version in localStorage
+- If different → clear cache, reload MFE
+- If same → update timestamp, mount directly
+
 ---
 
 ## 3. State Management
