@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardContent,
 } from "@repo/ui";
-import { getAppConfig } from "../../../server/config";
+import { getAppConfig, getAppUrl } from "../../../server/config";
 export const meta: MetaFunction = () => {
   return [{ title: "React App | MFE Platform" }];
 };
@@ -21,11 +21,9 @@ export const loader = async () => {
     return json({ appHost: (config.apps as any)[APP_IDS.REACT] });
   } catch (error) {
     console.error("Failed to load app config:", error);
-    // Fallback to proxy path in production
+    // Fallback using shared config logic
     return json({
-      appHost: process.env.VERCEL
-        ? "/api/proxy/react/"
-        : "http://localhost:8001",
+      appHost: getAppUrl(APP_IDS.REACT),
       error: "Configuration error",
     });
   }

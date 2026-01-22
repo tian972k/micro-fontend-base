@@ -88,11 +88,15 @@ export function MfeHost({
   const containerRef = useRef<HTMLDivElement>(null);
   // If MFE is already loaded, start with LOADING status (faster mount, no "checking" phase)
   const [status, setStatus] = useState<MfeStatus>(
-    window.MFE?.[name] ? MfeStatus.LOADING : MfeStatus.IDLE,
+    typeof window !== "undefined" && window.MFE?.[name]
+      ? MfeStatus.LOADING
+      : MfeStatus.IDLE,
   );
   const [errorDetails, setErrorDetails] = useState<string>("");
   // Track if this is a "fast mount" (MFE already loaded)
-  const isFastMount = useRef(!!window.MFE?.[name]);
+  const isFastMount = useRef(
+    typeof window !== "undefined" && !!window.MFE?.[name],
+  );
 
   const handleRetry = () => {
     setStatus(MfeStatus.IDLE);
@@ -149,14 +153,19 @@ export function MfeHost({
         return healthRes.json();
       };
 
+      // Helper to fetch manifest.json
+      const fetchManifest = async (): Promise<MfeManifest> => {
+        const manifestRes = await fetch(
+          `${host}/manifest.json?t=${Date.now()}`,
+        );
+        if (!manifestRes.ok) throw new Error("Manifest not found");
+        return manifestRes.json();
+      };
+
       // --- CHECK IF ALREADY LOADED ---
-      // If MFE is already registered in window.MFE, check version before mounting
-      // This prevents re-fetching manifest and re-loading script on route changes
-      // BUT ensures we reload when a new version is deployed
       if (window.MFE?.[name]) {
-        // Check if we should fetch health.json (based on 1 hour interval)
+        // ... (existing cache check logic preserved - skipped for brevity if identical)
         if (!shouldCheckVersion(name)) {
-          // Within cache interval, mount directly without network request
           const cachedVersion = getCachedVersion(name);
           console.log(
             `[MfeHost] ${name} already loaded (v${cachedVersion || "unknown"}), mounting directly (cache valid)`,
@@ -165,12 +174,12 @@ export function MfeHost({
           return;
         }
 
-        // Cache expired, check for new version
         try {
+          // Keep version check logic but make it non-blocking if possible?
+          // For now, keep it blocking to ensure correct version, but maybe parallelize manifest fetch if needed later (manifest not needed here though)
           const health = await fetchHealth();
           const cachedVersion = getCachedVersion(name);
 
-          // Check if version changed (means new deployment)
           if (
             health.version &&
             cachedVersion &&
@@ -179,14 +188,11 @@ export function MfeHost({
             console.log(
               `[MfeHost] ${name} version changed: ${cachedVersion} → ${health.version}, reloading...`,
             );
-            // Update cache with new version
             setStoredVersionCache(name, health.version, Date.now());
-            // Clear cached MFE to force reload
             delete window.MFE[name];
             delete manifestCache[name];
             // Fall through to full load
           } else {
-            // Same version, update check time and mount directly
             console.log(
               `[MfeHost] ${name} already loaded (v${health.version || "unknown"}), mounting directly`,
             );
@@ -198,7 +204,6 @@ export function MfeHost({
             return;
           }
         } catch (error) {
-          // Health check failed, try mounting cached version anyway
           console.warn(
             `[MfeHost] ${name} health check failed, using cached version`,
           );
@@ -217,29 +222,31 @@ export function MfeHost({
           return;
         }
 
-        // 1. Health Check
-        const health = await fetchHealth();
+        // PARALLEL FETCHING OPTIMIZATION
+        // Start fetching manifest immediately alongside health check
+        const healthPromise = fetchHealth();
+        // manifest promise depends on successful health check in original logic for maintenance mode?
+        // Actually, we can fetch both. If maintenance, we discard manifest result.
+        const manifestPromise = fetchManifest();
+
+        // Wait for health check first to check status
+        const health = await healthPromise;
         if (health.status === "maintenance") {
           if (mounted) setStatus(MfeStatus.MAINTENANCE);
           return;
         }
 
-        // Cache version for future comparisons (in memory and localStorage)
+        // Cache version
         if (health.version) {
           versionCache[name] = health.version;
           setStoredVersionCache(name, health.version, Date.now());
         }
 
-        // 2. Load Manifest
+        // Wait for manifest
         if (mounted) setStatus(MfeStatus.LOADING);
-        const manifestRes = await fetch(
-          `${host}/manifest.json?t=${Date.now()}`,
-        );
-        if (!manifestRes.ok) throw new Error("Manifest not found");
-        const manifest: MfeManifest = await manifestRes.json();
+        const manifest = await manifestPromise;
 
-        // Try to find the MFE entry point (src/entry-mfe.ts/tsx/js)
-        // Fallback to index.html if not found (though index.html usually points to standalone main.ts)
+        // Process Manifest
         const mfeEntryKey = Object.keys(manifest).find((key) =>
           key.match(/^src\/entry-mfe\.(ts|tsx|js)$/),
         );
@@ -252,7 +259,6 @@ export function MfeHost({
         const entryFile = entryData.file;
         const cssFiles = entryData.css || [];
 
-        // --- CACHE CHECK ---
         manifestCache[name] = entryFile;
 
         // 3. Inject Assets
@@ -269,9 +275,19 @@ export function MfeHost({
         const scriptUrl = entryFile.startsWith("http")
           ? entryFile
           : `${host}/${entryFile}`;
-        const scriptUrlWithCache = `${scriptUrl}${scriptUrl.includes("?") ? "&" : "?"}t=${Date.now()}`;
 
-        // Remove existing script if present (for HMR/dev mode)
+        // CACHE OPTIMIZATION:
+        // Only add timestamp if file does not look hashed.
+        // Hashed files (standard Vite output): ends with .[hash].js or -[hash].js
+        const isHashedFile =
+          /\.[a-f0-9]{8,}\.(js|mjs)$/i.test(entryFile) ||
+          /-[a-f0-9]{8,}\.(js|mjs)$/i.test(entryFile);
+
+        const scriptUrlWithCache = isHashedFile
+          ? scriptUrl
+          : `${scriptUrl}${scriptUrl.includes("?") ? "&" : "?"}t=${Date.now()}`;
+
+        // Remove existing script if present
         const existingScript = document.querySelector(
           `script[src^="${scriptUrl}"]`,
         );
