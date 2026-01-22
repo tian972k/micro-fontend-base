@@ -12,6 +12,54 @@ const manifestCache: Record<string, string> = {};
 // Cache for MFE versions - used to detect when to reload
 const versionCache: Record<string, string> = {};
 
+// Version check interval - 1 hour in milliseconds
+const VERSION_CHECK_INTERVAL = 60 * 60 * 1000;
+const VERSION_CACHE_KEY = "mfe_version_cache";
+
+// Helper to get cached version info from localStorage
+const getStoredVersionCache = (): Record<
+  string,
+  { version: string; checkedAt: number }
+> => {
+  try {
+    const stored = localStorage.getItem(VERSION_CACHE_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+};
+
+// Helper to save version info to localStorage
+const setStoredVersionCache = (
+  name: string,
+  version: string,
+  checkedAt: number,
+) => {
+  try {
+    const cache = getStoredVersionCache();
+    cache[name] = { version, checkedAt };
+    localStorage.setItem(VERSION_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // Ignore localStorage errors
+  }
+};
+
+// Check if we should fetch health.json based on last check time
+const shouldCheckVersion = (name: string): boolean => {
+  const cache = getStoredVersionCache();
+  const entry = cache[name];
+  if (!entry) return true;
+
+  const elapsed = Date.now() - entry.checkedAt;
+  return elapsed >= VERSION_CHECK_INTERVAL;
+};
+
+// Get cached version from localStorage
+const getCachedVersion = (name: string): string | null => {
+  const cache = getStoredVersionCache();
+  return cache[name]?.version || null;
+};
+
 export interface MfeHostProps {
   name: string;
   type: MicroAppType;
@@ -106,28 +154,46 @@ export function MfeHost({
       // This prevents re-fetching manifest and re-loading script on route changes
       // BUT ensures we reload when a new version is deployed
       if (window.MFE?.[name]) {
+        // Check if we should fetch health.json (based on 1 hour interval)
+        if (!shouldCheckVersion(name)) {
+          // Within cache interval, mount directly without network request
+          const cachedVersion = getCachedVersion(name);
+          console.log(
+            `[MfeHost] ${name} already loaded (v${cachedVersion || "unknown"}), mounting directly (cache valid)`,
+          );
+          if (mounted) await mountMicroApp();
+          return;
+        }
+
+        // Cache expired, check for new version
         try {
           const health = await fetchHealth();
+          const cachedVersion = getCachedVersion(name);
 
           // Check if version changed (means new deployment)
           if (
             health.version &&
-            versionCache[name] &&
-            health.version !== versionCache[name]
+            cachedVersion &&
+            health.version !== cachedVersion
           ) {
             console.log(
-              `[MfeHost] ${name} version changed: ${versionCache[name]} → ${health.version}, reloading...`,
+              `[MfeHost] ${name} version changed: ${cachedVersion} → ${health.version}, reloading...`,
             );
+            // Update cache with new version
+            setStoredVersionCache(name, health.version, Date.now());
             // Clear cached MFE to force reload
             delete window.MFE[name];
             delete manifestCache[name];
             // Fall through to full load
           } else {
-            // Same version, mount directly
+            // Same version, update check time and mount directly
             console.log(
               `[MfeHost] ${name} already loaded (v${health.version || "unknown"}), mounting directly`,
             );
-            if (health.version) versionCache[name] = health.version;
+            if (health.version) {
+              setStoredVersionCache(name, health.version, Date.now());
+              versionCache[name] = health.version;
+            }
             if (mounted) await mountMicroApp();
             return;
           }
@@ -158,9 +224,10 @@ export function MfeHost({
           return;
         }
 
-        // Cache version for future comparisons
+        // Cache version for future comparisons (in memory and localStorage)
         if (health.version) {
           versionCache[name] = health.version;
+          setStoredVersionCache(name, health.version, Date.now());
         }
 
         // 2. Load Manifest
