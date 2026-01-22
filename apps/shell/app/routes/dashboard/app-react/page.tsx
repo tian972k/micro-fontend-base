@@ -16,8 +16,19 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async () => {
-  const config = getAppConfig();
-  return json({ appHost: (config.apps as any)[APP_IDS.REACT] });
+  try {
+    const config = getAppConfig();
+    return json({ appHost: (config.apps as any)[APP_IDS.REACT] });
+  } catch (error) {
+    console.error("Failed to load app config:", error);
+    // Fallback to proxy path in production
+    return json({
+      appHost: process.env.VERCEL
+        ? "/api/proxy/react/"
+        : "http://localhost:8001",
+      error: "Configuration error",
+    });
+  }
 };
 
 export default function AppReactRoute() {

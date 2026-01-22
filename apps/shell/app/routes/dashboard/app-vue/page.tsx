@@ -16,8 +16,16 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async () => {
-  const config = getAppConfig();
-  return json({ appHost: (config.apps as any)[APP_IDS.VUE] });
+  try {
+    const config = getAppConfig();
+    return json({ appHost: (config.apps as any)[APP_IDS.VUE] });
+  } catch (error) {
+    console.error("Failed to load app config:", error);
+    return json({
+      appHost: process.env.VERCEL ? "/api/proxy/vue/" : "http://localhost:8003",
+      error: "Configuration error",
+    });
+  }
 };
 
 export default function AppVueRoute() {

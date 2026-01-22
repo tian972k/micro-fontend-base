@@ -16,8 +16,18 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async () => {
-  const config = getAppConfig();
-  return json({ appHost: (config.apps as any)[APP_IDS.SVELTE] });
+  try {
+    const config = getAppConfig();
+    return json({ appHost: (config.apps as any)[APP_IDS.SVELTE] });
+  } catch (error) {
+    console.error("Failed to load app config:", error);
+    return json({
+      appHost: process.env.VERCEL
+        ? "/api/proxy/svelte/"
+        : "http://localhost:8004",
+      error: "Configuration error",
+    });
+  }
 };
 
 export default function AppSvelteRoute() {
