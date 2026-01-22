@@ -77,7 +77,8 @@ The CI/CD pipeline for Orbit is designed for maximum efficiency using intelligen
 - Core logic lives in reusable workflows:
   - `reusable-lint.yml` for lint/typecheck
   - `reusable-build.yml` for per-app builds
-  - `reusable-deploy-vercel.yml` for Vercel deploys using prebuilt artifacts
+  - `reusable-deploy-vercel.yml` for Vercel deploys using prebuilt artifacts (static apps)
+  - `reusable-deploy-vercel-ssr.yml` for Vercel SSR deploys (Vercel cloud build)
 
 ### Secrets & Variables (Actions)
 
@@ -91,9 +92,108 @@ The CI/CD pipeline for Orbit is designed for maximum efficiency using intelligen
   - `VERCEL_PROJECT_ID_SVELTE`
   - `VERCEL_PROJECT_ID_SOLIDJS`
 - Optional Docker secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` (enables docker-\* jobs).
-- Optional repo variables: `TURBO_TEAM`, `TURBO_REMOTE_ONLY` (Turbo remote cache control).
+- Optional repo variables:
+  - `TURBO_TEAM`, `TURBO_REMOTE_ONLY` (Turbo remote cache control)
+  - `IS_VERCEL_CLOUD` (Platform mode - see below)
 
 > Add secrets in GitHub: Settings → Secrets and variables → Actions (not Environments).
+
+---
+
+## Platform Mode: IS_VERCEL_CLOUD
+
+The pipeline supports different deployment platforms through the `IS_VERCEL_CLOUD` environment variable.
+
+### Configuration
+
+Set `IS_VERCEL_CLOUD` in GitHub repository variables:
+
+- **`true`** (default): Vercel cloud build mode
+- **`false`**: Self-hosted/Docker mode
+
+```yaml
+# In ci-cd.yml
+env:
+  IS_VERCEL_CLOUD: ${{ vars.IS_VERCEL_CLOUD || 'true' }}
+```
+
+### SSR vs Static Apps
+
+The pipeline treats SSR and Static apps differently:
+
+| App Type   | Apps                                        | Build Behavior                           | Deploy Behavior                                     |
+| ---------- | ------------------------------------------- | ---------------------------------------- | --------------------------------------------------- |
+| **SSR**    | shell, app-nextjs                           | Conditional (based on `IS_VERCEL_CLOUD`) | Uses `reusable-deploy-vercel-ssr.yml`               |
+| **Static** | app-react, app-vue, app-svelte, app-solidjs | Always build                             | Uses `reusable-deploy-vercel.yml` with `--prebuilt` |
+
+### Flow by Platform Mode
+
+```mermaid
+flowchart TB
+    subgraph Vercel ["IS_VERCEL_CLOUD=true (Default)"]
+        direction TB
+        V_Lint[Lint] --> V_Pkg[Build Packages]
+        V_Pkg --> V_Static[Build Static Apps]
+        V_Pkg -.->|Skip| V_SSR[Build SSR Apps]
+        V_Static --> V_Deploy1[Deploy Static<br/>--prebuilt]
+        V_Pkg --> V_Deploy2[Deploy SSR<br/>Vercel cloud build]
+    end
+
+    subgraph Docker ["IS_VERCEL_CLOUD=false"]
+        direction TB
+        D_Lint[Lint] --> D_Pkg[Build Packages]
+        D_Pkg --> D_Static[Build Static Apps]
+        D_Pkg --> D_SSR[Build SSR Apps]
+        D_Static --> D_Deploy1[Deploy Static]
+        D_SSR --> D_Deploy2[Deploy SSR<br/>Use build artifacts]
+    end
+
+    style V_SSR fill:#6b7280,stroke:#4b5563,color:#fff
+    style V_Deploy2 fill:#22c55e,stroke:#16a34a,color:#fff
+    style D_SSR fill:#8b5cf6,stroke:#6d28d9,color:#fff
+```
+
+### Why Skip SSR Build on Vercel?
+
+When deploying SSR apps (Remix, Next.js) to Vercel:
+
+1. **Vercel Cloud Build**: Vercel builds the app in their infrastructure with optimized serverless functions
+2. **Local Build**: Cannot produce Vercel-compatible serverless output
+3. **Result**: Skip local build to save CI/CD time, let Vercel handle it
+
+When deploying to Docker or other platforms:
+
+1. **Docker Build**: Needs local build artifacts to create container image
+2. **Self-hosted**: SSR apps run as Node.js servers, need compiled output
+3. **Result**: Run full build, then deploy using artifacts
+
+### Examples
+
+**Scenario: Vercel deployment (default)**
+
+```
+IS_VERCEL_CLOUD=true
+
+1. Lint ✅
+2. Build packages ✅
+3. Build app-react (static) ✅
+4. Build shell (SSR) ⏭️ SKIPPED
+5. Deploy app-react --prebuilt ✅
+6. Deploy shell (Vercel cloud) ✅
+```
+
+**Scenario: Docker/self-hosted deployment**
+
+```
+IS_VERCEL_CLOUD=false
+
+1. Lint ✅
+2. Build packages ✅
+3. Build app-react (static) ✅
+4. Build shell (SSR) ✅
+5. Deploy app-react ✅
+6. Deploy shell (use artifacts) ✅
+```
 
 ---
 
