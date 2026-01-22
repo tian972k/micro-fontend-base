@@ -2,8 +2,9 @@
   "git": {
     "deploymentEnabled": false
   },
-  "installCommand": "npm i -g pnpm@9",
-  "buildCommand": "cd ../.. && pnpm install && VERCEL=1 pnpm turbo run build --filter=app-nextjs",
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && npm i -g pnpm@9 && pnpm install",
+  "buildCommand": "cd ../.. && VERCEL=1 pnpm turbo run build --filter=app-nextjs",
   "headers": [
     {
       "source": "/(.*)",
