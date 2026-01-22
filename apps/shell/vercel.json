@@ -3,7 +3,7 @@
     "deploymentEnabled": false
   },
   "installCommand": "echo 'Skipping install, using buildCommand instead'",
-  "buildCommand": "cd ../.. && pnpm install && VERCEL=1 pnpm turbo run build --filter=shell",
+  "buildCommand": "cd ../.. && npx pnpm@9 install && VERCEL=1 npx pnpm@9 turbo run build --filter=shell",
   "env": {
     "AVAILABLE_APPS": "react,vue,svelte,solid,nextjs",
     "VERCEL": "1"
