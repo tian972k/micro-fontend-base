@@ -35,8 +35,13 @@ export function MfeHost({
   remoteLoader,
 }: MfeHostProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<MfeStatus>(MfeStatus.IDLE);
+  // If MFE is already loaded, start with LOADING status (faster mount, no "checking" phase)
+  const [status, setStatus] = useState<MfeStatus>(
+    window.MFE?.[name] ? MfeStatus.LOADING : MfeStatus.IDLE,
+  );
   const [errorDetails, setErrorDetails] = useState<string>("");
+  // Track if this is a "fast mount" (MFE already loaded)
+  const isFastMount = useRef(!!window.MFE?.[name]);
 
   const handleRetry = () => {
     setStatus(MfeStatus.IDLE);
@@ -239,7 +244,9 @@ export function MfeHost({
       className="relative min-h-[100px] w-full h-full"
       suppressHydrationWarning
     >
-      {(status === MfeStatus.CHECKING || status === MfeStatus.LOADING) &&
+      {/* Only show loading for fresh loads, not fast mounts */}
+      {!isFastMount.current &&
+        (status === MfeStatus.CHECKING || status === MfeStatus.LOADING) &&
         (loadingComponent || <MfeLoading name={name} />)}
       <div
         ref={containerRef}
