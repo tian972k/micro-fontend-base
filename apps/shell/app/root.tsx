@@ -27,7 +27,28 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+// ... existing imports
+import { useEffect } from "react";
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    // Basic Web Vitals monitoring
+    if (typeof window !== "undefined") {
+      // @ts-ignore
+      import("web-vitals")
+        .then(({ onCLS, onFID, onLCP, onFCP, onTTFB }) => {
+          onCLS(console.log);
+          onFID(console.log);
+          onLCP(console.log);
+          onFCP(console.log);
+          onTTFB(console.log);
+        })
+        .catch(() => {
+          console.warn("web-vitals not installed");
+        });
+    }
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
