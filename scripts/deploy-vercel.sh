@@ -29,7 +29,8 @@ deploy_shell() {
     echo -e "${YELLOW}   Build: Vercel remote (Turborepo)${NC}"
     echo ""
     
-    cd "$ROOT_DIR/apps/shell"
+    # Run from root as required for this Vercel project structure
+    cd "$ROOT_DIR"
     vercel --prod
     
     echo -e "${GREEN}✅ Shell deployed!${NC}"
