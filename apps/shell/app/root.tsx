@@ -30,7 +30,22 @@ export const meta: MetaFunction = () => {
 // ... existing imports
 import { useEffect } from "react";
 
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useChangeLanguage } from "remix-i18next/react";
+import { useLoaderData } from "@remix-run/react";
+import { useTranslation } from "react-i18next";
+import i18next from "./i18next.server";
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const locale = await i18next.getLocale(request);
+  return json({ locale });
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { locale } = useLoaderData<typeof loader>();
+  const { i18n } = useTranslation();
+  useChangeLanguage(locale);
+
   useEffect(() => {
     // Basic Web Vitals monitoring
     if (typeof window !== "undefined") {
@@ -50,7 +65,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} dir={i18n.dir(locale)} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
