@@ -9,8 +9,11 @@ import vi from "./locales/vi.json";
 // Get initial locale from shared store
 const initialLocale = localeStore.getState().locale;
 
+// Fix for Module Federation: i18next might be imported as a Module Namespace
+const i18nInstance = (i18next as any).default || i18next;
+
 // Initialize i18next for the client
-i18next
+i18nInstance
   .use(initReactI18next)
   .use(LanguageDetector)
   .init({
@@ -32,16 +35,16 @@ localeStore.subscribe((state) => {
     "[Shell i18next] localeStore changed:",
     state.locale,
     "i18next.language:",
-    i18next.language,
+    i18nInstance.language,
   );
-  if (state.locale !== i18next.language) {
+  if (state.locale !== i18nInstance.language) {
     console.log("[Shell i18next] Changing language to:", state.locale);
-    i18next.changeLanguage(state.locale);
+    i18nInstance.changeLanguage(state.locale);
   }
 });
 
 // Also sync back: when i18next changes (e.g., from LanguageDetector), update store
-i18next.on("languageChanged", (lng) => {
+i18nInstance.on("languageChanged", (lng: string) => {
   console.log("[Shell i18next] languageChanged event:", lng);
   const currentStoreLocale = localeStore.getState().locale;
   if (lng !== currentStoreLocale && (lng === "en" || lng === "vi")) {
@@ -50,4 +53,4 @@ i18next.on("languageChanged", (lng) => {
   }
 });
 
-export default i18next;
+export default i18nInstance;
