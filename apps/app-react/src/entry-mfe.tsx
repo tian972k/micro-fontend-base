@@ -16,13 +16,13 @@ import dashboardVi from "./locales/vi/dashboard.json";
 
 // Initialize i18n
 i18n.use(initReactI18next);
-initI18n({
+const initPromise = initI18n({
   en: { dashboard: dashboardEn },
   vi: { dashboard: dashboardVi },
 });
 
 const {
-  mount,
+  mount: originalMount,
   unmount,
   default: microApp,
 } = createReactMfeEntry({
@@ -33,5 +33,10 @@ const {
   createRoot: ReactDOM.createRoot,
 });
 
+const mount = async (container: HTMLElement, props: any) => {
+  await initPromise;
+  originalMount(container, props);
+};
+
 export { mount, unmount };
-export default microApp;
+export default { ...microApp, mount };

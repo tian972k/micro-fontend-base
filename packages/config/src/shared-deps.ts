@@ -1,8 +1,20 @@
 // Framework-agnostic shared libraries
-export const baseShared = ["dayjs", "@repo/utils"];
+export const baseShared = [
+  "dayjs",
+  "@repo/utils",
+  "i18next",
+  "i18next-browser-languagedetector",
+  "i18next-http-backend",
+];
 
 // React-specific shared libraries
-export const reactShared = ["react", "react-dom", "@repo/core", "@repo/ui"];
+export const reactShared = [
+  "react",
+  "react-dom",
+  "@repo/core",
+  "@repo/ui",
+  "react-i18next",
+];
 
 // Combined list for React apps (Shell, React MFE, Next.js)
 export const federationShared = [...baseShared, ...reactShared];
