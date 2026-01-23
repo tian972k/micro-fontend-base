@@ -66,10 +66,16 @@ export async function initI18n(
   resources: Resource = {},
   defaultNamespace = "common",
 ): Promise<I18nInstance> {
+  console.log("[i18n] initI18n called. Initialized:", i18n.isInitialized);
+
   if (i18n.isInitialized) {
     // If already initialized, just add the new resources
     Object.keys(resources).forEach((lng) => {
       Object.keys(resources[lng]).forEach((ns) => {
+        console.log(
+          `[i18n] Adding resource bundle for ${lng}/${ns}`,
+          resources[lng][ns],
+        );
         i18n.addResourceBundle(lng, ns, resources[lng][ns], true, true);
       });
     });
@@ -80,6 +86,7 @@ export async function initI18n(
 
   // Get initial locale from store
   const currentLocale = localeStore.getState().locale;
+  console.log("[i18n] Initializing new instance with locale:", currentLocale);
 
   // Merge shared translations with app-specific resources
   const mergedResources: Resource = { ...sharedTranslations };
@@ -90,6 +97,8 @@ export async function initI18n(
     }
     Object.assign(mergedResources[lng], resources[lng]);
   });
+
+  console.log("[i18n] Merged resources:", mergedResources);
 
   await i18n.init({
     ...i18nConfig,
