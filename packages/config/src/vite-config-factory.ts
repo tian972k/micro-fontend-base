@@ -1,4 +1,4 @@
-import { defineConfig, type UserConfig } from "vite";
+import { defineConfig, type UserConfig, mergeConfig } from "vite";
 import type { Plugin } from "vite";
 import federation from "@originjs/vite-plugin-federation";
 import path from "path";
@@ -161,13 +161,7 @@ export function createMfeConfig(options: MfeConfigOptions) {
     }
 
     // Merge with viteConfigOverride
-    return {
-      ...config,
-      ...viteConfigOverride,
-      resolve: {
-        ...config.resolve,
-        ...viteConfigOverride.resolve,
-      },
-    };
+    // Merge with viteConfigOverride
+    return mergeConfig(config, viteConfigOverride);
   });
 }
