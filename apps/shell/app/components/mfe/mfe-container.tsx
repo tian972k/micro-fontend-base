@@ -33,7 +33,10 @@ export function MfeContainer({
   const prodRemoteLoader = async () => {
     // 1. Load remoteEntry.js
     await new Promise<void>((resolve, reject) => {
-      const remoteEntryUrl = `${host}/remoteEntry.js`;
+      // Ensure no double slashes
+      const cleanHost = host.endsWith("/") ? host.slice(0, -1) : host;
+      const remoteEntryUrl = `${cleanHost}/remoteEntry.js`;
+
       if (document.querySelector(`script[src="${remoteEntryUrl}"]`)) {
         return resolve();
       }
