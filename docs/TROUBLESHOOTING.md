@@ -175,7 +175,7 @@ pnpm run generate-dev-manifest
 // Access to fetch at 'http://localhost:8001' has been blocked by CORS policy
 
 // Solution: Ensure Vite dev server has CORS enabled
-// vite.config.ts already includes this
+// vite.config.mts already includes this
 ```
 
 1. **Verify APP_IDS match**:
@@ -267,7 +267,7 @@ pnpm list react
 1. **Check shared dependencies**:
 
 ```typescript
-// vite.config.ts
+// vite.config.mts
 import { baseShared } from "@repo/config";
 
 federation({
@@ -317,7 +317,7 @@ curl http://localhost:8001/manifest.json
 1. **Verify publicPath**:
 
 ```typescript
-// vite.config.ts
+// vite.config.mts
 build: {
   manifest: true,
   rollupOptions: {
@@ -350,7 +350,7 @@ declare module "app_react/App" {
 **Solutions:**
 
 ```typescript
-// vite.config.ts - Ensure singleton
+// vite.config.mts - Ensure singleton
 federation({
   shared: {
     react: {

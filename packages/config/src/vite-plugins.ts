@@ -113,7 +113,6 @@ export const commonMfeBuildOptions = {
   modulePreload: false,
   target: "esnext" as const,
   manifest: true,
-  minify: false,
   cssCodeSplit: false,
 };
 

@@ -6,8 +6,8 @@ import path from "path";
 import * as fs from "fs";
 import { getRouteManifest } from "remix-custom-routes";
 import { vercelPreset } from '@vercel/remix/vite';
-
 import { federationShared, PORTS, APP_IDS } from "@repo/config/vite";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // Custom Plugin to generate virtual MFE loaders map
 function mfeLoaderPlugin(mode: string, isSsrBuild?: boolean) {
@@ -31,9 +31,11 @@ function mfeLoaderPlugin(mode: string, isSsrBuild?: boolean) {
   };
 }
 
+
 export default defineConfig(({ mode, isSsrBuild }) => {
   const env = loadEnv(mode, path.resolve(__dirname, "../.."), "");
   const port = parseInt(env.SHELL_PORT || "8000", 10);
+  const isAnalyze = process.env.ANALYZE === "true";
 
   return {
     plugins: [
@@ -51,9 +53,6 @@ export default defineConfig(({ mode, isSsrBuild }) => {
         async routes() {
           const appDirectory = path.join(process.cwd(), "app");
           const routesDirectory = path.join(appDirectory, "routes");
-
-          // Custom Next.js Style Router Discovery
-          // Scans apps/shell/app/routes for page.tsx, layout.tsx, route.ts
           const files: [string, string][] = [];
 
           const walk = (dir: string, base: string) => {
@@ -67,7 +66,7 @@ export default defineConfig(({ mode, isSsrBuild }) => {
               } else {
                 const rel = path.relative(base, fullPath);
                 const ext = path.extname(rel);
-                const name = path.basename(rel, ext); // page, layout, route
+                const name = path.basename(rel, ext);
                 const dirs = path
                   .dirname(rel)
                   .split(path.sep)
@@ -85,44 +84,25 @@ export default defineConfig(({ mode, isSsrBuild }) => {
                   name === "layout" &&
                   (ext === ".tsx" || ext === ".jsx")
                 ) {
-                  // id is just the segments. e.g. "dashboard"
-                  if (isRoot) id = "root"; // Optional: root layout? Remix handles root.tsx separately usually.
-                  // If root components/layout.tsx exists, we might map it. But usually root.tsx is in app/.
-                  // We assume this walker is for routes folder.
+                  if (isRoot) id = "root";
                   if (isRoot) return;
                 } else if (
                   name === "route" &&
                   (ext === ".ts" || ext === ".tsx")
                 ) {
-                  // Resource route: "logout/route.ts" -> "logout"
                 } else {
-                  return; // Ignore other files
+                  return;
                 }
 
                 if (id === "") return;
-                // Prevent duplicate ID if page.tsx and layout.tsx exist (handled by getRouteManifest logic but we need unique list for input if possible,
-                // actually getRouteManifest takes [id, file], so duplicate IDs are allowed input but handled as conflicts?
-                // NO, core.js getRouteManifest iterates sortedRouteIds.
-                // If ID exists twice, it overwrites?
-                // Wait, routeManifest[id] = ...
-                // Yes, overwrite.
-                // BUT we need BOTH layout and page to exist in manifest!
-                // Remix Layout Route ID: "dashboard"
-                // Remix Index Route ID: "dashboard._index"
-                // My logic above gives different IDs: "dashboard" vs "dashboard._index". So no conflict!
-
-                // Use path relative to app directory, not absolute path
                 files.push([id, path.join("routes", rel)]);
               }
             });
           };
 
           walk(routesDirectory, routesDirectory);
-
-          // Sort by ID length descending for proper nesting
           files.sort(([a], [b]) => b.length - a.length);
-
-          // @ts-ignore - Definition is string[] but implementation and usage requires [string, string][]
+          // @ts-ignore
           return getRouteManifest(files);
         },
       }),
@@ -135,7 +115,6 @@ export default defineConfig(({ mode, isSsrBuild }) => {
               : Object.values(APP_IDS).reduce(
                   (acc, appName) => {
                     if (appName === "shell") return acc;
-                    // Convention: app-react -> app_react (for remote name)
                     const remoteName = appName.replace(/-/g, "_");
                     const port = PORTS[appName];
                     acc[remoteName] = `http://localhost:${port}/remoteEntry.js`;
@@ -146,6 +125,7 @@ export default defineConfig(({ mode, isSsrBuild }) => {
           shared: federationShared,
         }),
       tsconfigPaths(),
+      isAnalyze && visualizer({ open: true, filename: "stats.html" }),
     ],
     server: {
       port: port,
