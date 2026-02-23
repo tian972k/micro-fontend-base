@@ -26,8 +26,7 @@ export default createMfeConfig({
     "svelte",
     /^svelte\/.*/,
   ],
-  customBaseUrl: (isDev, _isMfeMode, url) => {
-    if (isDev) return url;
-    return process.env.VERCEL === "1" ? "/" : "/solidjs/";
+  customBaseUrl: (isDev, isMfeMode, url) => {
+    return process.env.VERCEL === "1" ? "/" : url;
   },
 });

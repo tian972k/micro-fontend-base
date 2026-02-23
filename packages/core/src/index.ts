@@ -17,10 +17,16 @@
 // Re-export shared (framework-agnostic)
 export * from "./shared";
 
+// Logger and Performance Monitor
+export { logger, mfeLogger, colors, createPrefixedLogger } from "./logger";
+export type { LogLevel, LoggerOptions } from "./logger";
+export { perfMonitor } from "./performance/monitor";
+
 // React-specific exports (for backward compatibility)
 export * from "./mfe/react/mfe-host";
 export * from "./state/react/use-user-store";
 export * from "./features/user-profile-feature";
+export { MfeErrorBoundary, withErrorBoundary } from "./react/error-boundary";
 
 // All MFE Factories
 export * from "./mfe/factories";

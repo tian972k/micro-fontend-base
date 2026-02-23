@@ -23,5 +23,8 @@ export * from "./state/react/use-counter-store";
 // React-specific factory
 export { createReactMfeEntry } from "./mfe/react-factory";
 
+// Error Boundary
+export { MfeErrorBoundary, withErrorBoundary } from "./react/error-boundary";
+
 // React Shared Features
 export * from "./features/user-profile-feature";

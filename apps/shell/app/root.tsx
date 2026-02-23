@@ -34,6 +34,7 @@ import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useChangeLanguage } from "remix-i18next/react";
 import { useLoaderData } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
+import { useLocaleStore } from "@repo/core/react";
 import i18next from "./i18next.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -44,7 +45,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export function Layout({ children }: { children: React.ReactNode }) {
   const { locale } = useLoaderData<typeof loader>();
   const { i18n } = useTranslation();
+  const { locale: storeLocale } = useLocaleStore();
   useChangeLanguage(locale);
+
+  // Sync i18next with locale store changes (from other MFEs)
+  useEffect(() => {
+    if (i18n.language !== storeLocale) {
+      i18n.changeLanguage(storeLocale);
+    }
+  }, [storeLocale, i18n]);
 
   useEffect(() => {
     // Basic Web Vitals monitoring

@@ -56,18 +56,30 @@ importers:
       dayjs:
         specifier: ^1.11.19
         version: 1.11.19
+      i18next:
+        specifier: ^25.7.4
+        version: 25.7.4(typescript@5.9.3)
+      i18next-browser-languagedetector:
+        specifier: ^8.2.0
+        version: 8.2.0
+      i18next-http-backend:
+        specifier: ^3.0.2
+        version: 3.0.2
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
       next:
         specifier: ^14.1.0
-        version: 14.2.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.2.35(@babel/core@7.28.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.2.0
         version: 18.3.1
       react-dom:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
+      react-i18next:
+        specifier: ^16.5.3
+        version: 16.5.3(i18next@25.7.4(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
     devDependencies:
       '@originjs/vite-plugin-federation':
         specifier: ^1.4.1
@@ -120,6 +132,12 @@ importers:
       i18next:
         specifier: ^25.7.4
         version: 25.7.4(typescript@5.9.3)
+      i18next-browser-languagedetector:
+        specifier: ^8.0.2
+        version: 8.2.0
+      i18next-http-backend:
+        specifier: ^3.0.2
+        version: 3.0.2
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -181,6 +199,15 @@ importers:
       dayjs:
         specifier: ^1.11.0
         version: 1.11.19
+      i18next:
+        specifier: ^25.7.4
+        version: 25.7.4(typescript@5.9.3)
+      i18next-browser-languagedetector:
+        specifier: ^8.2.0
+        version: 8.2.0
+      i18next-http-backend:
+        specifier: ^3.0.2
+        version: 3.0.2
       solid-js:
         specifier: ^1.8.11
         version: 1.9.10
@@ -224,6 +251,15 @@ importers:
       dayjs:
         specifier: ^1.11.19
         version: 1.11.19
+      i18next:
+        specifier: ^25.7.4
+        version: 25.7.4(typescript@5.9.3)
+      i18next-browser-languagedetector:
+        specifier: ^8.2.0
+        version: 8.2.0
+      i18next-http-backend:
+        specifier: ^3.0.2
+        version: 3.0.2
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -270,6 +306,15 @@ importers:
       dayjs:
         specifier: ^1.11.19
         version: 1.11.19
+      i18next:
+        specifier: ^25.7.4
+        version: 25.7.4(typescript@5.9.3)
+      i18next-browser-languagedetector:
+        specifier: ^8.2.0
+        version: 8.2.0
+      i18next-http-backend:
+        specifier: ^3.0.2
+        version: 3.0.2
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -2094,10 +2139,10 @@ packages:
       storybook: ^10.1.11
       vite: ^5.0.0 || ^6.0.0 || ^7.0.0
 
-  '@storybook/builder-vite@10.3.0-alpha.0':
-    resolution: {integrity: sha512-3dI0Z+2/1/wTrbWmp4DMH30qJ8yFo4OWq5gwUm/dUCOwHKmQKMUgr7i26OLuG6itQIhrsHfhOlnsb5FDBSXgLg==}
+  '@storybook/builder-vite@10.3.0-alpha.5':
+    resolution: {integrity: sha512-zMvLigsDlhQM5Lhlb1IJy8I5n6oNYTjaILQymK/ufFFrRblFd6jzJYcu6fmZ9JQZmE3dX4pGtZ9QU2psN99JeA==}
     peerDependencies:
-      storybook: ^10.3.0-alpha.0
+      storybook: ^10.3.0-alpha.5
       vite: ^5.0.0 || ^6.0.0 || ^7.0.0
 
   '@storybook/csf-plugin@10.1.11':
@@ -2118,12 +2163,12 @@ packages:
       webpack:
         optional: true
 
-  '@storybook/csf-plugin@10.3.0-alpha.0':
-    resolution: {integrity: sha512-o+hvAcvl3iHIem5tbSwgTKKiduu17TST/IHejSfka9NJ6c5EKsCSngDSLafoSlg573h2TsSJLKgeE8w/yLnWfg==}
+  '@storybook/csf-plugin@10.3.0-alpha.5':
+    resolution: {integrity: sha512-jRYrm23HN9Cwhhv0bPYafhEazZmGCKsF7Pj1b9n/TCxtlBf/7sypPwt5dYFAxZzedmtno5x00Ne3+EtTUv0zNA==}
     peerDependencies:
       esbuild: '*'
       rollup: '*'
-      storybook: ^10.3.0-alpha.0
+      storybook: ^10.3.0-alpha.5
       vite: '*'
       webpack: '*'
     peerDependenciesMeta:
@@ -6484,8 +6529,8 @@ packages:
   vue-component-type-helpers@2.2.12:
     resolution: {integrity: sha512-YbGqHZ5/eW4SnkPNR44mKVc6ZKQoRs/Rux1sxC6rdwXb4qpbOSYfDr9DsTHolOTGmIKgM9j141mZbBeg05R1pw==}
 
-  vue-component-type-helpers@3.2.3:
-    resolution: {integrity: sha512-lpJTa8a+12Cgy/n5OdlQTzQhSWOCu+6zQoNFbl3KYxwAoB95mYIgMLKEYMvQykPJ2ucBDjJJISdIBHc1d9Hd3w==}
+  vue-component-type-helpers@3.2.4:
+    resolution: {integrity: sha512-05lR16HeZDcDpB23ku5b5f1fBOoHqFnMiKRr2CiEvbG5Ux4Yi0McmQBOET0dR0nxDXosxyVqv67q6CzS3AK8rw==}
 
   vue-docgen-api@4.79.2:
     resolution: {integrity: sha512-n9ENAcs+40awPZMsas7STqjkZiVlIjxIKgiJr5rSohDP0/JCrD9VtlzNojafsA1MChm/hz2h3PDtUedx3lbgfA==}
@@ -8031,16 +8076,14 @@ snapshots:
       - rollup
       - webpack
 
-  '@storybook/builder-vite@10.3.0-alpha.0(esbuild@0.27.2)(rollup@4.55.1)(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2))':
+  '@storybook/builder-vite@10.3.0-alpha.5(esbuild@0.27.2)(rollup@4.55.1)(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2))':
     dependencies:
-      '@storybook/csf-plugin': 10.3.0-alpha.0(esbuild@0.27.2)(rollup@4.55.1)(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2))
-      '@vitest/mocker': 3.2.4(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2))
+      '@storybook/csf-plugin': 10.3.0-alpha.5(esbuild@0.27.2)(rollup@4.55.1)(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2))
       storybook: 10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       ts-dedent: 2.2.0
       vite: 7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2)
     transitivePeerDependencies:
       - esbuild
-      - msw
       - rollup
       - webpack
 
@@ -8053,7 +8096,7 @@ snapshots:
       rollup: 4.55.1
       vite: 7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2)
 
-  '@storybook/csf-plugin@10.3.0-alpha.0(esbuild@0.27.2)(rollup@4.55.1)(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2))':
+  '@storybook/csf-plugin@10.3.0-alpha.5(esbuild@0.27.2)(rollup@4.55.1)(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2))':
     dependencies:
       storybook: 10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       unplugin: 2.3.11
@@ -8170,7 +8213,7 @@ snapshots:
       storybook: 10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       type-fest: 2.19.0
       vue: 3.5.26(typescript@5.9.3)
-      vue-component-type-helpers: 3.2.3
+      vue-component-type-helpers: 3.2.4
 
   '@sveltejs/vite-plugin-svelte-inspector@2.1.0(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@20.19.28)))(svelte@4.2.20)(vite@5.4.21(@types/node@20.19.28))':
     dependencies:
@@ -9650,7 +9693,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
       eslint-plugin-react-hooks: 4.6.2(eslint@8.57.1)
@@ -9684,7 +9727,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -9699,7 +9742,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -11431,7 +11474,7 @@ snapshots:
 
   negotiator@0.6.4: {}
 
-  next@14.2.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next@14.2.35(@babel/core@7.28.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@next/env': 14.2.35
       '@swc/helpers': 0.5.5
@@ -11441,7 +11484,7 @@ snapshots:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.28.6)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.2.33
       '@next/swc-darwin-x64': 14.2.33
@@ -12474,7 +12517,7 @@ snapshots:
 
   storybook-solidjs-vite@1.0.0-beta.7(esbuild@0.27.2)(rollup@4.55.1)(solid-js@1.9.10)(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(vite-plugin-solid@2.11.10(@testing-library/jest-dom@6.9.1)(solid-js@1.9.10)(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2)))(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2)):
     dependencies:
-      '@storybook/builder-vite': 10.3.0-alpha.0(esbuild@0.27.2)(rollup@4.55.1)(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2))
+      '@storybook/builder-vite': 10.3.0-alpha.5(esbuild@0.27.2)(rollup@4.55.1)(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(vite@7.3.1(@types/node@20.19.28)(jiti@1.21.7)(yaml@2.8.2))
       '@storybook/types': 9.0.0-alpha.1(storybook@10.1.11(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       magic-string: 0.30.21
       solid-js: 1.9.10
@@ -12485,7 +12528,6 @@ snapshots:
     transitivePeerDependencies:
       - '@storybook/test'
       - esbuild
-      - msw
       - rollup
       - webpack
 
@@ -12640,10 +12682,12 @@ snapshots:
     dependencies:
       inline-style-parser: 0.1.1
 
-  styled-jsx@5.1.1(react@18.3.1):
+  styled-jsx@5.1.1(@babel/core@7.28.6)(react@18.3.1):
     dependencies:
       client-only: 0.0.1
       react: 18.3.1
+    optionalDependencies:
+      '@babel/core': 7.28.6
 
   sucrase@3.35.1:
     dependencies:
@@ -13298,7 +13342,7 @@ snapshots:
 
   vue-component-type-helpers@2.2.12: {}
 
-  vue-component-type-helpers@3.2.3: {}
+  vue-component-type-helpers@3.2.4: {}
 
   vue-docgen-api@4.79.2(vue@3.5.26(typescript@5.9.3)):
     dependencies:

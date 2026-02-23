@@ -12,37 +12,36 @@ export default createMfeConfig({
   mainFile: "./src/main.tsx",
   customBaseUrl: (isDev, _isMfeMode, url) => {
     if (isDev) return url;
-    // VERCEL=1 means standalone deploy, use root path
-    // Otherwise use /react/ for MFE mode in shell
-    return process.env.VERCEL === "1" ? "/" : process.env.PUBLIC_BASE_PATH || "/react/";
+    return process.env.VERCEL === "1" ? "/" : process.env.PUBLIC_BASE_PATH || "/";
   },
   viteConfigOverride: {
     plugins: [
-        viteCompression({
-            algorithm: "gzip",
-            ext: ".gz",
-        }),
-        viteCompression({
-            algorithm: "brotliCompress",
-            ext: ".br",
-        }),
-        visualizer({
-            open: false,
-            gzipSize: true,
-            brotliSize: true,
-            filename: "stats.html",
-        }),
+      viteCompression({
+        algorithm: "gzip",
+        ext: ".gz",
+      }),
+      viteCompression({
+        algorithm: "brotliCompress",
+        ext: ".br",
+      }),
+      visualizer({
+        open: false,
+        gzipSize: true,
+        brotliSize: true,
+        filename: "stats.html",
+      }),
     ],
     build: {
-        rollupOptions: {
-            output: {
-                manualChunks: {
-                    "react-vendor": ["react", "react-dom", "react-i18next"],
-                    utils: ["lodash", "dayjs"],
-                    ui: ["@repo/ui"],
-                },
-            },
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Don't chunk react-i18next - it's not shared
+            "react-vendor": ["react", "react-dom"],
+            utils: ["lodash", "dayjs"],
+            ui: ["@repo/ui"],
+          },
         },
+      },
     },
   },
 });

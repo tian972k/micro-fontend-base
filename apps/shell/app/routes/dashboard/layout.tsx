@@ -8,6 +8,7 @@ import {
 } from "@remix-run/react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@repo/ui";
 import { AppSidebar } from "@/components/layout/sidebar";
+import { DebugPanel } from "@/components/debug-panel";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { useEffect } from "react";
 import { userActions } from "@repo/core/react";
@@ -76,6 +77,8 @@ export default function DashboardRoute() {
           <Outlet />
         </div>
       </SidebarInset>
+      {/* Debug Panel - Only in development */}
+      {import.meta.env.DEV && <DebugPanel />}
     </SidebarProvider>
   );
 }

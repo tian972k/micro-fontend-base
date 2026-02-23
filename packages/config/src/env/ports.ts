@@ -1,7 +1,8 @@
-import { APP_IDS } from "../constants/apps";
+import { MFE_APPS, HOST_APP } from "../constants/apps";
 
 /**
  * Centralized port configuration for all applications in the monorepo.
+ * Auto-generated from MFE_APPS registry.
  * Values are read from environment variables with sensible defaults.
  */
 
@@ -34,14 +35,21 @@ const getPort = (envVar: string, defaultPort: number): number => {
   return defaultPort;
 };
 
-export const PORTS = {
-  [APP_IDS.SHELL]: getPort("SHELL_PORT", 8000),
-  [APP_IDS.REACT]: getPort("APP_REACT_PORT", 8001),
-  [APP_IDS.NEXTJS]: getPort("APP_NEXTJS_PORT", 8002),
-  [APP_IDS.VUE]: getPort("APP_VUE_PORT", 8003),
-  [APP_IDS.SVELTE]: getPort("APP_SVELTE_PORT", 8004),
-  [APP_IDS.SOLIDJS]: getPort("APP_SOLIDJS_PORT", 8005),
-} as const;
+// Auto-generate PORTS from MFE_APPS and HOST_APP registry
+const generatePorts = () => {
+  const ports: Record<string, number> = {
+    [HOST_APP.id]: getPort("SHELL_PORT", HOST_APP.port),
+  };
+
+  MFE_APPS.forEach((app) => {
+    const envKey = app.id.replace("app-", "").toUpperCase() + "_PORT";
+    ports[app.id] = getPort(envKey, app.port);
+  });
+
+  return ports;
+};
+
+export const PORTS = generatePorts();
 
 export const getAppUrl = (appName: keyof typeof PORTS | string) => {
   const port = (PORTS as any)[appName] || 8000;

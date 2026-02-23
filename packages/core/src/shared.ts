@@ -11,6 +11,9 @@ export * from "./events/event-bus";
 // Types
 export * from "./types";
 
+// Contracts (public API boundaries)
+export * from "./contracts";
+
 // Constants
 export * from "./constants/keys";
 

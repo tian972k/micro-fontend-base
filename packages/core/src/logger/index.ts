@@ -365,6 +365,75 @@ export function createPrefixedLogger(prefix: string) {
   return createLogger({ prefix });
 }
 
+// MFE-specific debug utilities
+export const mfeLogger = {
+  /** Track MFE lifecycle */
+  lifecycle(mfeId: string, event: "mount" | "unmount" | "error", data?: any) {
+    const emoji = event === "mount" ? "🚀" : event === "unmount" ? "📴" : "❌";
+    console.log(`${emoji} [MFE:${mfeId}] ${event.toUpperCase()}`, data || "");
+  },
+
+  /** Track state changes */
+  state(store: string, action: string, data?: any) {
+    if (import.meta.env?.DEV) {
+      console.log(`🔄 [State:${store}] ${action}`, data || "");
+    }
+  },
+
+  /** Track i18n changes */
+  i18n(event: string, locale: string) {
+    if (import.meta.env?.DEV) {
+      console.log(`🌐 [i18n] ${event} → ${locale}`);
+    }
+  },
+
+  /** Performance measurement */
+  perf(label: string, duration: number) {
+    const color = duration < 100 ? c.green : duration < 500 ? c.yellow : c.red;
+    console.log(`⚡ [Perf] ${label}: ${color}${duration}ms${c.reset}`);
+  },
+
+  /** Error with stack trace */
+  errorWithStack(context: string, error: Error) {
+    console.error(`❌ [${context}] ${error.message}`);
+    if (error.stack && import.meta.env?.DEV) {
+      console.error(c.gray + error.stack + c.reset);
+    }
+  },
+
+  /** Debug mode toggle */
+  enableDebug() {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("mfe:debug", "true");
+      console.log("🔍 Debug mode enabled. Reload to see debug logs.");
+    }
+  },
+
+  disableDebug() {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("mfe:debug");
+      console.log("🔍 Debug mode disabled.");
+    }
+  },
+
+  isDebugEnabled(): boolean {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("mfe:debug") === "true";
+    }
+    return false;
+  },
+};
+
+// Global debug helpers for browser console
+if (typeof window !== "undefined") {
+  (window as any).__MFE_DEBUG__ = {
+    enableDebug: mfeLogger.enableDebug,
+    disableDebug: mfeLogger.disableDebug,
+    logs: [],
+    version: "1.0.0",
+  };
+}
+
 // Export types and colors for advanced usage
 export { c as colors };
 export type { LoggerOptions, LogLevel };

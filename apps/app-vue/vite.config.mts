@@ -8,9 +8,8 @@ export default createMfeConfig({
   entryFile: "./src/entry-mfe.ts",
   mainFile: "./src/main.ts",
   additionalInputs: { index: "./index.html" },
-  customBaseUrl: (isDev, _isMfeMode, url) => {
-    if (isDev) return url;
-    return process.env.VERCEL === "1" ? "/" : "/vue/";
+  customBaseUrl: (isDev, isMfeMode, url) => {
+    return process.env.VERCEL === "1" ? "/" : url;
   },
   viteConfigOverride: {
     resolve: {

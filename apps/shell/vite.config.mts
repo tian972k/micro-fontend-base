@@ -122,13 +122,26 @@ export default defineConfig(({ mode, isSsrBuild }) => {
                   },
                   {} as Record<string, string>,
                 ),
-          shared: federationShared,
+          // Share libs with singletons to avoid conflicts
+          shared: federationShared.reduce(
+            (acc, lib) => {
+              acc[lib] = {
+                singleton: true,
+                requiredVersion: false,
+                strictVersion: false,
+                eager: lib === "@repo/utils" || lib === "dayjs",
+              };
+              return acc;
+            },
+            {} as Record<string, any>
+          ),
         }),
       tsconfigPaths(),
       isAnalyze && visualizer({ open: true, filename: "stats.html" }),
     ],
     server: {
       port: port,
+      strictPort: true, // Don't auto-switch port if already in use
     },
     build: {
       target: isSsrBuild ? "modules" : "esnext",

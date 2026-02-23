@@ -57,7 +57,7 @@ export function createMfeConfig(options: MfeConfigOptions) {
     frameworkPlugin,
     federationShared,
     entryFile,
-    mainFile,
+    mainFile: _mainFile,
     htmlFile = "./index.html",
     additionalInputs = {},
     additionalExternals = [],
@@ -93,7 +93,19 @@ export function createMfeConfig(options: MfeConfigOptions) {
         exposes: {
           "./Mfe": entryFile,
         },
-        shared: federationShared,
+        // Share libs with proper singletons to avoid conflicts
+        shared: federationShared.reduce(
+          (acc, lib) => {
+            acc[lib] = {
+              singleton: true,
+              requiredVersion: false,
+              strictVersion: false,
+              eager: lib === "@repo/utils" || lib === "dayjs", // Load these eagerly
+            };
+            return acc;
+          },
+          {} as Record<string, any>,
+        ),
       }),
       createVirtualManifestPlugin(entryFile),
       createHealthPlugin(appId),
@@ -142,11 +154,13 @@ export function createMfeConfig(options: MfeConfigOptions) {
       },
       server: {
         port,
+        strictPort: true, // Don't auto-switch port if already in use
         cors: true,
         origin: url,
       },
       preview: {
         port,
+        strictPort: true, // Don't auto-switch port if already in use
         cors: true,
       },
       base: baseUrl,

@@ -723,5 +723,5 @@ interface Logger {
 ## Related Documentation
 
 - [Architecture](../../docs/ARCHITECTURE.md) - System design and patterns
-- [Tutorial](../../docs/TUTORIAL.md) - Step-by-step development guide
+- [MFE Development Guide](../../docs/MFE_DEVELOPMENT_GUIDE.md) - Add or update MFEs
 - [@repo/ui](../ui/README.md) - UI component library

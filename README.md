@@ -57,27 +57,15 @@ graph TB
 
 ## Documentation
 
-### Core Guides
-
-| Guide                                        | Description                                        |
-| -------------------------------------------- | -------------------------------------------------- |
-| [Getting Started](./docs/GETTING_STARTED.md) | Setup, Installation, and Running the Platform      |
-| [Tutorial](./docs/TUTORIAL.md)               | Step-by-step guide to building your first MFE      |
-| [Architecture](./docs/ARCHITECTURE.md)       | System design, Module Federation, State Management |
-| [Standards](./docs/STANDARDS.md)             | Code style, Naming conventions, Best practices     |
-| [Deployment](./docs/DEPLOYMENT.md)           | CI/CD, Docker strategies, Production setup         |
-| [📊 Visual Guide](./docs/VISUAL_GUIDE.md)    | **Comprehensive diagrams & architecture visuals**  |
-
-### Additional Resources
-
-| Guide                                        | Description                                      |
-| -------------------------------------------- | ------------------------------------------------ |
-| [Contributing](./CONTRIBUTING.md)            | Development workflow, PR guidelines, Code review |
-| [Troubleshooting](./docs/TROUBLESHOOTING.md) | Common issues and solutions                      |
-| [Scripts Reference](./docs/SCRIPTS.md)       | Documentation for all automation scripts         |
-| [Performance](./docs/PERFORMANCE.md)         | Optimization strategies and best practices       |
-| [Security](./SECURITY.md)                    | Security guidelines and vulnerability reporting  |
-| [CI/CD Reference](./docs/CI_CD_REFERENCE.md) | Pipeline optimization and technologies           |
+- [docs/PACKAGE_SUMMARY.md](docs/PACKAGE_SUMMARY.md) — Complete package overview (start here for navigation)
+- [docs/DOCUMENTATION_MAP.md](docs/DOCUMENTATION_MAP.md) — How to navigate all documentation by role/use case
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — SA/technical spec with diagrams
+- [docs/API_CONTRACTS.md](docs/API_CONTRACTS.md) — public API boundaries, event contracts, versioning strategy
+- [docs/MFE_ADAPTER_PATTERNS.md](docs/MFE_ADAPTER_PATTERNS.md) — framework adapter implementations (React/Vue/Svelte/Solid/Next.js)
+- [docs/ENTERPRISE_PATTERNS_INTERVIEW_GUIDE.md](docs/ENTERPRISE_PATTERNS_INTERVIEW_GUIDE.md) — production patterns, interview prep, how Google/TikTok build MFEs
+- [docs/MFE_DEVELOPMENT_GUIDE.md](docs/MFE_DEVELOPMENT_GUIDE.md) — dev + prod build guide
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — issue handling
+- [docs/examples/typed-event-communication.ts](docs/examples/typed-event-communication.ts) — runnable example: cross-MFE type-safe events
 
 ---
 
@@ -159,11 +147,8 @@ cd micro-fontend-base
 # 2️⃣ Install dependencies
 pnpm install
 
-# 3️⃣ Setup environment
-bash scripts/onboard.sh
-
-# 4️⃣ Start development
-pnpm dev
+# 3️⃣ Start development
+pnpm dev:all
 ```
 
 **✨ Open [http://localhost:8000](http://localhost:8000)**
@@ -236,16 +221,13 @@ flowchart TB
 
     Build --> BuildPass{Pass?}
     BuildPass -->|No| Dev
-    BuildPass -->|Yes| Deploy[Deploy: pnpm docker:build:smart]
-
-    Deploy --> End([End])
+    BuildPass -->|Yes| End([End])
 
     style Start fill:#3b82f6,stroke:#2563eb,color:#fff
     style Dev fill:#8b5cf6,stroke:#7c3aed,color:#fff
     style Test fill:#f59e0b,stroke:#d97706,color:#fff
     style Lint fill:#f59e0b,stroke:#d97706,color:#fff
     style Build fill:#10b981,stroke:#059669,color:#fff
-    style Deploy fill:#ec4899,stroke:#db2777,color:#fff
     style End fill:#3b82f6,stroke:#2563eb,color:#fff
 ```
 
@@ -257,59 +239,23 @@ flowchart TB
 
 | Command          | Description                     |
 | :--------------- | :------------------------------ |
-| `pnpm dev`       | Start all apps (Shell + MFEs)   |
+| `pnpm dev:all`   | Start all apps (Shell + MFEs)   |
 | `pnpm dev:shell` | Start only the Shell            |
-| `pnpm dev:mfes`  | Start only MFE apps             |
 | `pnpm storybook` | Run Storybook for UI components |
-| `pnpm cli`       | Interactive CLI for scaffolding |
 
 ### Build & Deploy
 
-| Command                   | Description                       |
-| :------------------------ | :-------------------------------- |
-| `pnpm build`              | Build all packages and apps       |
-| `pnpm build:mfes`         | Build all MFE apps                |
-| `pnpm build:mfes:prod`    | Production build for MFEs         |
-| `pnpm docker:build:smart` | Smart Docker build (changed only) |
+| Command                | Description                 |
+| :--------------------- | :-------------------------- |
+| `pnpm build`           | Build all packages and apps |
+| `pnpm build:mfes:prod` | Production build for MFEs   |
 
 ### Quality & Validation
 
-| Command                    | Description                  |
-| :------------------------- | :--------------------------- |
-| `pnpm lint`                | Run ESLint                   |
-| `pnpm type-check`          | TypeScript type checking     |
-| `pnpm validate:mfe-config` | Check MFE configuration      |
-| `pnpm validate:app-ids`    | Validate APP_IDS consistency |
-| `pnpm test`                | Run all tests                |
-
----
-
-## Detailed Directory Structure
-
-```text
-micro-fontend-base/
-├── apps/
-│   ├── shell/           # Remix host application (SSR)
-│   ├── app-react/       # React micro-frontend
-│   ├── app-nextjs/      # Next.js micro-frontend
-│   ├── app-vue/         # Vue 3 micro-frontend
-│   ├── app-svelte/      # Svelte micro-frontend
-│   └── app-solidjs/     # SolidJS micro-frontend
-│
-├── packages/
-│   ├── ui/              # Multi-framework design system
-│   ├── core/            # State management & MFE utilities
-│   ├── utils/           # Helper functions
-│   └── config/          # Shared configurations
-│
-├── scripts/
-│   ├── mfe.config.mjs   # Central MFE configuration
-│   ├── cli.mjs          # Interactive CLI
-│   ├── create-app.mjs   # App scaffolding
-│   └── ...              # Build & utility scripts
-│
-└── docs/                # Documentation
-```
+| Command           | Description              |
+| :---------------- | :----------------------- |
+| `pnpm lint`       | Run ESLint               |
+| `pnpm type-check` | TypeScript type checking |
 
 ---
 
@@ -343,92 +289,6 @@ import { Button, Card } from "@repo/ui/solid";
 | Sheet     |  ✅   | 🔜  |  🔜   |   🔜   |
 | Dropdown  |  ✅   | 🔜  |  🔜   |   🔜   |
 | Sidebar   |  ✅   | 🔜  |  🔜   |   🔜   |
-
-### Run Storybook
-
-```bash
-# All frameworks
-pnpm storybook:all
-
-# Individual frameworks
-pnpm storybook:react   # Port 6006
-pnpm storybook:vue     # Port 6007
-pnpm storybook:solid   # Port 6008
-pnpm storybook:svelte  # Port 6009
-```
-
----
-
-## MFE Configuration
-
-All MFE apps are configured centrally in `scripts/mfe.config.mjs`:
-
-```javascript
-export const MFE_APPS = [
-  {
-    name: "app-react",
-    framework: "react",
-    port: 8001,
-    entryFile: "entry-mfe.tsx",
-    outputDir: "dist",
-  },
-  // Add new apps here...
-];
-```
-
-### Add a New MFE
-
-1. **Use the CLI:**
-
-```bash
-pnpm cli
-# Select: 1. create-app
-```
-
-1. **Add to config:**
-
-```javascript
-// scripts/mfe.config.mjs
-{
-  name: 'app-my-dashboard',
-  framework: 'react',
-  port: 8006,
-  entryFile: 'entry-mfe.tsx',
-  outputDir: 'dist',
-}
-```
-
-1. **Start development:**
-
-```bash
-pnpm dev --filter=app-my-dashboard
-```
-
----
-
-## 🐳 Docker Deployment
-
-### Development
-
-```bash
-# Start all services
-docker-compose up --build
-
-# Start specific services
-docker-compose up shell app-react app-vue
-```
-
-### Production
-
-```bash
-# Smart build (only changed apps)
-EXECUTE=true pnpm docker:build:smart
-
-# Force build all
-FORCE_ALL=true EXECUTE=true node scripts/smart-docker-build.js
-```
-
----
 
 ## Architecture Overview
 
@@ -473,7 +333,7 @@ See [Architecture Guide](./docs/ARCHITECTURE.md) for detailed documentation.
 4. Push to the branch (`git push origin feat/amazing-feature`)
 5. Open a Pull Request
 
-See [Standards](./docs/STANDARDS.md) for coding conventions.
+See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for the short contribution guide.
 
 ---
 

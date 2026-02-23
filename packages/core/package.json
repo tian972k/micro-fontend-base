@@ -34,10 +34,25 @@
       "development": "./src/svelte.ts",
       "import": "./dist/svelte.js"
     },
+    "./contracts": {
+      "types": "./src/contracts/index.ts",
+      "development": "./src/contracts/index.ts",
+      "import": "./dist/contracts/index.js"
+    },
     "./store/react": {
       "types": "./src/state/react/use-user-store.ts",
       "development": "./src/state/react/use-user-store.ts",
       "import": "./dist/state/react/use-user-store.js"
+    },
+    "./logger": {
+      "types": "./src/logger/index.ts",
+      "development": "./src/logger/index.ts",
+      "import": "./dist/logger/index.js"
+    },
+    "./performance/monitor": {
+      "types": "./src/performance/monitor.ts",
+      "development": "./src/performance/monitor.ts",
+      "import": "./dist/performance/monitor.js"
     },
     "./package.json": "./package.json"
   },

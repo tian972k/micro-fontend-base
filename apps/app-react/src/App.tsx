@@ -3,11 +3,19 @@ import { UserProfileFeature } from "./features/user-profile";
 import { type MicroAppProps, useLocaleStore } from "@repo/core/react";
 import { useTranslation } from "react-i18next";
 import { Card, Button } from "@repo/ui/react";
+import { useEffect } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function App(_props: MicroAppProps) {
-  const { t } = useTranslation(["dashboard", "common"]);
+  const { t, i18n } = useTranslation(["dashboard", "common"]);
   const { locale, setLocale } = useLocaleStore();
+
+  // Sync i18next with locale store
+  useEffect(() => {
+    if (i18n.language !== locale) {
+      i18n.changeLanguage(locale);
+    }
+  }, [locale, i18n]);
 
   const toggleLanguage = () => {
     setLocale(locale === "en" ? "vi" : "en");

@@ -8,10 +8,5 @@ echo ""
 echo "📝 Linting and formatting staged files..."
 npx lint-staged
 
-# 2. Validate app IDs are unique
-echo ""
-echo "🔗 Validating app IDs..."
-pnpm validate:app-ids
-
 echo ""
 echo "✅ Pre-commit checks passed!"

@@ -558,6 +558,6 @@ export default {
 
 ## Related Documentation
 
-- [Tutorial](../../docs/TUTORIAL.md) - Step-by-step component usage guide
-- [Standards](../../docs/STANDARDS.md) - Coding conventions
+- [MFE Development Guide](../../docs/MFE_DEVELOPMENT_GUIDE.md) - Add or update MFEs
+- [Architecture](../../docs/ARCHITECTURE.md) - System overview
 - [@repo/core](../core/README.md) - Core utilities and state management
