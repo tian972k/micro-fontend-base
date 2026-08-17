@@ -57,15 +57,13 @@ graph TB
 
 ## Documentation
 
-- [docs/PACKAGE_SUMMARY.md](docs/PACKAGE_SUMMARY.md) — Complete package overview (start here for navigation)
-- [docs/DOCUMENTATION_MAP.md](docs/DOCUMENTATION_MAP.md) — How to navigate all documentation by role/use case
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — SA/technical spec with diagrams
-- [docs/API_CONTRACTS.md](docs/API_CONTRACTS.md) — public API boundaries, event contracts, versioning strategy
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — SA/technical spec with diagrams (system design, MFE registration/mount lifecycle, cross-MFE state sync)
+- [docs/API_CONTRACTS.md](docs/API_CONTRACTS.md) — public API boundaries: EventBus, stores, MFE entry contract
 - [docs/MFE_ADAPTER_PATTERNS.md](docs/MFE_ADAPTER_PATTERNS.md) — framework adapter implementations (React/Vue/Svelte/Solid/Next.js)
-- [docs/ENTERPRISE_PATTERNS_INTERVIEW_GUIDE.md](docs/ENTERPRISE_PATTERNS_INTERVIEW_GUIDE.md) — production patterns, interview prep, how Google/TikTok build MFEs
+- [docs/ENTERPRISE_PATTERNS_INTERVIEW_GUIDE.md](docs/ENTERPRISE_PATTERNS_INTERVIEW_GUIDE.md) — conceptual reference on MFE platform patterns at scale
 - [docs/MFE_DEVELOPMENT_GUIDE.md](docs/MFE_DEVELOPMENT_GUIDE.md) — dev + prod build guide
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — issue handling
-- [docs/examples/typed-event-communication.ts](docs/examples/typed-event-communication.ts) — runnable example: cross-MFE type-safe events
+- [docs/examples/typed-event-communication.ts](docs/examples/typed-event-communication.ts) — runnable example: cross-MFE EventBus usage
 
 ---
 
