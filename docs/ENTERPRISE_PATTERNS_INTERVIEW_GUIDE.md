@@ -1,6 +1,17 @@
 # Enterprise Patterns & Interview Guide
 
-This document bridges Orbit with **how Google, Figma, TikTok, and Amazon** architect production micro-frontends. Use this as both a reference and interview preparation guide.
+This document is **conceptual/educational reference material** on how
+large MFE platforms handle scaling, versioning, and observability — it
+is not a line-by-line description of this repo's current implementation.
+For what this codebase actually does today, see
+[ARCHITECTURE.md](ARCHITECTURE.md) and [API_CONTRACTS.md](API_CONTRACTS.md).
+
+> **Note on code samples below:** event names like `"nav:navigate"` /
+> `"user:login"` are illustrative, not currently wired-up event keys (see
+> [API_CONTRACTS.md](API_CONTRACTS.md#runtime-event-contracts) for the
+> real ones). Calls use the correct real API shape
+> (`globalEventBus.emit`/`globalEventBus.on`), just with placeholder
+> event names.
 
 ---
 
@@ -219,10 +230,10 @@ export type RuntimeEventMap = {
 };
 
 // Step 2: MFE-A emits
-EventBus.emit("nav:navigate", { to: "/analytics" });
+globalEventBus.emit("nav:navigate", { to: "/analytics" });
 
 // Step 3: MFE-B listens (TypeScript catches mismatches)
-EventBus.subscribe("nav:navigate", (payload) => {
+globalEventBus.on("nav:navigate", (payload) => {
   // payload is { to: string; replace?: boolean }
   navigate(payload.to, { replace: payload.replace ?? false });
 });
@@ -232,14 +243,14 @@ EventBus.subscribe("nav:navigate", (payload) => {
 
 ```typescript
 // ❌ Old: Runtime errors
-EventBus.emit("navigate", { url: "/dashboard" }); // Typo: "url" not "to"
-EventBus.subscribe("navigate", (data) => {
+globalEventBus.emit("navigate", { url: "/dashboard" }); // Typo: "url" not "to"
+globalEventBus.on("navigate", (data) => {
   console.log(data.nonExistent); // Silently undefined
 });
 
 // ✅ New: Compile-time safety
-EventBus.emit("nav:navigate", { to: "/dashboard" }); // ✅ TypeScript knows the shape
-// EventBus.emit("nav:navigate", { url: "/dashboard" }); // ❌ Type error caught immediately
+globalEventBus.emit("nav:navigate", { to: "/dashboard" }); // ✅ TypeScript knows the shape
+// globalEventBus.emit("nav:navigate", { url: "/dashboard" }); // ❌ Type error caught immediately
 ```
 
 ### Interview Question
@@ -643,7 +654,7 @@ import { currentUser } from "app-react"; // Tight coupling!
 const user = await fetch("/api/user"); // Inefficient
 
 // ❌ Wrong: Event bus for state (async, unreliable)
-EventBus.emit("get:user", { ... }); // Missing data for 100ms
+globalEventBus.emit("get:user", { ... }); // Missing data for 100ms
 ```
 
 ---
@@ -691,7 +702,7 @@ describe("React MFE Adapter", () => {
   it("handles event bus communication", async () => {
     await mount(container);
 
-    EventBus.emit("user:login", { userId: "alice" });
+    globalEventBus.emit("user:login", { userId: "alice" });
     await waitFor(() => {
       expect(screen.getByText("Welcome, alice")).toBeInTheDocument();
     });
