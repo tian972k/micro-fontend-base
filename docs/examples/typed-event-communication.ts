@@ -1,290 +1,135 @@
 /**
- * Example: Type-Safe Cross-MFE Communication
+ * Example: Cross-MFE Communication via the shared EventBus
  *
- * This demonstrates the Orbit framework's contract-based event system,
- * inspired by Google Chrome and TikTok's internal architectures.
+ * This reflects the *actual* runtime API in this repo today
+ * (packages/core/src/events/event-bus.ts), not an aspirational one.
  *
- * Real-world use cases:
- * - Navigation between MFEs (Shell initiates, other MFEs listen)
- * - User authentication events (User MFE broadcasts, others update UI)
- * - Theme/locale changes (Config MFE broadcasts, others adapt)
- * - Cross-MFE notifications (Analytics, alerts, etc.)
+ * Key facts about the real implementation:
+ * - `EventBus` is a class with a singleton accessor `EventBus.getInstance()`.
+ *   You almost always want the pre-built singleton export instead:
+ *   `import { globalEventBus } from "@repo/core/shared"`.
+ * - `emit`/`on`/`off` are *instance* methods (not static) - there is no
+ *   `EventBus.emit(...)`, only `globalEventBus.emit(...)`.
+ * - Event names today are the small set of string constants in
+ *   `EVENT_KEYS` (packages/core/src/constants/keys.ts) - currently just
+ *   `APP_COUNTER` and `LOCALE_CHANGE`. Payloads are `unknown` at the
+ *   EventBus level; each listener narrows the type itself (see
+ *   packages/core/src/state/common/counter-store.ts and locale-store.ts
+ *   for the real pattern).
+ * - There *is* a `RuntimeEventMap` type (packages/core/src/contracts/
+ *   runtime-events.ts) sketching a more strongly-typed event contract
+ *   (`nav:navigate`, `user:login`, `theme:set`, etc.), but as of this
+ *   writing it isn't wired into EventBus - nothing in the codebase emits
+ *   or listens for those event names. Treat it as a design sketch for a
+ *   possible future improvement, not a currently-working API.
  */
 
-import {
-  RuntimeEventMap,
-  RuntimeEventName,
-  RuntimeEventPayload,
-} from "@repo/core/contracts";
-import { EventBus } from "@repo/core/shared";
+import { globalEventBus, EVENT_KEYS } from "@repo/core/shared";
 
 // ============================================================================
-// SCENARIO 1: Navigate Between MFEs (Shell Orchestration)
+// SCENARIO 1: Broadcast a local state change to every other MFE
 // ============================================================================
 
 /**
- * Shell app orchestrates navigation.
- *
- * When user clicks "Analytics" in sidebar:
- * 1. Shell emits typed navigation event
- * 2. Current MFE unmounts
- * 3. New MFE mounts in same container
+ * This is the real pattern used by counter-store.ts: update local state,
+ * then broadcast it under a shared key so every other MFE's copy of the
+ * same store (or any other listener) picks it up.
  */
-export const navigateToAnalytics = () => {
-  // Fully typed—TypeScript catches errors at compile time
-  EventBus.emit("nav:navigate", {
-    to: "/analytics",
-    replace: false,
-  });
-  // ✅ Works: Matches RuntimeEventMap["nav:navigate"]
-  // ❌ Won't compile: EventBus.emit("nav:navigate", { to: "/analytics", unknown: true })
-};
+export function broadcastCounter(count: number) {
+  globalEventBus.emit(EVENT_KEYS.APP_COUNTER, { count });
+}
 
 // ============================================================================
-// SCENARIO 2: User Login (Cross-MFE Authentication)
+// SCENARIO 2: Listen for changes broadcast by other MFEs
+// ============================================================================
+
+export function listenForCounterChanges(
+  onChange: (count: number) => void,
+): () => void {
+  // `on` returns an unsubscribe function - always call it on cleanup
+  // (e.g. in a React useEffect's return, or on MFE unmount).
+  return globalEventBus.on(EVENT_KEYS.APP_COUNTER, (data: unknown) => {
+    const payload = data as { count?: number };
+    if (typeof payload?.count === "number") {
+      onChange(payload.count);
+    }
+  });
+}
+
+// React usage:
+//
+//   useEffect(() => listenForCounterChanges(setLocalCount), []);
+
+// ============================================================================
+// SCENARIO 3: The recommended pattern for a *new* synced store
 // ============================================================================
 
 /**
- * User MFE broadcasts login event.
- * Other MFEs listen and update their local state.
+ * Rather than hand-rolling emit/on calls like the scenarios above (which
+ * is what counter-store.ts/locale-store.ts did before being refactored),
+ * new stores should use the `syncStore` helper
+ * (packages/core/src/state/sync-store.ts). It wires up both directions
+ * (broadcast local changes, apply remote changes) and guards against the
+ * store re-broadcasting a change it just received from the bus:
+ *
+ *   import { createStore } from "zustand/vanilla";
+ *   import { syncStore } from "@repo/core/shared";
+ *
+ *   const store = createStore<{ value: string }>(() => ({ value: "" }));
+ *
+ *   syncStore(
+ *     {
+ *       getState: () => store.getState(),
+ *       setState: (state) => store.setState(state),
+ *       subscribe: (listener) => store.subscribe(listener),
+ *     },
+ *     { key: "MY_NEW_EVENT_KEY" },
+ *   );
+ *
+ * See packages/core/src/state/common/counter-store.ts for a complete,
+ * working example of this pattern.
  */
 
-// In user-mfe/src/auth.ts
-export const handleLogin = async (email: string, password: string) => {
-  const response = await fetch("/api/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
-  const { userId, token } = await response.json();
-
-  // Broadcast to all MFEs
-  EventBus.emit("user:login", {
-    userId,
-    token,
-  });
-};
-
-// In analytics-mfe/src/app.tsx
-import { useEffect } from "react";
-
-export const Analytics = () => {
-  useEffect(() => {
-    const unsubscribe = EventBus.subscribe("user:login", (payload) => {
-      // payload is fully typed: { userId: string; token?: string }
-      console.log("User logged in:", payload.userId);
-      // Update analytics context, fetch user-specific dashboards, etc.
-    });
-
-    return unsubscribe;
-  }, []);
-
-  return "Analytics Dashboard";
-};
-
 // ============================================================================
-// SCENARIO 3: Theme Changes (Cascading Updates)
+// ADDING A NEW EVENT KEY
 // ============================================================================
 
 /**
- * Config MFE updates theme.
- * All MFEs listen and apply CSS/Tailwind theme classes.
+ * 1. Add the key to EVENT_KEYS in packages/core/src/constants/keys.ts:
+ *
+ *      export const EVENT_KEYS = {
+ *        APP_COUNTER: "APP_COUNTER",
+ *        LOCALE_CHANGE: "LOCALE_CHANGE",
+ *        MY_NEW_EVENT: "MY_NEW_EVENT",
+ *      } as const;
+ *
+ * 2. Emit it: globalEventBus.emit(EVENT_KEYS.MY_NEW_EVENT, myPayload);
+ * 3. Listen: globalEventBus.on(EVENT_KEYS.MY_NEW_EVENT, (data) => { ... });
+ *
+ * There's currently no compile-time enforcement of the payload shape for
+ * a given key (see the note about RuntimeEventMap above) - callers agree
+ * on the shape by convention. Keep payloads small, and document the
+ * shape next to the EVENT_KEYS entry.
  */
-
-export const setTheme = (theme: "light" | "dark" | "system") => {
-  EventBus.emit("theme:set", { theme });
-
-  // Every MFE that subscribed updates:
-  // - Tailwind class on <html>
-  // - Rerender components that use useTheme()
-};
-
-// In any MFE hook:
-import { userStore } from "@repo/core/shared";
-
-export const useTheme = () => {
-  const { theme } = userStore.getState();
-
-  // Listen for theme changes
-  useEffect(() => {
-    const unsubscribe = EventBus.subscribe("theme:set", (payload) => {
-      // payload: { theme: "light" | "dark" | "system" }
-      applyTheme(payload.theme);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  return theme;
-};
-
-// ============================================================================
-// SCENARIO 4: Adding a Custom Event (Extension Pattern)
-// ============================================================================
-
-/**
- * Want to add cross-MFE feature flags?
- *
- * Step 1: Extend RuntimeEventMap in @repo/core/contracts/runtime-events.ts
- *
- *   export type RuntimeEventMap = {
- *     // existing events...
- *     "feature:changed": { featureKey: string; enabled: boolean; rolloutPercent?: number };
- *   };
- *
- * Step 2: Use in your MFE (TypeScript ensures type safety):
- */
-
-export const enableFeature = (featureKey: string, enabled: boolean) => {
-  EventBus.emit("feature:changed", {
-    featureKey,
-    enabled,
-    rolloutPercent: 50,
-  });
-};
-
-// Step 3: Other MFEs listen:
-export const useFeatureFlag = (featureKey: string) => {
-  const [enabled, setEnabled] = React.useState(false);
-
-  useEffect(() => {
-    const unsubscribe = EventBus.subscribe("feature:changed", (payload) => {
-      if (payload.featureKey === featureKey) {
-        setEnabled(payload.enabled);
-      }
-    });
-
-    return unsubscribe;
-  }, [featureKey]);
-
-  return enabled;
-};
-
-// ============================================================================
-// SCENARIO 5: Analytics Event Tracking (Pattern for Observability)
-// ============================================================================
-
-/**
- * Every MFE can track user behavior without coupling to analytics vendor.
- *
- * Step 1: Add event to RuntimeEventMap
- *   "analytics:track": { event: string; properties: Record<string, unknown> };
- *
- * Step 2: Track in your MFE
- */
-
-export const trackUserAction = (
-  action: string,
-  properties: Record<string, unknown>,
-) => {
-  EventBus.emit("analytics:track", {
-    event: action,
-    properties,
-  });
-};
-
-// Step 3: Analytics MFE (or Shell) listens and forwards to vendor
-export const setupAnalyticsListener = () => {
-  EventBus.subscribe("analytics:track", (payload) => {
-    // Send to Mixpanel, Segment, etc.
-    mixpanel.track(payload.event, payload.properties);
-  });
-};
 
 // ============================================================================
 // BEST PRACTICES
 // ============================================================================
 
 /**
- * ✅ DO:
- * - Emit events for cross-MFE concerns (navigation, auth, theme)
- * - Subscribe in useEffect + clean up on unmount
- * - Type-check event payloads (TypeScript will help)
- * - Document new events you add to RuntimeEventMap
+ * DO:
+ * - Always store and call the unsubscribe function `on()` returns.
+ * - Narrow `unknown` payloads defensively before using them (see
+ *   listenForCounterChanges above) - nothing validates the payload shape
+ *   at runtime.
+ * - Prefer `syncStore` over hand-rolled emit/on pairs for new synced state.
  *
- * ❌ DON'T:
- * - Emit 100+ events per second (use stores for high-frequency updates)
- * - Break event API contracts (SemVer rules apply)
- * - Store MFE state outside of Zustand stores + EventBus
- * - Create event cycles (A emits X → B emits X → A listens)
- */
-
-// ============================================================================
-// TYPE SAFETY SHOWCASE (Why Contracts Matter)
-// ============================================================================
-
-// ✅ Correct: TypeScript knows the shape
-const goodExample = () => {
-  EventBus.emit("user:login", { userId: "123", token: "secret" });
-};
-
-// ❌ Won't compile: Property 'username' does not exist
-const badExample = () => {
-  // @ts-expect-error: Property 'username' does not exist
-  EventBus.emit("user:login", { username: "alice" });
-};
-
-// ✅ Correct: Accessing payload properties is type-safe
-EventBus.subscribe("user:login", (payload) => {
-  const userId = payload.userId; // ✅ Type: string
-  // const token = payload.nonExistent; // ❌ Type error
-});
-
-// ============================================================================
-// PRODUCTION EXAMPLE: Login Flow with Error Handling
-// ============================================================================
-
-export const RealWorldLoginExample = async () => {
-  try {
-    // 1. User logs in
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "user@example.com", password: "..." }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Login failed");
-    }
-
-    const { userId, token } = await response.json();
-
-    // 2. Emit typed event—all listening MFEs update instantly
-    EventBus.emit("user:login", { userId, token });
-
-    // 3. Navigate to dashboard
-    EventBus.emit("nav:navigate", { to: "/dashboard" });
-
-    // 4. Show success notification
-    EventBus.emit("notification:show", {
-      title: "Welcome",
-      message: `Logged in as ${email}`,
-      variant: "success",
-    });
-  } catch (error) {
-    EventBus.emit("notification:show", {
-      title: "Login failed",
-      message: error.message,
-      variant: "error",
-    });
-  }
-};
-
-// ============================================================================
-// Comparison: Without Contracts (Brittle)
-// ============================================================================
-
-/**
- * ❌ Before (untyped event system):
- *
- * EventBus.emit("login", { userId: "123" }); // Missing 'token'?
- * EventBus.subscribe("login", (data: any) => { // 'any' kills type safety
- *   console.log(data.userId);     // Works
- *   console.log(data.nonExistent); // Silent error in production
- * });
- *
- * ✅ After (with contracts):
- *
- * EventBus.emit("user:login", { userId: "123" });
- * // @ts-error: Object literal may only specify known properties
- * EventBus.emit("user:login", { username: "alice" }); // ✅ Caught at compile time
+ * DON'T:
+ * - Reference `EventBus.emit(...)` / `EventBus.subscribe(...)` directly -
+ *   those methods don't exist on the class; use the `globalEventBus`
+ *   instance and its `emit`/`on`/`off` methods.
+ * - Assume payloads are typed by key - they're `unknown` until you narrow
+ *   them yourself.
+ * - Emit very high-frequency events (dozens+/sec) through the bus; prefer
+ *   a store subscription for that kind of update volume.
  */
