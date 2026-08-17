@@ -157,9 +157,55 @@ This enables:
 
 ## MFE Registration & Mount Lifecycle
 
+```mermaid
+sequenceDiagram
+    participant Shell as Shell (MfeHost)
+    participant Remote as Remote MFE bundle
+    participant Registry as AppRegistry
+    participant Manager as MountManager
+
+    Shell->>Shell: validate host (isValidMfeHost)
+    Shell->>Remote: fetch health.json / manifest.json
+    Shell->>Remote: inject script tag (remoteEntry.js)
+    Remote->>Remote: bundle evaluates, calls createXMfeEntry(...)
+    Remote->>Registry: AppRegistry.register(name, app)
+    Registry-->>Shell: dispatch "mfe:registered" CustomEvent
+    Shell->>Shell: waitForMfe resolves (or 5s timeout)
+    Shell->>Manager: MountManager.mount(appId, container, props, hooks, app.mount)
+    Manager->>Manager: onBeforeMount hook
+    Manager->>Remote: app.mount(container, props)
+    Manager->>Manager: onAfterMount hook (raced against timeout)
+    Manager-->>Shell: mount recorded / error surfaced
+```
+
 - Each remote registers itself into `window.MFE[name]` via `AppRegistry.register()` (`packages/core/src/mfe/registry.ts`). Registration also dispatches a `mfe:registered` `CustomEvent` on `window` with `{ name }` in `detail`.
 - `MfeHost.waitForMfe` listens for that event instead of polling `window.MFE` on an interval, with a timeout (default 5s) as a safety net if registration never happens.
 - `MountManager.mount()` (`packages/core/src/mfe/mount-manager.ts`) races the actual mount (including `onBeforeMount`/`onAfterMount` hooks) against a timeout via `Promise.race`, so a hook that hangs indefinitely can't keep the mount pending forever — the timeout now actually aborts the mount attempt rather than only logging a warning while the mount continues in the background.
+
+## Cross-MFE State Sync Flow
+
+```mermaid
+sequenceDiagram
+    participant AppA as MFE A (e.g. app-react)
+    participant Store as Shared store (window singleton)
+    participant Bus as globalEventBus
+    participant AppB as MFE B (e.g. app-vue)
+
+    AppA->>Store: setState({ count: 5 })
+    Store->>Bus: syncStore subscriber emits EVENT_KEYS.APP_COUNTER
+    Bus-->>Store: same store instance receives its own event
+    Note over Store: isInternalChange guard prevents a rebroadcast loop
+    AppB->>Store: reads the same window.__COUNTER_STORE__ instance
+    Note over AppA,AppB: All MFEs on the page already share one store<br/>instance (window singleton) - EventBus sync mainly<br/>matters for listeners outside that instance (future<br/>cross-tab/cross-window bridges)
+```
+
+Common stores (counter/locale/theme/user) all follow the same shape:
+`packages/core/src/state/create-singleton-store.ts` gives every store a
+single instance per page via `window`, and `packages/core/src/state/
+sync-store.ts` (used by counter/locale) broadcasts local changes and
+applies remote ones through `globalEventBus`, guarding against rebroadcast
+loops. See [API_CONTRACTS.md](API_CONTRACTS.md#runtime-event-contracts)
+for the concrete `emit`/`on` API.
 
 ## Failure Modes & Handling
 
