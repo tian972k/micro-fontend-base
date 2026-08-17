@@ -1,62 +1,74 @@
 # API Contracts & Specifications
 
-This document defines the public API boundaries and contracts for Orbit framework—modeled on how Google Chrome, TikTok, and other large-scale platforms manage MFE interfaces.
+This document defines the public API boundaries this repo's packages
+expose to the apps that consume them (`packages/core`, `packages/config`,
+`packages/ui`), so MFEs can depend on a stable surface instead of internal
+implementation details.
 
 ---
 
 ## Design Philosophy
 
-**Goal**: Provide stable, version-proof contracts that MFEs can safely extend and evolve without breaking peer MFEs.
-
-**Inspired by:**
-
-- **Google Chrome**: Module federation contracts + versioning for internal modules
-- **TikTok**: Shared event bus with strongly-typed payloads
-- **Amazon/Airbnb**: Feature flag contracts for A/B testing across MFEs
+**Goal**: Provide a stable surface that MFEs can depend on without
+breaking when internals change, and be explicit about which parts of the
+current implementation are load-bearing vs. still evolving.
 
 ---
 
 ## Runtime Event Contracts
 
-MFEs communicate via `EventBus` with **strongly-typed payloads**.
+MFEs communicate via the shared `globalEventBus` singleton
+(`packages/core/src/events/event-bus.ts`). `emit`/`on`/`off` are
+**instance** methods on that singleton — there's no static `EventBus.emit(...)`.
 
 ### Event Definition
 
 ```typescript
-import {
-  RuntimeEventMap,
-  RuntimeEventName,
-  RuntimeEventPayload,
-} from "@repo/core/contracts";
+import { globalEventBus, EVENT_KEYS } from "@repo/core/shared";
 
-// Available events
-type Events = RuntimeEventMap;
+// Emit
+globalEventBus.emit(EVENT_KEYS.APP_COUNTER, { count: 5 });
 
-// Example: Navigate
-EventBus.emit("nav:navigate", { to: "/dashboard", replace: false });
-
-// Example: User login
-EventBus.emit("user:login", { userId: "123", token: "..." });
-
-// Example: Show notification
-EventBus.emit("notification:show", {
-  title: "Success",
-  message: "Profile updated",
-  variant: "success",
+// Listen (returns an unsubscribe function - always call it on cleanup)
+const unsubscribe = globalEventBus.on(EVENT_KEYS.APP_COUNTER, (data) => {
+  const payload = data as { count: number };
+  console.log(payload.count);
 });
 ```
 
-### Adding New Events (Extension Pattern)
+Today's event keys live in `EVENT_KEYS`
+(`packages/core/src/constants/keys.ts`) — currently just `APP_COUNTER` and
+`LOCALE_CHANGE`. Payloads are `unknown` at the bus level; each listener is
+responsible for narrowing the shape itself (see
+`packages/core/src/state/common/counter-store.ts` for the reference
+pattern), since nothing validates payload shape at runtime.
 
-When adding cross-MFE communication, extend `RuntimeEventMap`:
+There's also a `RuntimeEventMap` type
+(`packages/core/src/contracts/runtime-events.ts`) sketching a more
+strongly-typed contract (`nav:navigate`, `user:login`, `theme:set`, etc.).
+**As of this writing it isn't wired into `EventBus`** — nothing in the
+codebase actually emits or listens for those event names. Treat it as a
+design sketch for a possible future improvement (a generic, key-constrained
+`emit<K extends RuntimeEventName>(key: K, payload: RuntimeEventPayload<K>)`),
+not a currently-working API. See
+[docs/examples/typed-event-communication.ts](examples/typed-event-communication.ts)
+for a working example of the current API.
+
+### Adding New Events
 
 ```typescript
-// packages/core/src/contracts/runtime-events.ts
-export type RuntimeEventMap = {
-  // ... existing events
-  "analytics:track": { event: string; properties: Record<string, unknown> };
-};
+// packages/core/src/constants/keys.ts
+export const EVENT_KEYS = {
+  APP_COUNTER: "APP_COUNTER",
+  LOCALE_CHANGE: "LOCALE_CHANGE",
+  MY_NEW_EVENT: "MY_NEW_EVENT", // add here
+} as const;
 ```
+
+For new **synced state**, prefer the `syncStore` helper
+(`packages/core/src/state/sync-store.ts`) over hand-rolled `emit`/`on`
+pairs — it handles both directions and guards against re-broadcast loops.
+See `counter-store.ts` for a complete example.
 
 ---
 
@@ -67,13 +79,17 @@ Shared stores provide **singleton access** across MFEs.
 ### User Store (Example)
 
 ```typescript
-import { userStore } from "@repo/core/shared";
+import { userStore, userActions } from "@repo/core/shared";
 
 // Read
 const user = userStore.getState().user;
 
-// Write
-userStore.setState({ user: { id: "123", name: "Alice" } });
+// Write (prefer the actions - they set isAuthenticated correctly too)
+userActions.login({
+  name: "Alice",
+  email: "alice@example.com",
+  avatarUrl: "https://example.com/avatar.png",
+});
 
 // Subscribe
 userStore.subscribe((state) => {
@@ -87,19 +103,24 @@ userStore.subscribe((state) => {
 
 ## MFE Entry Point Contract
 
-All MFEs must expose this interface:
+All MFEs must expose this interface (`MicroApp` /`MicroAppProps` in
+`packages/core/src/types/index.ts`):
 
 ```typescript
-export interface MfeEntryPoint {
-  mount(container: HTMLElement, props?: MfeProps): void | Promise<void>;
-  unmount(container: HTMLElement): void | Promise<void>;
+export interface MicroApp {
+  mount: (container: HTMLElement, props: MicroAppProps) => void;
+  unmount: (container: HTMLElement) => void;
 }
 
-export interface MfeProps {
-  userId?: string;
-  theme?: "light" | "dark";
+export interface MicroAppConfig {
+  theme?: "light" | "dark" | "system";
   locale?: string;
   [key: string]: unknown;
+}
+
+export interface MicroAppProps extends MicroAppConfig {
+  auth?: { user: User | null; token: string };
+  eventBus?: unknown;
 }
 ```
 
@@ -140,69 +161,41 @@ export const App = () => (
 
 ## Versioning Strategy
 
-### Semantic Versioning (SemVer)
-
-```
-@repo/core@2.1.0
-  ↑    ↑  ↑
-  |    |  └─ Patch: Bug fixes (2.1.1)
-  |    └────── Minor: New APIs (2.2.0)
-  └─────────── Major: Breaking changes (3.0.0)
-```
-
-### Compatibility Matrix
-
-| Core Version  | React | Vue | Solid | Svelte |
-| ------------- | :---: | :-: | :---: | :----: |
-| 2.x           |  ✅   | ✅  |  ✅   |   ✅   |
-| 3.0 (planned) |  ✅   | 🔶  |  🔶   |   🔶   |
-
-🔶 = May require adapter updates
+Packages follow standard SemVer (`@repo/core` is currently `0.1.0` — see
+`packages/core/package.json`). Since all apps in this monorepo consume
+`@repo/core` via the workspace protocol (`workspace:*`), there isn't
+currently a real cross-version compatibility concern day-to-day — but if
+this framework is ever published externally or consumed by apps outside
+this monorepo, breaking changes to anything in this document should bump
+the major version and be called out in `CHANGELOG.md`.
 
 ---
 
-## Large-Scale MFE Patterns (Google/TikTok Inspiration)
+## Metrics & Observability
 
-### 1. Feature Flags
-
-Control rollout of new MFE features across environments.
-
-```typescript
-import { useFeatureFlag } from "@repo/core/react";
-
-export const Analytics = () => {
-  const isNewAnalyticsDashboard = useFeatureFlag("new-analytics-dashboard");
-
-  return isNewAnalyticsDashboard ? <NewDashboard /> : <OldDashboard />;
-};
-```
-
-### 2. A/B Testing
-
-Split traffic between MFE variants.
-
-```typescript
-import { getExperimentVariant } from "@repo/core/shared";
-
-const variant = getExperimentVariant("exp-new-checkout");
-// Returns: "control" | "treatment"
-```
-
-### 3. Metrics & Observability
-
-All MFEs report standardized metrics.
+`perfMonitor` (`packages/core/src/performance/monitor.ts`) tracks MFE load
+and mount timing using the Performance API. This one is real and in active
+use — see `apps/app-react/src/entry-mfe.tsx` for the reference integration.
 
 ```typescript
 import { perfMonitor } from "@repo/core/performance/monitor";
 
 perfMonitor.startMfeLoad("app-react");
 // ... mount logic
+await perfMonitor.measureMount("app-react", () => {
+  /* mount call */
+});
 perfMonitor.endMfeLoad("app-react");
 
 // Export
 const metrics = perfMonitor.getAllMetrics();
-// [{mfeId, loadTime, mountTime, errors}]
+// [{ mfeId, loadTime, mountTime, timestamp }]
 ```
+
+> Feature flags and A/B testing are **not implemented** in this codebase
+> today (no `useFeatureFlag`/`getExperimentVariant` exist). If you need
+> them, they'd be a natural extension of the `EVENT_KEYS`/`syncStore`
+> pattern above — not something to import from `@repo/core` yet.
 
 ---
 
@@ -212,26 +205,7 @@ Before releasing an MFE to production:
 
 - [ ] Entry point implements `mount`/`unmount`
 - [ ] Error boundary wraps entire app
-- [ ] Event bus communication is typed
-- [ ] Performance metrics are emitted
-- [ ] Semver bump is documented
-- [ ] Breaking changes are in CHANGELOG
+- [ ] Performance metrics are emitted (`perfMonitor`)
+- [ ] Semver bump is documented in `CHANGELOG.md`
 - [ ] MFE is tested with Shell integration
 - [ ] Manifest is generated (`health.json`, `manifest.json`)
-
----
-
-## Related Reading
-
-- **Google's Module System**: <https://bit.ly/google-module-federation>
-- **TikTok's Micro-App Architecture**: TikTok Engineering Blog
-- **Amazon's Internal MFE**: AWS re:Invent talks on monorepo scaling
-
----
-
-## Next Steps
-
-1. Implement **Feature Flags** (Q1 2026)
-2. Add **A/B Testing Support** (Q2 2026)
-3. Standardize **Metrics Collection** (Q1 2026)
-4. Publish as **npm package** (by end of 2026)
