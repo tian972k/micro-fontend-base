@@ -29,11 +29,21 @@ export class MountManager {
   ): Promise<void> {
     const { timeout = 10000, strict = false } = options;
 
-    const timeoutId = setTimeout(() => {
-      logger.error(`[MountManager] Mount timeout for "${appId}"`, { timeout });
-    }, timeout);
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    try {
+    // A timer that rejects on its own once `timeout` elapses, so that a
+    // hook (onBeforeMount/onAfterMount) that hangs forever can't keep this
+    // promise pending indefinitely. Previously the timeout only logged an
+    // error while the mount kept running in the background.
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(
+          new Error(`Mount timeout for "${appId}" after ${timeout}ms`),
+        );
+      }, timeout);
+    });
+
+    const doMount = async (): Promise<void> => {
       logger.info(`[MountManager] Mounting "${appId}"`);
 
       // Before mount hook
@@ -58,6 +68,10 @@ export class MountManager {
       });
 
       logger.info(`[MountManager] Successfully mounted "${appId}"`);
+    };
+
+    try {
+      await Promise.race([doMount(), timeoutPromise]);
     } catch (error) {
       logger.error(`[MountManager] Mount failed for "${appId}"`, error);
 
