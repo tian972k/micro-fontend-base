@@ -23,6 +23,4 @@ export default createMfeConfig({
   define: {
     "process.env": {}, // Polyfill process.env for Next.js compat
   },
-    return process.env.VERCEL === "1" ? "/" : "/";
-  },
 });
