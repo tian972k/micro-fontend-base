@@ -72,4 +72,10 @@ jobs:
           name: ${{ inputs.app }}-build
           path: |
             apps/${{ inputs.app }}/.vercel/output
+          # .vercel/output is a dot-directory. Since upload-artifact v4.4,
+          # hidden files/folders are excluded by default, which silently
+          # produced an empty artifact here. Without this flag, the
+          # downstream deploy job had nothing to deploy from and had to
+          # rebuild from scratch to compensate (see reusable-deploy-vercel.yml).
+          include-hidden-files: true
           retention-days: 1

@@ -43,6 +43,10 @@ pnpm build:packages
 pnpm build:apps
 ```
 
+### Vercel deploy artifact seems empty / deploy step re-builds from scratch
+
+`actions/upload-artifact@v4.4+` excludes hidden files and folders (anything starting with `.`) by default. `apps/<app>/.vercel/output` is a dot-directory, so it must be uploaded with `include-hidden-files: true` (see `reusable-build.yml`) or the artifact silently contains nothing. If you add new dot-prefixed paths to any `upload-artifact` step in this repo, remember this flag.
+
 ---
 
 ## Runtime Issues
