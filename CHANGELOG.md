@@ -2,10 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
-## Unreleased
+## [0.1.1] - 2026-08-17
 
 ### Fixed
 
+- **`.github/workflows/reusable-build.yml` / `reusable-deploy-vercel.yml` / `reusable-deploy-vercel-ssr.yml`**: pinned the Vercel CLI to `vercel@59.1.3` in all three workflows instead of `vercel@latest`. The build job and deploy job each ran their own separate `npm install -g vercel@latest` at different points in time; if a new CLI version shipped in between, `vercel deploy --prebuilt` could reject the artifact from `vercel build` due to a Build Output API version mismatch between the two CLI instances. This was previously masked by the redundant local rebuild in the deploy job (see the artifact-fix entry below) — since both steps ran the same CLI instance, drift wasn't possible. Now that the redundant rebuild is gone, pinning is what actually prevents the mismatch.
 - **`packages/core` — `MfeHost`**: validate that `host` is a well-formed `http(s)` URL (`isValidMfeHost`) before it's ever used to build a `<script>`/`<link>` `src`. Prevents malformed or unexpectedly-sourced `host` values from being turned into a remote script load. See [docs/ARCHITECTURE.md § Security Considerations](docs/ARCHITECTURE.md#security-considerations).
 - **`.github/workflows/reusable-build.yml` / `reusable-deploy-vercel.yml`**: the build job's `Upload artifact` step uploads `apps/<app>/.vercel/output`, a dot-prefixed (hidden) directory. Since `actions/upload-artifact@v4.4` (Sept 2024), hidden files/folders are excluded from uploads by default — so this artifact was silently empty. The deploy job then re-ran a full `vercel build` locally to compensate, defeating the entire point of the separate build/deploy jobs (build once, deploy prebuilt) and wasting CI time on every static-app deploy (app-react/app-vue/app-svelte/app-solidjs). Fixed by adding `include-hidden-files: true` to the upload step, fixing the download path in the deploy job to reconstruct `.vercel/output` correctly, and removing the now-redundant rebuild + its unnecessary `pnpm install`/Node setup/`packages-build` download steps from the deploy job.
 - **`reusable-lint.yml`**: type-check step no longer swallows failures with `|| echo`.
