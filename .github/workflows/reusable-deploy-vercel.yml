@@ -34,28 +34,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Download packages build
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-build
-          path: packages
-
       - name: Download app build
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.app }}-build
-          path: apps/${{ inputs.app }}
+          # upload-artifact flattens a single upload path down to that
+          # directory's contents (its "least common ancestor"), so what
+          # was uploaded from apps/${app}/.vercel/output needs to be
+          # downloaded back into that same directory to reconstruct it.
+          path: apps/${{ inputs.app }}/.vercel/output
 
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
@@ -71,19 +58,6 @@ jobs:
             vercel pull --yes --environment=production --token=$VERCEL_TOKEN
           else
             vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
-          fi
-
-      - name: Build with Vercel
-        working-directory: apps/${{ inputs.app }}
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          # Make pnpm available globally for Vercel subprocess
-          npm install -g pnpm@9
-          if [ "${{ inputs.is_production }}" == "true" ]; then
-            vercel build --prod --token=$VERCEL_TOKEN
-          else
-            vercel build --token=$VERCEL_TOKEN
           fi
 
       - name: Deploy to Vercel
