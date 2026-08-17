@@ -45,7 +45,7 @@ jobs:
           path: apps/${{ inputs.app }}/.vercel/output
 
       - name: Install Vercel CLI
-        run: npm install -g vercel@latest
+        run: npm install -g vercel@59.1.3
 
       - name: Pull Vercel Environment
         working-directory: apps/${{ inputs.app }}
