@@ -146,6 +146,21 @@ This enables:
 
 ---
 
+## Security Considerations
+
+`MfeHost` (`packages/core/src/mfe/react/mfe-host.tsx`) dynamically injects `<script>`/`<link>` tags for the `host` it's given, and later executes whatever `mount`/`unmount` that remote registers on `window.MFE`. That makes `host` a trust boundary:
+
+- **`host` must always come from trusted, server-controlled configuration** — see `apps/shell/app/server/config.ts`, which resolves each MFE's host from environment/port config, never from client-supplied input (query params, user profile fields, etc.).
+- `MfeHost` validates `host` is a well-formed `http(s)` URL before using it (`isValidMfeHost`), as a defense-in-depth check for any other consumer of the component. This is a shape check, not an allowlist — callers that accept `host` from a less trusted source should add their own allowlist on top.
+- CSS/JS assets are only injected once per URL (`document.querySelector` dedupe), so a malicious or misbehaving remote can't be used to keep injecting duplicate assets on repeated mounts.
+- There is currently no Subresource Integrity (SRI) check on the loaded remote entry script. This is a known trade-off of the dynamic-script-tag loading strategy (vs. native Module Federation), acceptable when all remotes are deployed from this monorepo's own CI, but worth revisiting before allowing third-party-hosted remotes.
+
+## MFE Registration & Mount Lifecycle
+
+- Each remote registers itself into `window.MFE[name]` via `AppRegistry.register()` (`packages/core/src/mfe/registry.ts`). Registration also dispatches a `mfe:registered` `CustomEvent` on `window` with `{ name }` in `detail`.
+- `MfeHost.waitForMfe` listens for that event instead of polling `window.MFE` on an interval, with a timeout (default 5s) as a safety net if registration never happens.
+- `MountManager.mount()` (`packages/core/src/mfe/mount-manager.ts`) races the actual mount (including `onBeforeMount`/`onAfterMount` hooks) against a timeout via `Promise.race`, so a hook that hangs indefinitely can't keep the mount pending forever — the timeout now actually aborts the mount attempt rather than only logging a warning while the mount continues in the background.
+
 ## Failure Modes & Handling
 
 | Failure Mode         | Symptom           | Detection            | Resolution                |
