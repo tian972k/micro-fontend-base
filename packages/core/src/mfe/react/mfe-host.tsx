@@ -6,6 +6,52 @@ import { MfeMaintenance } from "./mfe-host-states/mfe-maintenance";
 import { MfeLoading } from "./mfe-host-states/mfe-loading";
 import { MfeStrategyFactory } from "../strategy/factory";
 import { type MicroAppType, MfeStatus } from "../../types";
+import { MFE_REGISTERED_EVENT, type MfeRegisteredEventDetail } from "../registry";
+
+/**
+ * Validates that `host` is a well-formed absolute http(s) URL before it is
+ * ever used to build a <script>/<link> src. This is a defense-in-depth
+ * check: `host` should always come from trusted, server-controlled config
+ * (see apps/shell/app/server/config.ts), never directly from user input,
+ * but MfeHost is a reusable primitive and shouldn't assume its caller got
+ * that right.
+ */
+function isValidMfeHost(host: string): boolean {
+  try {
+    const url = new URL(host);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Safe JSON.stringify for the `props` dependency comparison below.
+ * Falls back to a stable placeholder instead of throwing if `props`
+ * contains functions, circular references, etc.
+ */
+function safeStringifyProps(props: MicroAppProps): string {
+  try {
+    return JSON.stringify(props);
+  } catch {
+    return "[unserializable-props]";
+  }
+}
+
+/**
+ * Whether we're running in a dev build. Cache-busting query params
+ * (`?t=timestamp`) are only appended in dev, where always-fresh health/
+ * manifest checks matter more than CDN cacheability. In production this
+ * would defeat CDN caching on every single MfeHost mount.
+ */
+function isDevBuild(): boolean {
+  try {
+    // Vite exposes this at build time; guarded for non-Vite consumers.
+    return Boolean((import.meta as any)?.env?.DEV);
+  } catch {
+    return false;
+  }
+}
 
 // Cache for manifest file names
 const manifestCache: Record<string, string> = {};
@@ -112,29 +158,57 @@ export function MfeHost({
           return resolve(window.MFE[name]);
         }
 
-        const startTime = Date.now();
-        const interval = setInterval(() => {
-          if (window.MFE?.[name]) {
-            clearInterval(interval);
+        // Event-driven wait instead of polling: AppRegistry.register()
+        // dispatches MFE_REGISTERED_EVENT on window as soon as the app
+        // is available, so we just listen for that (with a timeout as
+        // a safety net in case registration never happens).
+        const onRegistered = (event: Event) => {
+          const detail = (event as CustomEvent<MfeRegisteredEventDetail>)
+            .detail;
+          if (detail?.name === name && window.MFE?.[name]) {
+            cleanup();
             resolve(window.MFE[name]);
-          } else if (Date.now() - startTime > timeout) {
-            clearInterval(interval);
-            reject(
-              new Error(`Timeout waiting for MicroApp "${name}" to register`),
-            );
           }
-        }, 50);
+        };
+
+        const timeoutId = setTimeout(() => {
+          cleanup();
+          reject(
+            new Error(`Timeout waiting for MicroApp "${name}" to register`),
+          );
+        }, timeout);
+
+        const cleanup = () => {
+          clearTimeout(timeoutId);
+          window.removeEventListener(MFE_REGISTERED_EVENT, onRegistered);
+        };
+
+        window.addEventListener(MFE_REGISTERED_EVENT, onRegistered);
       });
     };
 
     const loadMfe = async () => {
       if (!mounted) return;
 
+      // Reject early if `host` isn't a well-formed http(s) URL, before it's
+      // ever interpolated into a fetch URL or a <script>/<link> src.
+      if (!isValidMfeHost(host)) {
+        console.error(`[MfeHost] Invalid host for "${name}": "${host}"`);
+        if (mounted) {
+          setStatus(MfeStatus.ERROR);
+          setErrorDetails(`Invalid MFE host configuration for "${name}"`);
+        }
+        return;
+      }
+
+      // Cache-busting query param, dev-only (see isDevBuild doc comment).
+      const cacheBust = isDevBuild() ? `?t=${Date.now()}` : "";
+
       // Helper to fetch health.json
       const fetchHealth = async (): Promise<HealthCheckResponse> => {
         let healthCheckUrl = `${host}`;
         if (!healthCheckUrl.includes("health.json")) {
-          healthCheckUrl = `${host}${host.endsWith("/") ? "" : "/"}health.json?t=${Date.now()}`;
+          healthCheckUrl = `${host}${host.endsWith("/") ? "" : "/"}health.json${cacheBust}`;
         }
 
         let healthRes;
@@ -155,16 +229,13 @@ export function MfeHost({
 
       // Helper to fetch manifest.json
       const fetchManifest = async (): Promise<MfeManifest> => {
-        const manifestRes = await fetch(
-          `${host}/manifest.json?t=${Date.now()}`,
-        );
+        const manifestRes = await fetch(`${host}/manifest.json${cacheBust}`);
         if (!manifestRes.ok) throw new Error("Manifest not found");
         return manifestRes.json();
       };
 
       // --- CHECK IF ALREADY LOADED ---
       if (window.MFE?.[name]) {
-        // ... (existing cache check logic preserved - skipped for brevity if identical)
         if (!shouldCheckVersion(name)) {
           const cachedVersion = getCachedVersion(name);
           console.log(
@@ -175,8 +246,8 @@ export function MfeHost({
         }
 
         try {
-          // Keep version check logic but make it non-blocking if possible?
-          // For now, keep it blocking to ensure correct version, but maybe parallelize manifest fetch if needed later (manifest not needed here though)
+          // Blocking on purpose: we need the confirmed version before
+          // deciding whether to reuse the mounted app or reload it.
           const health = await fetchHealth();
           const cachedVersion = getCachedVersion(name);
 
@@ -222,11 +293,10 @@ export function MfeHost({
           return;
         }
 
-        // PARALLEL FETCHING OPTIMIZATION
-        // Start fetching manifest immediately alongside health check
+        // Fetch health and manifest in parallel to shave latency off the
+        // happy path. If the app turns out to be in maintenance mode, we
+        // simply discard the (already in-flight) manifest response below.
         const healthPromise = fetchHealth();
-        // manifest promise depends on successful health check in original logic for maintenance mode?
-        // Actually, we can fetch both. If maintenance, we discard manifest result.
         const manifestPromise = fetchManifest();
 
         // Wait for health check first to check status
@@ -347,7 +417,7 @@ export function MfeHost({
         strategy.unmount(window.MFE[name], containerRef.current);
       }
     };
-  }, [name, host, type, JSON.stringify(props)]);
+  }, [name, host, type, safeStringifyProps(props)]);
 
   if (status === MfeStatus.MAINTENANCE) {
     return maintenanceComponent || <MfeMaintenance name={name} />;
