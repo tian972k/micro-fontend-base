@@ -6,7 +6,10 @@ import { MfeMaintenance } from "./mfe-host-states/mfe-maintenance";
 import { MfeLoading } from "./mfe-host-states/mfe-loading";
 import { MfeStrategyFactory } from "../strategy/factory";
 import { type MicroAppType, MfeStatus } from "../../types";
-import { MFE_REGISTERED_EVENT, type MfeRegisteredEventDetail } from "../registry";
+import {
+  MFE_REGISTERED_EVENT,
+  type MfeRegisteredEventDetail,
+} from "../registry";
 
 /**
  * Validates that `host` is a well-formed absolute http(s) URL before it is
@@ -274,7 +277,7 @@ export function MfeHost({
             if (mounted) await mountMicroApp();
             return;
           }
-        } catch (error) {
+        } catch {
           console.warn(
             `[MfeHost] ${name} health check failed, using cached version`,
           );
