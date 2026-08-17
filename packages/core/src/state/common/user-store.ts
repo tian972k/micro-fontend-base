@@ -1,4 +1,5 @@
 import { createStore, type StoreApi } from "zustand/vanilla";
+import { createSingletonStore } from "../create-singleton-store";
 
 // --- Types ---
 
@@ -21,10 +22,6 @@ export interface UserState {
 
 type UserStoreApi = StoreApi<UserState>;
 
-interface GlobalWindow extends Window {
-  __USER_STORE__?: UserStoreApi;
-}
-
 const initialState = {
   isAuthenticated: false,
   user: null,
@@ -42,28 +39,16 @@ const createUserStore = (): UserStoreApi =>
       })),
   }));
 
-// --- Singleton Logic ---
-
-let store$: UserStoreApi;
-
-if (typeof window !== "undefined") {
-  const win = window as GlobalWindow;
-  if (!win.__USER_STORE__) {
-    win.__USER_STORE__ = createUserStore();
-  }
-  store$ = win.__USER_STORE__;
-} else {
-  // Server-side: Create a fresh store per request context (conceptually)
-  store$ = createUserStore();
-}
-
 // --- Exports ---
 
 /**
  * The singleton vanilla Zustand store instance.
  * Useful for usage outside of React components or in other vanilla JS contexts.
  */
-export const userStore = store$;
+export const userStore = createSingletonStore(
+  "__USER_STORE__",
+  createUserStore,
+);
 
 // Re-export actions for backward compatibility if needed,
 // OR prefer using the store's methods directly.

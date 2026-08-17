@@ -1,6 +1,7 @@
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { globalEventBus } from "../../events/event-bus";
+import { createSingletonStore } from "../create-singleton-store";
+import { syncStore } from "../sync-store";
 import { EVENT_KEYS } from "../../constants/keys";
 
 export type Locale = "en" | "vi";
@@ -14,19 +15,13 @@ export interface LocaleState {
 
 type LocaleStoreApi = StoreApi<LocaleState>;
 
-interface GlobalWindow extends Window {
-  __LOCALE_STORE__?: LocaleStoreApi;
-}
-
 const createLocaleStore = (): LocaleStoreApi => {
   const store = createStore<LocaleState>()(
     persist(
       (set): LocaleState => ({
         locale: "en",
         setLocale: (locale: Locale): void => {
-          console.log("[LocaleStore] setLocale called:", locale);
           set({ locale });
-          globalEventBus.emit(EVENT_KEYS.LOCALE_CHANGE, { locale });
         },
       }),
       {
@@ -44,36 +39,21 @@ const createLocaleStore = (): LocaleStoreApi => {
     ),
   );
 
-  // Listen for cross-MFE sync
-  globalEventBus.on(EVENT_KEYS.LOCALE_CHANGE, (data: unknown) => {
-    const payload = data as { locale: Locale };
-    console.log("[LocaleStore] EventBus received:", payload);
-    if (
-      payload &&
-      payload.locale &&
-      payload.locale !== store.getState().locale
-    ) {
-      console.log("[LocaleStore] Updating from EventBus:", payload.locale);
-      store.setState({ locale: payload.locale });
-    }
-  });
+  // Keep `locale` in sync with the same store in every other MFE via the
+  // shared EventBus (both directions: broadcast local changes, and apply
+  // changes broadcast by others). `setLocale` itself stays a plain
+  // zustand action - it doesn't need to know about cross-MFE sync at all.
+  syncStore(
+    {
+      getState: () => store.getState(),
+      setState: (state) => store.setState(state),
+      subscribe: (listener) => store.subscribe(listener),
+    },
+    { key: EVENT_KEYS.LOCALE_CHANGE },
+  );
 
   return store;
 };
-
-// --- Singleton Logic ---
-
-let store$: LocaleStoreApi;
-
-if (typeof window !== "undefined") {
-  const win = window as GlobalWindow;
-  if (!win.__LOCALE_STORE__) {
-    win.__LOCALE_STORE__ = createLocaleStore();
-  }
-  store$ = win.__LOCALE_STORE__;
-} else {
-  store$ = createLocaleStore();
-}
 
 // --- Exports ---
 
@@ -81,7 +61,10 @@ if (typeof window !== "undefined") {
  * The singleton vanilla Zustand store instance for locale.
  * Framework-agnostic - use with any framework.
  */
-export const localeStore = store$;
+export const localeStore = createSingletonStore(
+  "__LOCALE_STORE__",
+  createLocaleStore,
+);
 
 /**
  * Available locales with labels
