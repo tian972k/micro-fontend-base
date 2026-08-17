@@ -1,6 +1,16 @@
 # MFE Adapter Pattern & Framework Integration Guide
 
-This guide documents the **adapter pattern** used across Orbit, inspired by how Google Chrome, Figma, and TikTok manage cross-framework integrations at scale.
+This guide documents the **adapter pattern** used across Orbit: each
+framework exposes the same `mount`/`unmount` interface to the Shell.
+
+> **Note on code samples below:** the event names used (`"nav:navigate"`,
+> `"user:login"`, etc.) are illustrative of the _pattern_, not currently
+> wired-up event keys — today's real event keys are `EVENT_KEYS.APP_COUNTER`
+> and `EVENT_KEYS.LOCALE_CHANGE` (see
+> [API_CONTRACTS.md](API_CONTRACTS.md#runtime-event-contracts)). Calls
+> below correctly use `globalEventBus.emit`/`globalEventBus.on` (the real
+> instance API - not a static `EventBus.emit`), just with placeholder
+> event names to demonstrate the shape of the pattern.
 
 ---
 
@@ -62,21 +72,21 @@ export const unmount = async (container: HTMLElement) => {
 
 ```typescript
 // app-react/src/mfe.tsx
-import { EventBus } from "@repo/core/shared";
+import { globalEventBus } from "@repo/core/shared";
 
 let eventListeners: (() => void)[] = [];
 
 export const mount = async (container: HTMLElement, props?: MfeProps) => {
   // Register listeners
   eventListeners.push(
-    EventBus.subscribe("nav:navigate", (payload) => {
+    globalEventBus.on("nav:navigate", (payload) => {
       console.log("Navigating to:", payload.to);
       // Update local state, redirect, etc.
     }),
   );
 
   eventListeners.push(
-    EventBus.subscribe("user:login", (payload) => {
+    globalEventBus.on("user:login", (payload) => {
       // Update user context
       setUser({ id: payload.userId, token: payload.token });
     }),
@@ -132,14 +142,14 @@ export const unmount = async (container: HTMLElement) => {
 
 ```typescript
 // app-vue/src/mfe.ts
-import { EventBus, userStore } from "@repo/core/shared";
+import { globalEventBus, userStore } from "@repo/core/shared";
 
 let unsubscribers: (() => void)[] = [];
 
 export const mount = async (container: HTMLElement, props?: MfeProps) => {
   // Register event listeners at MFE level (not component level)
   unsubscribers.push(
-    EventBus.subscribe("user:login", (payload) => {
+    globalEventBus.on("user:login", (payload) => {
       // Update Zustand store, which Vue components can read via `useStore`
       userStore.setState({
         user: { id: payload.userId, authenticated: true },
@@ -193,14 +203,14 @@ watch(user, (newUser) => {
 ```typescript
 // app-svelte/src/mfe.ts
 import App from "./App.svelte";
-import { EventBus, userStore } from "@repo/core/shared";
+import { globalEventBus, userStore } from "@repo/core/shared";
 
 let app: App;
 let unsubscribers: (() => void)[] = [];
 
 export const mount = async (container: HTMLElement, props?: MfeProps) => {
   unsubscribers.push(
-    EventBus.subscribe("user:login", (payload) => {
+    globalEventBus.on("user:login", (payload) => {
       userStore.setState({
         user: { id: payload.userId, authenticated: true },
       });
@@ -252,14 +262,14 @@ export const unmount = async (container: HTMLElement) => {
 import { render } from "solid-js/web";
 import { createEffect, onCleanup } from "solid-js";
 import App from "./App";
-import { EventBus } from "@repo/core/shared";
+import { globalEventBus } from "@repo/core/shared";
 
 let dispose: (() => void) | null = null;
 let eventUnsubscribers: (() => void)[] = [];
 
 export const mount = async (container: HTMLElement, props?: MfeProps) => {
   eventUnsubscribers.push(
-    EventBus.subscribe("user:login", (payload) => {
+    globalEventBus.on("user:login", (payload) => {
       console.log("Logged in:", payload.userId);
       // Update SolidJS signals as needed
     }),
@@ -344,7 +354,7 @@ const listeners: (() => void)[] = [];
 const timers: NodeJS.Timeout[] = [];
 
 export const mount = async (container: HTMLElement, props?: MfeProps) => {
-  listeners.push(EventBus.subscribe("event:name", handler));
+  listeners.push(globalEventBus.on("event:name", handler));
   timers.push(setInterval(pollSomething, 5000));
 };
 
