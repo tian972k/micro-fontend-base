@@ -12,19 +12,24 @@ import {
 } from "../registry";
 
 /**
- * Validates that `host` is a well-formed absolute http(s) URL before it is
- * ever used to build a <script>/<link> src. This is a defense-in-depth
- * check: `host` should always come from trusted, server-controlled config
- * (see apps/shell/app/server/config.ts), never directly from user input,
- * but MfeHost is a reusable primitive and shouldn't assume its caller got
- * that right.
+ * Validates `host` and normalizes it (no trailing slash) before it is ever
+ * used to build a fetch URL or a <script>/<link> src. This is a
+ * defense-in-depth check: `host` should always come from trusted,
+ * server-controlled config (see apps/shell/app/server/config.ts), never
+ * directly from user input, but MfeHost is a reusable primitive and
+ * shouldn't assume its caller got that right.
+ *
+ * Same-origin relative hosts (e.g. "/api/proxy/react/", used on Vercel)
+ * are accepted; anything that resolves to a non-http(s) URL is rejected.
+ * Returns `null` when the host is invalid.
  */
-function isValidMfeHost(host: string): boolean {
+function normalizeMfeHost(host: string): string | null {
   try {
-    const url = new URL(host);
-    return url.protocol === "http:" || url.protocol === "https:";
+    const url = new URL(host, window.location.origin);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    return host.replace(/\/+$/, "");
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -147,13 +152,23 @@ export function MfeHost({
     typeof window !== "undefined" && !!window.MFE?.[name],
   );
 
+  // Bumping this re-runs the load effect, so "Retry" doesn't need a full
+  // page reload (which would also throw away the shell's state).
+  const [retryCount, setRetryCount] = useState(0);
+
   const handleRetry = () => {
+    setErrorDetails("");
     setStatus(MfeStatus.IDLE);
-    window.location.reload();
+    setRetryCount((count) => count + 1);
   };
 
   useEffect(() => {
     let mounted = true;
+    // Captured once so cleanup unmounts from the same element we mounted
+    // into, even if the ref has changed by the time cleanup runs.
+    const container = containerRef.current;
+    // Only unmount in cleanup if this effect actually mounted the app.
+    let didMount = false;
 
     const waitForMfe = (name: string, timeout = 5000): Promise<MicroApp> => {
       return new Promise((resolve, reject) => {
@@ -195,7 +210,8 @@ export function MfeHost({
 
       // Reject early if `host` isn't a well-formed http(s) URL, before it's
       // ever interpolated into a fetch URL or a <script>/<link> src.
-      if (!isValidMfeHost(host)) {
+      const baseUrl = normalizeMfeHost(host);
+      if (baseUrl === null) {
         console.error(`[MfeHost] Invalid host for "${name}": "${host}"`);
         if (mounted) {
           setStatus(MfeStatus.ERROR);
@@ -209,10 +225,9 @@ export function MfeHost({
 
       // Helper to fetch health.json
       const fetchHealth = async (): Promise<HealthCheckResponse> => {
-        let healthCheckUrl = `${host}`;
-        if (!healthCheckUrl.includes("health.json")) {
-          healthCheckUrl = `${host}${host.endsWith("/") ? "" : "/"}health.json${cacheBust}`;
-        }
+        const healthCheckUrl = baseUrl.endsWith("health.json")
+          ? baseUrl
+          : `${baseUrl}/health.json${cacheBust}`;
 
         let healthRes;
         try {
@@ -232,7 +247,7 @@ export function MfeHost({
 
       // Helper to fetch manifest.json
       const fetchManifest = async (): Promise<MfeManifest> => {
-        const manifestRes = await fetch(`${host}/manifest.json${cacheBust}`);
+        const manifestRes = await fetch(`${baseUrl}/manifest.json${cacheBust}`);
         if (!manifestRes.ok) throw new Error("Manifest not found");
         return manifestRes.json();
       };
@@ -301,6 +316,9 @@ export function MfeHost({
         // simply discard the (already in-flight) manifest response below.
         const healthPromise = fetchHealth();
         const manifestPromise = fetchManifest();
+        // If we bail out before awaiting the manifest (maintenance mode or
+        // a failed health check), don't let its rejection go unhandled.
+        manifestPromise.catch(() => {});
 
         // Wait for health check first to check status
         const health = await healthPromise;
@@ -336,7 +354,7 @@ export function MfeHost({
 
         // 3. Inject Assets
         cssFiles.forEach((css: string) => {
-          const cssUrl = css.startsWith("http") ? css : `${host}/${css}`;
+          const cssUrl = css.startsWith("http") ? css : `${baseUrl}/${css}`;
           if (!document.querySelector(`link[href^="${cssUrl}"]`)) {
             const link = document.createElement("link");
             link.rel = "stylesheet";
@@ -347,7 +365,7 @@ export function MfeHost({
 
         const scriptUrl = entryFile.startsWith("http")
           ? entryFile
-          : `${host}/${entryFile}`;
+          : `${baseUrl}/${entryFile}`;
 
         // CACHE OPTIMIZATION:
         // Only add timestamp if file does not look hashed.
@@ -389,17 +407,21 @@ export function MfeHost({
     };
 
     const mountMicroApp = async () => {
-      if (!containerRef.current) return;
+      if (!container) return;
       try {
         const microApp = await waitForMfe(name);
+        // The host may have unmounted (route change, props change) while we
+        // were waiting; mounting now would leak an app into a detached node.
+        if (!mounted) return;
         // Use Strategy Factory to determine how to mount
         const strategy = MfeStrategyFactory.get(type);
-        strategy.mount(microApp, containerRef.current, {
+        strategy.mount(microApp, container, {
           theme: "light",
           ...props,
         });
+        didMount = true;
 
-        if (mounted) setStatus(MfeStatus.MOUNTED);
+        setStatus(MfeStatus.MOUNTED);
       } catch (err: unknown) {
         console.error(`[MfeHost] Error mounting ${name}:`, err);
         if (mounted) {
@@ -415,12 +437,12 @@ export function MfeHost({
 
     return () => {
       mounted = false;
-      if (containerRef.current && window.MFE?.[name]) {
+      if (didMount && container && window.MFE?.[name]) {
         const strategy = MfeStrategyFactory.get(type);
-        strategy.unmount(window.MFE[name], containerRef.current);
+        strategy.unmount(window.MFE[name], container);
       }
     };
-  }, [name, host, type, safeStringifyProps(props)]);
+  }, [name, host, type, safeStringifyProps(props), retryCount]);
 
   if (status === MfeStatus.MAINTENANCE) {
     return maintenanceComponent || <MfeMaintenance name={name} />;
