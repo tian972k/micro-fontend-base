@@ -1,79 +1,46 @@
-import { PORTS, APP_IDS } from "@repo/config";
-
-// MFE port mapping for production (exposed via docker-compose)
-const MFE_PORTS: Record<string, number> = {
-  [APP_IDS.REACT]: 8001,
-  [APP_IDS.NEXTJS]: 8002,
-  [APP_IDS.VUE]: 8003,
-  [APP_IDS.SVELTE]: 8004,
-  [APP_IDS.SOLIDJS]: 8005,
-};
+import { MFE_APPS, PORTS, type MfeApp } from "@repo/config";
 
 /**
- * Get app configuration for MFE loading.
+ * Runtime MFE registry for the shell, derived from MFE_APPS.
  *
- * IMPORTANT: These URLs are used by the BROWSER (client-side) to fetch MFE assets.
- * Browser cannot resolve Docker internal hostnames like 'http://app-react'.
+ * The URLs returned here are used by the BROWSER to load MFE code, so
+ * they must be reachable from the client (not Docker-internal hostnames).
  *
- * Options:
- * 1. Development: http://localhost:{PORTS[appId]} (Vite dev server ports)
- * 2. Production (Docker): http://localhost:{MFE_PORTS[appId]} (exposed Docker ports)
- * 3. Production (Vercel): Relative paths like /react/, /vue/ (shell's vercel.json proxies these)
+ * Resolution order for each app:
+ * 1. MFE_URL_<ID> env var (e.g. MFE_URL_APP_REACT=https://cdn.example.com/react/v42)
+ *    - read at request time, so one MFE can be repointed (rollback, canary,
+ *      new release) without rebuilding or redeploying the shell.
+ * 2. Development: the app's Vite dev server (http://localhost:<port>).
+ * 3. Vercel: the shell's same-origin proxy (/api/proxy/<slug>/).
+ * 4. Docker Compose / other: http://localhost:<port> (ports exposed by compose).
  */
-export function getAppUrl(appId: string) {
-  const isDevelopment = process.env.NODE_ENV !== "production";
-
-  if (isDevelopment) {
-    // Development: use Vite dev server ports
-    return `http://localhost:${(PORTS as any)[appId]}`;
+export function getAppUrl(appId: string): string {
+  const app = MFE_APPS.find((a) => a.id === appId);
+  if (!app) {
+    throw new Error(`Unknown MFE "${appId}" (not in MFE_APPS)`);
   }
 
-  // Production: determine deployment target
+  const override = process.env[envKeyFor(app)];
+  if (override) return override;
+
+  if (process.env.NODE_ENV !== "production") {
+    return `http://localhost:${PORTS[app.id] ?? app.port}`;
+  }
   if (process.env.VERCEL) {
-    // Vercel deployment: use proxy paths via /api/proxy/[app]
-    // This ensures proper error handling and health checks
-    // /api/proxy/react/ → health check → https://app-react.vercel.app/
-    const pathMap: Record<string, string> = {
-      [APP_IDS.REACT]: "/api/proxy/react/",
-      [APP_IDS.NEXTJS]: "/api/proxy/nextjs/",
-      [APP_IDS.VUE]: "/api/proxy/vue/",
-      [APP_IDS.SVELTE]: "/api/proxy/svelte/",
-      [APP_IDS.SOLIDJS]: "/api/proxy/solid/",
-    };
-    return pathMap[appId] || `/api/proxy/${appId}/`;
+    return `/api/proxy/${app.slug}/`;
   }
-
-  // Docker Compose: use exposed ports
-  // Browser accesses localhost:{exposed_port} which maps to container:80
-  const mfePort = MFE_PORTS[appId];
-  if (mfePort) {
-    return `http://localhost:${mfePort}`;
-  }
-
-  // Fallback: should not reach here
-  console.warn(`No URL configured for ${appId}`);
-  return `http://localhost:${(PORTS as any)[appId]}`;
+  return `http://localhost:${app.port}`;
 }
 
-/**
- * Get app configuration for MFE loading.
- *
- * IMPORTANT: These URLs are used by the BROWSER (client-side) to fetch MFE assets.
- * Browser cannot resolve Docker internal hostnames like 'http://app-react'.
- *
- * Options:
- * 1. Development: http://localhost:{PORTS[appId]} (Vite dev server ports)
- * 2. Production (Docker): http://localhost:{MFE_PORTS[appId]} (exposed Docker ports)
- * 3. Production (Vercel): Relative paths like /react/, /vue/ (shell's vercel.json proxies these)
- */
+/** MFE_URL_APP_REACT for app-react, etc. */
+export function envKeyFor(app: Pick<MfeApp, "id">): string {
+  return `MFE_URL_${app.id.replace(/-/g, "_").toUpperCase()}`;
+}
+
 export function getAppConfig() {
   return {
-    apps: {
-      [APP_IDS.REACT]: getAppUrl(APP_IDS.REACT),
-      [APP_IDS.NEXTJS]: getAppUrl(APP_IDS.NEXTJS),
-      [APP_IDS.VUE]: getAppUrl(APP_IDS.VUE),
-      [APP_IDS.SVELTE]: getAppUrl(APP_IDS.SVELTE),
-      [APP_IDS.SOLIDJS]: getAppUrl(APP_IDS.SOLIDJS),
-    },
+    apps: Object.fromEntries(
+      MFE_APPS.map((app) => [app.id, getAppUrl(app.id)]),
+    ) as Record<MfeApp["id"], string>,
   };
 }
