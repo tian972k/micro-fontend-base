@@ -1,13 +1,12 @@
-import { ActionFunctionArgs, redirect } from "@remix-run/node";
+import { redirect, type ActionFunctionArgs } from "@remix-run/node";
+import { logout } from "../../server/auth.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  // In a real app, you would destroy the session here.
-  // e.g., return redirect("/login", { headers: { "Set-Cookie": await destroySession(session) } });
-
-  // For this demo, we just redirect.
-  return redirect("/login");
+  return logout(request);
 };
 
+// Logging out must be a POST (a GET could be triggered cross-site by an
+// <img> tag); plain visits just go back to the login page.
 export const loader = async () => {
   return redirect("/login");
 };

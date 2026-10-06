@@ -1,26 +1,24 @@
 import {
   Outlet,
-  redirect,
   useRouteError,
   isRouteErrorResponse,
   useLocation,
+  useLoaderData,
   Link,
 } from "@remix-run/react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@repo/ui";
 import { AppSidebar } from "@/components/layout/sidebar";
 import { DebugPanel } from "@/components/debug-panel";
-import { LoaderFunctionArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useEffect } from "react";
 import { userActions } from "@repo/core/react";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { Search } from "@/components/dashboard/search";
+import { requireUser } from "../../server/auth.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const cookieHeader = request.headers.get("Cookie");
-  if (!cookieHeader || !cookieHeader.includes("auth_token=")) {
-    return redirect("/login");
-  }
-  return null;
+  const user = await requireUser(request);
+  return json({ user });
 };
 
 function Breadcrumbs() {
@@ -48,15 +46,17 @@ function Breadcrumbs() {
 }
 
 export default function DashboardRoute() {
-  // Simulate fetching user profile
+  const { user } = useLoaderData<typeof loader>();
+
+  // Publish the server-verified user to the shared store so every MFE
+  // sees the same identity.
   useEffect(() => {
-    const dummyUser = {
-      name: "Tuan Pham",
-      email: "tuan.pham@example.com",
-      avatarUrl: "https://github.com/shadcn.png",
-    };
-    userActions.login(dummyUser);
-  }, []);
+    userActions.login({
+      name: user.name,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+    });
+  }, [user.name, user.email, user.avatarUrl]);
 
   return (
     <SidebarProvider>

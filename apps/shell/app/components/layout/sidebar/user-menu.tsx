@@ -33,6 +33,7 @@ import {
 import { useSubmit } from "@remix-run/react";
 import {
   useUserStore,
+  userActions,
   useThemeStore,
   useLocaleStore,
   type Theme,
@@ -49,6 +50,8 @@ export function UserMenu() {
   const { t, i18n } = useTranslation();
 
   const handleLogout = () => {
+    // Clear the shared store so MFEs don't keep showing the old user.
+    userActions.logout();
     submit(null, { method: "post", action: "/logout" });
   };
 
