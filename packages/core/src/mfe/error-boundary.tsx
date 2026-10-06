@@ -6,6 +6,7 @@
 import React from "react";
 import type { MfeError } from "../types/mfe-context";
 import { logger } from "../logger/logger";
+import { telemetry } from "../telemetry";
 
 interface ErrorBoundaryProps {
   appId: string;
@@ -49,6 +50,12 @@ export class MfeErrorBoundary extends React.Component<
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
+    });
+
+    telemetry.captureError(error, {
+      mfeId: appId,
+      source: "MfeErrorBoundary",
+      extra: { componentStack: errorInfo.componentStack },
     });
 
     // Notify parent about error
@@ -162,6 +169,11 @@ export function useErrorHandler(
 ) {
   return (error: Error, errorInfo?: { componentStack?: string }) => {
     logger.error(`[useErrorHandler] Error in "${appId}"`, error);
+    telemetry.captureError(error, {
+      mfeId: appId,
+      source: "useErrorHandler",
+      extra: { componentStack: errorInfo?.componentStack },
+    });
 
     if (onError) {
       onError({

@@ -1,5 +1,6 @@
 import React, { Component, type ReactNode, type ErrorInfo } from "react";
 import { mfeLogger } from "../logger";
+import { telemetry } from "../telemetry";
 
 interface Props {
   children: ReactNode;
@@ -44,43 +45,13 @@ export class MfeErrorBoundary extends Component<Props, State> {
     // Call custom error handler
     onError?.(error, errorInfo);
 
-    // Send to monitoring in production
-    if (!import.meta.env?.DEV && typeof window !== "undefined") {
-      this.sendToMonitoring(error, errorInfo);
-    }
-  }
-
-  private sendToMonitoring(error: Error, errorInfo: ErrorInfo) {
-    // Send to Sentry, Datadog, etc.
-    if (window.Sentry) {
-      window.Sentry.captureException(error, {
-        tags: {
-          mfe: this.props.mfeId || "unknown",
-          component: "ErrorBoundary",
-        },
-        extra: {
-          componentStack: errorInfo.componentStack,
-        },
-      });
-    }
-
-    // Log to custom endpoint
-    fetch("/api/errors", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        mfeId: this.props.mfeId,
-        message: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack,
-        timestamp: new Date().toISOString(),
-      }),
-    }).catch((err: unknown) =>
-      mfeLogger.errorWithStack(
-        "ErrorBoundary",
-        err instanceof Error ? err : new Error(String(err)),
-      ),
-    );
+    // Report through the shared telemetry reporters (beacon endpoint,
+    // Sentry, ... whatever the host installed).
+    telemetry.captureError(error, {
+      mfeId: mfeId || "unknown",
+      source: "ErrorBoundary",
+      extra: { componentStack: errorInfo.componentStack },
+    });
   }
 
   private handleReset = () => {

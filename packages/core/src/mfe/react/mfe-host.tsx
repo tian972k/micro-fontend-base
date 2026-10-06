@@ -6,6 +6,7 @@ import type {
   MfeManifestEntry,
 } from "../../types";
 import { createPrefixedLogger } from "../../logger";
+import { telemetry } from "../../telemetry";
 import { type MicroAppProps } from "../../types";
 import { MfeError } from "./mfe-host-states/mfe-error";
 import { MfeMaintenance } from "./mfe-host-states/mfe-maintenance";
@@ -213,6 +214,9 @@ export function MfeHost({
       });
     };
 
+    const loadStartedAt =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+
     const loadMfe = async () => {
       if (!mounted) return;
 
@@ -221,6 +225,11 @@ export function MfeHost({
       const baseUrl = normalizeMfeHost(host);
       if (baseUrl === null) {
         hostLogger.error(`Invalid host for "${name}": "${host}"`);
+        telemetry.captureError(new Error("Invalid MFE host"), {
+          mfeId: name,
+          source: "MfeHost.validateHost",
+          extra: { host },
+        });
         if (mounted) {
           setStatus(MfeStatus.ERROR);
           setErrorDetails(`Invalid MFE host configuration for "${name}"`);
@@ -432,6 +441,7 @@ export function MfeHost({
         if (mounted) await mountMicroApp();
       } catch (err: unknown) {
         hostLogger.error(`Failed to execute entry script for "${name}":`, err);
+        telemetry.captureError(err, { mfeId: name, source: "MfeHost.load" });
         if (mounted) {
           setStatus(MfeStatus.ERROR);
           setErrorDetails(err instanceof Error ? err.message : String(err));
@@ -455,8 +465,19 @@ export function MfeHost({
         didMount = true;
 
         setStatus(MfeStatus.MOUNTED);
+        const now =
+          typeof performance !== "undefined" ? performance.now() : Date.now();
+        // Time from effect start to mounted: health check + manifest +
+        // script load + registration + mount.
+        telemetry.captureMetric(
+          "mfe.load_to_mount",
+          Math.round(now - loadStartedAt),
+          { mfeId: name, source: "MfeHost" },
+          "ms",
+        );
       } catch (err: unknown) {
         hostLogger.error(`Error mounting ${name}:`, err);
+        telemetry.captureError(err, { mfeId: name, source: "MfeHost.mount" });
         if (mounted) {
           setStatus(MfeStatus.ERROR);
           setErrorDetails(
