@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "start": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "clean": "rm -rf node_modules dist .cache .turbo .vite"
+    "clean": "rm -rf node_modules dist .cache .turbo .vite",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@repo/config": "workspace:*",

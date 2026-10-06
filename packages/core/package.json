@@ -59,7 +59,8 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint \"**/*.ts*\"",
-    "clean": "rm -rf node_modules dist .turbo"
+    "clean": "rm -rf node_modules dist .turbo",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",

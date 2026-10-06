@@ -14,7 +14,8 @@
     "lint": "next lint",
     "build:mfe": "vite build -c vite.config.mts && node ../../scripts/generate-manifest.mjs $PWD public",
     "watch:mfe": "vite build -c vite.config.mts --watch",
-    "clean": "rm -rf node_modules .next out dist .cache .turbo"
+    "clean": "rm -rf node_modules .next out dist .cache .turbo",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@repo/config": "workspace:*",

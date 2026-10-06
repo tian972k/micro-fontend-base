@@ -16,7 +16,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "types": ["svelte", "vite/client"],
+    "types": ["svelte", "vite/client", "node"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],

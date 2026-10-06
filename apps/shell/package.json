@@ -15,7 +15,8 @@
     "start": "PORT=${PORT:-8000} remix-serve ./build/server/index.js",
     "start:local": "MFE_FORCE_LOCALHOST=true PORT=${PORT:-8000} remix-serve ./build/server/index.js",
     "typecheck": "tsc",
-    "clean": "rm -rf node_modules build public/build .cache .turbo"
+    "clean": "rm -rf node_modules build public/build .cache .turbo",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

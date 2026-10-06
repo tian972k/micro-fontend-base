@@ -10,7 +10,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "start": "vite preview",
-    "clean": "rm -rf node_modules dist .cache .turbo"
+    "clean": "rm -rf node_modules dist .cache .turbo",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@repo/config": "workspace:*",
