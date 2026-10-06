@@ -1,3 +1,4 @@
+import { MFE_APPS } from "@repo/config";
 import { createPrefixedLogger, mfeLogger } from "../logger";
 
 const perfLogger = createPrefixedLogger("perf");
@@ -61,15 +62,9 @@ class PerformanceMonitor {
     const match = url.match(/localhost:(\d+)/);
     if (!match) return null;
 
-    const portMap: Record<string, string> = {
-      "8001": "app-react",
-      "8002": "app-nextjs",
-      "8003": "app-vue",
-      "8004": "app-svelte",
-      "8005": "app-solidjs",
-    };
-
-    return portMap[match[1]] || null;
+    // Dev servers are identified by their registry port.
+    const port = Number(match[1]);
+    return MFE_APPS.find((app) => app.port === port)?.id ?? null;
   }
 
   /**

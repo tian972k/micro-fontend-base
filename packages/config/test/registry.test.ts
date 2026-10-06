@@ -21,7 +21,10 @@ describe("MFE registry", () => {
   });
 
   it("derives APP_IDS and federation names", () => {
-    expect(APP_IDS.REACT).toBe("app-react");
-    expect(toFederationName("app-solidjs")).toBe("app_solidjs");
+    for (const app of MFE_APPS) {
+      const key = app.id.replace(/^app-/, "").toUpperCase();
+      expect((APP_IDS as Record<string, string>)[key]).toBe(app.id);
+    }
+    expect(toFederationName("app-some-thing")).toBe("app_some_thing");
   });
 });

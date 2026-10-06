@@ -80,18 +80,18 @@ export const HOST_APP = {
   port: 8000,
 } as const;
 
-// Type-safe MFE app IDs generation
-type MfeAppKey = "REACT" | "NEXTJS" | "VUE" | "SVELTE" | "SOLIDJS";
-type GeneratedAppIds = Record<MfeAppKey, string>;
-
-const generateAppIds = (): GeneratedAppIds => {
-  const ids = {} as any;
-  MFE_APPS.forEach((app) => {
-    const key = app.id.replace("app-", "").toUpperCase();
-    ids[key] = app.id;
-  });
-  return ids;
+// Type-safe MFE app IDs, derived from the registry: "app-react" -> REACT.
+type AppKey<Id extends string> = Id extends `app-${infer Name}`
+  ? Uppercase<Name>
+  : Uppercase<Id>;
+type GeneratedAppIds = {
+  [App in (typeof MFE_APPS)[number] as AppKey<App["id"]>]: App["id"];
 };
+
+const generateAppIds = (): GeneratedAppIds =>
+  Object.fromEntries(
+    MFE_APPS.map((app) => [app.id.replace(/^app-/, "").toUpperCase(), app.id]),
+  ) as GeneratedAppIds;
 
 // Auto-generate APP_IDS from registry with type safety
 export const APP_IDS = {
@@ -111,6 +111,9 @@ export const isMfeApp = (id: string): id is MfeAppId =>
   MFE_APPS.some((app) => app.id === id);
 
 export type MfeApp = (typeof MFE_APPS)[number];
+
+/** Accent colours the shell knows how to render for an app page. */
+export type MfeAccent = "primary" | "emerald" | "orange" | "blue";
 
 /** Module Federation container name for an app id (app-react -> app_react). */
 export const toFederationName = (id: string) => id.replace(/-/g, "_");
