@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
 
 const FRAMEWORKS = {
-  react: { port: 8006, template: 'react-ts' },
-  vue: { port: 8007, template: 'vue-ts' },
-  svelte: { port: 8008, template: 'svelte-ts' },
-  solidjs: { port: 8009, template: 'solid-ts' },
+  react: { port: 8006, template: 'react-ts', type: 'react', entry: 'entry-mfe.tsx' },
+  vue: { port: 8007, template: 'vue-ts', type: 'vue', entry: 'entry-mfe.ts' },
+  svelte: { port: 8008, template: 'svelte-ts', type: 'svelte', entry: 'entry-mfe.ts' },
+  solidjs: { port: 8009, template: 'solid-ts', type: 'solid', entry: 'entry-mfe.tsx' },
 };
 
 async function main() {
@@ -45,17 +45,43 @@ async function main() {
   // Step 2: Add to MFE_APPS registry
   console.log('📝 Updating app registry...');
   const appsPath = join(process.cwd(), 'packages/config/src/constants/apps.ts');
-  let appsContent = require('fs').readFileSync(appsPath, 'utf-8');
+  let appsContent = readFileSync(appsPath, 'utf-8');
   
   const port = FRAMEWORKS[framework].port;
-  const newAppEntry = `  { id: '${appName}', name: '${capitalizeWords(appName.replace('app-', ''))}', framework: '${framework}', port: ${port} },`;
-  
+  const slug = appName.replace('app-', '');
+  const displayName = capitalizeWords(slug);
+  const newAppEntry = [
+    '  {',
+    `    id: "${appName}",`,
+    `    name: "${displayName}",`,
+    `    framework: "${framework}",`,
+    `    port: ${port},`,
+    `    slug: "${slug}",`,
+    `    type: "${FRAMEWORKS[framework].type}",`,
+    `    title: "${displayName}",`,
+    `    description: "${displayName} micro-frontend.",`,
+    '    accent: "primary",',
+    '  },',
+  ].join('\n');
+
   appsContent = appsContent.replace(
     /(export const MFE_APPS = \[[\s\S]*?)(] as const;)/,
     `$1${newAppEntry}\n$2`
   );
-  
+
   writeFileSync(appsPath, appsContent);
+
+  // Keep the JS copy used by build scripts in sync (a unit test checks it).
+  const scriptsConfigPath = join(process.cwd(), 'scripts/mfe.config.mjs');
+  const scriptsConfig = readFileSync(scriptsConfigPath, 'utf-8');
+  const outputDir = 'dist';
+  writeFileSync(
+    scriptsConfigPath,
+    scriptsConfig.replace(
+      /(export const MFE_APPS = \[[\s\S]*?)(\n\];)/,
+      `$1\n  {\n    name: '${appName}',\n    framework: '${framework}',\n    port: ${port},\n    entryFile: '${FRAMEWORKS[framework].entry}',\n    outputDir: '${outputDir}',\n  },$2`,
+    ),
+  );
   console.log(`   ✅ Added to MFE_APPS registry with port ${port}`);
 
   // Step 3: Ports auto-generated from MFE_APPS - no manual update needed
@@ -84,7 +110,7 @@ async function main() {
       '@repo/utils': 'workspace:*',
     },
     devDependencies: {
-      '@originjs/vite-plugin-federation': '^1.4.1',
+      '@module-federation/vite': 'catalog:',
       '@repo/config': 'workspace:*',
       '@types/node': '^20.0.0',
       typescript: '^5.0.0',

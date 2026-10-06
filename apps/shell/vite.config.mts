@@ -1,36 +1,11 @@
 import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig, loadEnv } from "vite";
-import federation from "@originjs/vite-plugin-federation";
 import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
 import * as fs from "fs";
 import { getRouteManifest } from "remix-custom-routes";
 import { vercelPreset } from '@vercel/remix/vite';
-import { federationShared, PORTS, APP_IDS } from "@repo/config/vite";
 import { visualizer } from "rollup-plugin-visualizer";
-
-// Custom Plugin to generate virtual MFE loaders map
-function mfeLoaderPlugin(mode: string, isSsrBuild?: boolean) {
-  const virtualModuleId = "virtual:mfe-loaders";
-  const resolvedVirtualModuleId = "\0" + virtualModuleId;
-
-  return {
-    name: "vite-plugin-mfe-loaders",
-    resolveId(id: string) {
-      if (id === virtualModuleId) {
-        return resolvedVirtualModuleId;
-      }
-    },
-    load(id: string) {
-      if (id === resolvedVirtualModuleId) {
-        // Always return empty loaders - use manifest-based loading for both dev and prod
-        // Module Federation in dev mode has issues with remoteEntry.js
-        return `export const mfeLoaders = {};`;
-      }
-    },
-  };
-}
-
 
 export default defineConfig(({ mode, isSsrBuild }) => {
   const env = loadEnv(mode, path.resolve(__dirname, "../.."), "");
@@ -39,7 +14,6 @@ export default defineConfig(({ mode, isSsrBuild }) => {
 
   return {
     plugins: [
-      mfeLoaderPlugin(mode, isSsrBuild),
       remix({
         ...(process.env.VERCEL ? { presets: [vercelPreset()] } : {}),
         future: {
@@ -106,36 +80,8 @@ export default defineConfig(({ mode, isSsrBuild }) => {
           return getRouteManifest(files);
         },
       }),
-      !isSsrBuild &&
-        federation({
-          name: "shell",
-          remotes:
-            mode === "production"
-              ? {}
-              : Object.values(APP_IDS).reduce(
-                  (acc, appName) => {
-                    if (appName === "shell") return acc;
-                    const remoteName = appName.replace(/-/g, "_");
-                    const port = PORTS[appName];
-                    acc[remoteName] = `http://localhost:${port}/remoteEntry.js`;
-                    return acc;
-                  },
-                  {} as Record<string, string>,
-                ),
-          // Share libs with singletons to avoid conflicts
-          shared: federationShared.reduce(
-            (acc, lib) => {
-              acc[lib] = {
-                singleton: true,
-                requiredVersion: false,
-                strictVersion: false,
-                eager: lib === "@repo/utils" || lib === "dayjs",
-              };
-              return acc;
-            },
-            {} as Record<string, any>
-          ),
-        }),
+      // MFEs are loaded at runtime with @module-federation/runtime (see
+      // app/lib/federation.ts), so the shell needs no federation build plugin.
       tsconfigPaths(),
       isAnalyze && visualizer({ open: true, filename: "stats.html" }),
     ],
@@ -151,23 +97,4 @@ export default defineConfig(({ mode, isSsrBuild }) => {
       noExternal: ["isbot"],
     },
   };
-});// Disable federation - use manifest-based loading instead
-      // !isSsrBuild &&
-      //   federation({
-      //     name: "shell",
-      //     remotes:
-      //       mode === "production"
-      //         ? {}
-      //         : Object.values(APP_IDS).reduce(
-      //             (acc, appName) => {
-      //               if (appName === "shell") return acc;
-      //               // Convention: app-react -> app_react (for remote name)
-      //               const remoteName = appName.replace(/-/g, "_");
-      //               const port = PORTS[appName];
-      //               acc[remoteName] = `http://localhost:${port}/remoteEntry.js`;
-      //               return acc;
-      //             },
-      //             {} as Record<string, string>,
-      //           ),
-      //     shared: federationShared,
-      //
+});

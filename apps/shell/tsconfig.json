@@ -4,8 +4,7 @@
     "**/*.ts",
     "**/*.tsx",
     "**/.server/**/*.ts",
-    "**/.client/**/*.ts",
-    "remotes.d.ts"
+    "**/.client/**/*.ts"
   ],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],

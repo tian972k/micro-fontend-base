@@ -28,7 +28,6 @@
     "react-i18next": "catalog:"
   },
   "devDependencies": {
-    "@originjs/vite-plugin-federation": "catalog:",
     "@repo/config": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

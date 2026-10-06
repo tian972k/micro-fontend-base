@@ -4,8 +4,10 @@ export * from "./constants/keys";
 export * from "./constants/apps";
 export * from "./constants/routes";
 export {
-  baseShared,
   reactShared,
+  vueShared,
+  svelteShared,
+  solidShared,
   federationShared,
   nonReactShared,
 } from "./shared-deps";

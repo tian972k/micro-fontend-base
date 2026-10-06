@@ -1,5 +1,5 @@
 import { svelte, vitePreprocess } from "@sveltejs/vite-plugin-svelte";
-import { createMfeConfig, nonReactShared, APP_IDS } from "@repo/config/vite";
+import { createMfeConfig, svelteShared, APP_IDS } from "@repo/config/vite";
 
 const sveltePlugin = svelte({
   preprocess: vitePreprocess(),
@@ -13,13 +13,10 @@ const sveltePlugin = svelte({
 export default createMfeConfig({
   appId: APP_IDS.SVELTE,
   frameworkPlugin: sveltePlugin,
-  federationShared: ["svelte", ...nonReactShared],
+  federationShared: svelteShared,
   entryFile: "./src/entry-mfe.ts",
   mainFile: "./src/main.ts",
   additionalInputs: { index: "./index.html" },
-  customBaseUrl: (isDev, isMfeMode, url) => {
-    return process.env.VERCEL === "1" ? "/" : url;
-  },
   viteConfigOverride: {
     resolve: {
       conditions: ['import', 'module', 'browser', 'default'],

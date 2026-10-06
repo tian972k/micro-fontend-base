@@ -1,30 +1,18 @@
 /**
- * Shared dependencies configuration for Module Federation
- * Each app loads its own i18n instance to avoid conflicts
+ * Module Federation shared singletons.
+ *
+ * Only framework runtimes are shared: they hold global state (React's
+ * dispatcher, Vue's reactivity, ...) and must exist once per page. The
+ * shell provides React; Vue/Svelte/Solid remotes share theirs with each
+ * other. Platform state (stores, EventBus, registry, telemetry) does NOT
+ * need sharing - @repo/core keeps those singletons on `window`.
  */
+export const reactShared = ["react", "react-dom"] as const;
+export const vueShared = ["vue"] as const;
+export const svelteShared = ["svelte"] as const;
+export const solidShared = ["solid-js"] as const;
 
-// Framework-agnostic shared libraries (avoid i18n libs - each app manages own)
-export const baseShared = [
-  "dayjs",
-  "@repo/utils",
-  // NOTE: i18next NOT shared - each app manages own instance
-  // This prevents conflicts when multiple MFEs mount
-];
-
-// React-specific shared libraries
-export const reactShared = [
-  "react",
-  "react-dom",
-  "@repo/core",
-  "@repo/ui",
-  // NOTE: react-i18next NOT shared - use app's own i18next instance
-];
-
-// Combined list for React apps (Shell, React MFE, Next.js)
-export const federationShared = [...baseShared, ...reactShared];
-
-// Non-React apps (SolidJS, Vue, Svelte) - only share base libs
-export const nonReactShared = [
-  ...baseShared,
-  "@repo/core", // Core has framework-agnostic utilities
-];
+/** @deprecated use reactShared - kept for older app configs. */
+export const federationShared = reactShared;
+/** @deprecated non-React remotes now share only their own framework. */
+export const nonReactShared = [] as const;
