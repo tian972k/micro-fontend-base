@@ -7,9 +7,9 @@ import type { MetaDescriptor, MetaFunction } from "@remix-run/node";
  *
  *   export const meta = mergeMeta(() => [{ title: "Login" }]);
  */
-export function mergeMeta(
-  overrides: (...args: Parameters<MetaFunction>) => MetaDescriptor[],
-): MetaFunction {
+export function mergeMeta<Loader = unknown>(
+  overrides: (...args: Parameters<MetaFunction<Loader>>) => MetaDescriptor[],
+): MetaFunction<Loader> {
   return (args) => {
     const parent = args.matches.flatMap((match) => match.meta ?? []);
     const own = overrides(args);
