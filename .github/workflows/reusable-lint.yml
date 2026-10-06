@@ -63,6 +63,10 @@ jobs:
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 
+      # App vite configs import @repo/config's built output (dist/vite.js).
+      - name: Build workspace packages
+        run: pnpm build:packages
+
       - name: Generate dev manifests
         run: node scripts/generate-dev-manifest.mjs
 
