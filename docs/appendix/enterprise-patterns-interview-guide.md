@@ -4,14 +4,13 @@ This document is **conceptual/educational reference material** on how
 large MFE platforms handle scaling, versioning, and observability — it
 is not a line-by-line description of this repo's current implementation.
 For what this codebase actually does today, see
-[ARCHITECTURE.md](ARCHITECTURE.md) and [API_CONTRACTS.md](API_CONTRACTS.md).
+[architecture.md](../architecture.md) and [api/core.md](../api/core.md).
 
-> **Note on code samples below:** event names like `"nav:navigate"` /
-> `"user:login"` are illustrative, not currently wired-up event keys (see
-> [API_CONTRACTS.md](API_CONTRACTS.md#runtime-event-contracts) for the
-> real ones). Calls use the correct real API shape
-> (`globalEventBus.emit`/`globalEventBus.on`), just with placeholder
-> event names.
+> **Note on code samples below:** samples use the low-level
+> `globalEventBus` for brevity. In this repo, prefer the typed, versioned
+> buses (`runtimeEvents` exposes `nav:navigate`, `user:login`, `theme:set`,
+> … under `runtime:v1`). See
+> [api/core.md](../api/core.md#typed-versioned-events-recommended).
 
 ---
 
@@ -745,9 +744,9 @@ describe("React MFE Adapter", () => {
 ## Next Steps for Interview Preparation
 
 1. **Familiarize yourself with the codebase:**
-   - [docs/ARCHITECTURE.md](ARCHITECTURE.md)
-   - [docs/API_CONTRACTS.md](API_CONTRACTS.md)
-   - [docs/MFE_ADAPTER_PATTERNS.md](MFE_ADAPTER_PATTERNS.md)
+   - [docs/architecture.md](../architecture.md)
+   - [docs/api/core.md](../api/core.md)
+   - [docs/creating-a-micro-frontend.md](../creating-a-micro-frontend.md)
 
 2. **Run the project locally:**
 

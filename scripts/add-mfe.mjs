@@ -104,7 +104,7 @@ async function main() {
   console.log('   3. Create vite.config.mts using createMfeConfig');
   console.log('   4. Run: pnpm install');
   console.log('   5. Run: pnpm dev:all');
-  console.log('\n📚 See docs/MFE_DEVELOPMENT_GUIDE.md for details\n');
+  console.log('\n📚 See docs/creating-a-micro-frontend.md for the next steps\n');
 }
 
 function capitalizeWords(str) {

@@ -10,9 +10,9 @@ A **multi-framework UI component library** with shared variants and consistent s
 2. [Installation](#installation)
 3. [Usage](#usage)
 4. [Available Components](#-available-components)
-5. [Shared Variants](#-shared-variants)
+5. [Shared Variants](#shared-variants)
 6. [Storybook](#storybook)
-7. [Generate Components](#-generate-components)
+7. [Generate Components](#generate-components)
 8. [Project Structure](#-project-structure)
 9. [API Reference](#api-reference)
 
@@ -558,6 +558,6 @@ export default {
 
 ## Related Documentation
 
-- [MFE Development Guide](../../docs/MFE_DEVELOPMENT_GUIDE.md) - Add or update MFEs
-- [Architecture](../../docs/ARCHITECTURE.md) - System overview
+- [Creating a micro-frontend](../../docs/creating-a-micro-frontend.md) - Add or update MFEs (incl. scoped styling)
+- [Architecture](../../docs/architecture.md) - System overview
 - [@repo/core](../core/README.md) - Core utilities and state management
