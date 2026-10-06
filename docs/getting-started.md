@@ -33,19 +33,20 @@ work on one app in isolation.
 
 ## Everyday commands
 
-| Command                           | What it does                                                            |
-| --------------------------------- | ----------------------------------------------------------------------- |
-| `pnpm dev`                        | All apps in dev mode                                                    |
-| `pnpm dev:shell`                  | Shell only (MFEs must be running elsewhere or show "Connection Failed") |
-| `pnpm --filter app-react dev`     | One MFE                                                                 |
-| `pnpm build`                      | Build everything (Turborepo, cached)                                    |
-| `pnpm type-check` / `pnpm lint`   | Static checks for every workspace                                       |
-| `pnpm test`                       | Unit tests (Vitest)                                                     |
-| `pnpm test:e2e`                   | End-to-end tests (Playwright, starts shell + app-react)                 |
-| `pnpm lhci`                       | Lighthouse budgets against the production shell build                   |
-| `pnpm mfe:add <name> <framework>` | Scaffold a new MFE and register it                                      |
-| `pnpm storybook`                  | UI component explorer                                                   |
-| `pnpm kill-ports`                 | Free ports 8000–8005                                                    |
+| Command                            | What it does                                                               |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `pnpm dev`                         | All apps in dev mode                                                       |
+| `pnpm dev:shell`                   | Shell only (MFEs must be running elsewhere or show "Connection Failed")    |
+| `pnpm --filter app-react dev`      | One MFE                                                                    |
+| `pnpm build`                       | Build everything (Turborepo, cached)                                       |
+| `pnpm type-check` / `pnpm lint`    | Static checks for every workspace                                          |
+| `pnpm test`                        | Unit tests (Vitest)                                                        |
+| `pnpm test:e2e`                    | End-to-end tests (Playwright, starts shell + app-react)                    |
+| `pnpm lhci`                        | Lighthouse budgets against the production shell build                      |
+| `pnpm orbit:init --name <project>` | Initialise a new project from Orbit ([guide](./starting-a-new-project.md)) |
+| `pnpm mfe:add <name> <framework>`  | Scaffold a new MFE and register it                                         |
+| `pnpm storybook`                   | UI component explorer                                                      |
+| `pnpm kill-ports`                  | Free ports 8000–8005                                                       |
 
 ## Environment
 

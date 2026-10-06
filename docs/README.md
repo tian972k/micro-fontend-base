@@ -2,6 +2,7 @@
 
 ## Guides
 
+0. [Starting a new project](./starting-a-new-project.md): template + `pnpm orbit:init`
 1. [Getting started](./getting-started.md): install, run, demo login, commands
 2. [Architecture](./architecture.md): shell, remotes, registry, MF 2.0 loading, state, isolation
 3. [Creating a micro-frontend](./creating-a-micro-frontend.md): scaffold, registry fields, entries per framework, styling
