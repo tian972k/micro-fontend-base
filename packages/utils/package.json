@@ -19,15 +19,15 @@
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
-    "clsx": "^2.0.0",
-    "eslint": "^8.0.0",
-    "tailwind-merge": "^2.0.0",
-    "typescript": "^5.0.0"
+    "clsx": "catalog:",
+    "eslint": "catalog:",
+    "tailwind-merge": "catalog:",
+    "typescript": "catalog:"
   },
   "dependencies": {
-    "clsx": "^2.0.0",
-    "dayjs": "^1.11.19",
-    "tailwind-merge": "^2.0.0"
+    "clsx": "catalog:",
+    "dayjs": "catalog:",
+    "tailwind-merge": "catalog:"
   },
   "sideEffects": false
 }

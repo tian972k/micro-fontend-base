@@ -64,12 +64,12 @@
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
-    "@types/node": "^20.0.0",
-    "@types/react": "^18.2.20",
-    "@types/react-dom": "^18.2.7",
-    "eslint": "^8.0.0",
-    "react": "^18.2.0",
-    "typescript": "^5.0.0"
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "eslint": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:"
   },
   "peerDependencies": {
     "react": "^18.2.0",
@@ -85,10 +85,10 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
-    "clsx": "^2.0.0",
-    "i18next": "^25.7.4",
+    "clsx": "catalog:",
+    "i18next": "catalog:",
     "lucide-react": "^0.300.0",
-    "tailwind-merge": "^2.0.0",
-    "zustand": "^5.0.10"
+    "tailwind-merge": "catalog:",
+    "zustand": "catalog:"
   }
 }
