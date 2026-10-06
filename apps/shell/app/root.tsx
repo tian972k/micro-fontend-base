@@ -10,6 +10,7 @@ import styles from "@repo/ui/globals.css?url";
 import localStyles from "./tailwind.css?url";
 import { ThemeProvider } from "./components/providers/theme-provider";
 import { ThemeScript } from "@repo/ui";
+import { useNonce } from "./components/providers/nonce-provider";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -44,6 +45,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { locale } = useLoaderData<typeof loader>();
+  const nonce = useNonce();
   const { i18n } = useTranslation();
   const { locale: storeLocale } = useLocaleStore();
   useChangeLanguage(locale);
@@ -82,12 +84,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         {/* Inline script to prevent FOUC */}
-        <ThemeScript />
+        <ThemeScript nonce={nonce} />
       </head>
       <body>
         {children}
-        <ScrollRestoration />
-        <Scripts />
+        <ScrollRestoration nonce={nonce} />
+        <Scripts nonce={nonce} />
       </body>
     </html>
   );

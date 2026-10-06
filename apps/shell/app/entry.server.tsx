@@ -16,6 +16,8 @@ import { createInstance } from "i18next";
 import i18next from "./i18next.server";
 import i18n from "./i18n";
 import en from "./locales/en.json";
+import { NonceProvider } from "./components/providers/nonce-provider";
+import { applySecurityHeaders, createNonce } from "./server/csp.server";
 import vi from "./locales/vi.json";
 
 const ABORT_DELAY = 5_000;
@@ -28,6 +30,9 @@ export default async function handleRequest(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   loadContext: AppLoadContext,
 ) {
+  const nonce = createNonce();
+  applySecurityHeaders(responseHeaders, nonce);
+
   const instance = createInstance();
   const lng = await i18next.getLocale(request);
   const ns = i18next.getRouteNamespaces(remixContext);
@@ -49,6 +54,7 @@ export default async function handleRequest(
         responseHeaders,
         remixContext,
         instance,
+        nonce,
       )
     : handleBrowserRequest(
         request,
@@ -56,6 +62,7 @@ export default async function handleRequest(
         responseHeaders,
         remixContext,
         instance,
+        nonce,
       );
 }
 
@@ -65,18 +72,23 @@ function handleBotRequest(
   responseHeaders: Headers,
   remixContext: EntryContext,
   i18n: any,
+  nonce: string,
 ) {
   return new Promise((resolve, reject) => {
     let shellRendered = false;
     const { pipe, abort } = renderToPipeableStream(
-      <I18nextProvider i18n={i18n}>
-        <RemixServer
-          context={remixContext}
-          url={request.url}
-          abortDelay={ABORT_DELAY}
-        />
-      </I18nextProvider>,
+      <NonceProvider value={nonce}>
+        <I18nextProvider i18n={i18n}>
+          <RemixServer
+            context={remixContext}
+            url={request.url}
+            abortDelay={ABORT_DELAY}
+            nonce={nonce}
+          />
+        </I18nextProvider>
+      </NonceProvider>,
       {
+        nonce,
         onAllReady() {
           shellRendered = true;
           const body = new PassThrough();
@@ -118,18 +130,23 @@ function handleBrowserRequest(
   responseHeaders: Headers,
   remixContext: EntryContext,
   i18n: any,
+  nonce: string,
 ) {
   return new Promise((resolve, reject) => {
     let shellRendered = false;
     const { pipe, abort } = renderToPipeableStream(
-      <I18nextProvider i18n={i18n}>
-        <RemixServer
-          context={remixContext}
-          url={request.url}
-          abortDelay={ABORT_DELAY}
-        />
-      </I18nextProvider>,
+      <NonceProvider value={nonce}>
+        <I18nextProvider i18n={i18n}>
+          <RemixServer
+            context={remixContext}
+            url={request.url}
+            abortDelay={ABORT_DELAY}
+            nonce={nonce}
+          />
+        </I18nextProvider>
+      </NonceProvider>,
       {
+        nonce,
         onShellReady() {
           shellRendered = true;
           const body = new PassThrough();
