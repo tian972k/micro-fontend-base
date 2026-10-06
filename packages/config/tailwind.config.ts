@@ -85,3 +85,33 @@ export const sharedConfig: Omit<Config, "content"> = {
   },
   plugins: [animate],
 };
+
+/**
+ * Selector every MFE's root element carries (MfeHost sets it on the host
+ * container; standalone dev sets it on the app's root node).
+ */
+export const mfeScopeSelector = (appId: string) => `[data-mfe="${appId}"]`;
+
+/**
+ * Tailwind config for a micro-frontend. Utilities are emitted as
+ * `[data-mfe="<appId>"] .p-4 { ... }`, so an MFE's classes only apply
+ * inside its own root and can't override the shell or other MFEs (and
+ * different Tailwind versions/configs can't collide on the same class).
+ *
+ * Preflight stays global: it is identical across apps on the same
+ * Tailwind major, so duplicates are harmless.
+ *
+ * Caveat: content rendered through a portal to <body> is outside the
+ * scope. Give portals a container inside the MFE root (Radix: the
+ * `container` prop on *.Portal).
+ */
+export function createMfeTailwindConfig(
+  appId: string,
+  content: Config["content"],
+): Config {
+  return {
+    ...sharedConfig,
+    content,
+    important: mfeScopeSelector(appId),
+  };
+}
