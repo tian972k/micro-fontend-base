@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import type { HealthCheckResponse, MicroApp, MfeManifest } from "../../types";
+import type {
+  HealthCheckResponse,
+  MicroApp,
+  MfeManifest,
+  MfeManifestEntry,
+} from "../../types";
+import { createPrefixedLogger } from "../../logger";
 import { type MicroAppProps } from "../../types";
 import { MfeError } from "./mfe-host-states/mfe-error";
 import { MfeMaintenance } from "./mfe-host-states/mfe-maintenance";
@@ -55,11 +61,13 @@ function safeStringifyProps(props: MicroAppProps): string {
 function isDevBuild(): boolean {
   try {
     // Vite exposes this at build time; guarded for non-Vite consumers.
-    return Boolean((import.meta as any)?.env?.DEV);
+    return Boolean(import.meta.env?.DEV);
   } catch {
     return false;
   }
 }
+
+const hostLogger = createPrefixedLogger("MfeHost");
 
 // Cache for manifest file names
 const manifestCache: Record<string, string> = {};
@@ -125,7 +133,7 @@ export interface MfeHostProps {
   onMount?: () => void;
   onUnmount?: () => void;
   onError?: (error: string) => void;
-  remoteLoader?: () => Promise<any>;
+  remoteLoader?: () => Promise<unknown>;
   className?: string;
 }
 
@@ -212,7 +220,7 @@ export function MfeHost({
       // ever interpolated into a fetch URL or a <script>/<link> src.
       const baseUrl = normalizeMfeHost(host);
       if (baseUrl === null) {
-        console.error(`[MfeHost] Invalid host for "${name}": "${host}"`);
+        hostLogger.error(`Invalid host for "${name}": "${host}"`);
         if (mounted) {
           setStatus(MfeStatus.ERROR);
           setErrorDetails(`Invalid MFE host configuration for "${name}"`);
@@ -256,8 +264,8 @@ export function MfeHost({
       if (window.MFE?.[name]) {
         if (!shouldCheckVersion(name)) {
           const cachedVersion = getCachedVersion(name);
-          console.log(
-            `[MfeHost] ${name} already loaded (v${cachedVersion || "unknown"}), mounting directly (cache valid)`,
+          hostLogger.debug(
+            `${name} already loaded (v${cachedVersion || "unknown"}), mounting directly (cache valid)`,
           );
           if (mounted) await mountMicroApp();
           return;
@@ -274,16 +282,16 @@ export function MfeHost({
             cachedVersion &&
             health.version !== cachedVersion
           ) {
-            console.log(
-              `[MfeHost] ${name} version changed: ${cachedVersion} → ${health.version}, reloading...`,
+            hostLogger.debug(
+              `${name} version changed: ${cachedVersion} → ${health.version}, reloading...`,
             );
             setStoredVersionCache(name, health.version, Date.now());
             delete window.MFE[name];
             delete manifestCache[name];
             // Fall through to full load
           } else {
-            console.log(
-              `[MfeHost] ${name} already loaded (v${health.version || "unknown"}), mounting directly`,
+            hostLogger.debug(
+              `${name} already loaded (v${health.version || "unknown"}), mounting directly`,
             );
             if (health.version) {
               setStoredVersionCache(name, health.version, Date.now());
@@ -293,9 +301,7 @@ export function MfeHost({
             return;
           }
         } catch {
-          console.warn(
-            `[MfeHost] ${name} health check failed, using cached version`,
-          );
+          hostLogger.warn(`${name} health check failed, using cached version`);
           if (mounted) await mountMicroApp();
           return;
         }
@@ -343,7 +349,9 @@ export function MfeHost({
         );
 
         const entryKey = mfeEntryKey || "index.html";
-        const entryData = manifest[entryKey] || (manifest["index.html"] as any);
+        const entryData = (manifest[entryKey] ?? manifest["index.html"]) as
+          | MfeManifestEntry
+          | undefined;
 
         if (!entryData) throw new Error("Entry file not found in manifest");
 
@@ -398,7 +406,7 @@ export function MfeHost({
 
         if (mounted) await mountMicroApp();
       } catch (err: unknown) {
-        console.error("Failed to execute MFE entry script:", err);
+        hostLogger.error(`Failed to execute entry script for "${name}":`, err);
         if (mounted) {
           setStatus(MfeStatus.ERROR);
           setErrorDetails(err instanceof Error ? err.message : String(err));
@@ -423,7 +431,7 @@ export function MfeHost({
 
         setStatus(MfeStatus.MOUNTED);
       } catch (err: unknown) {
-        console.error(`[MfeHost] Error mounting ${name}:`, err);
+        hostLogger.error(`Error mounting ${name}:`, err);
         if (mounted) {
           setStatus(MfeStatus.ERROR);
           setErrorDetails(

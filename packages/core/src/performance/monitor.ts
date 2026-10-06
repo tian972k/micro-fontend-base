@@ -1,4 +1,6 @@
-import { mfeLogger } from "../logger";
+import { createPrefixedLogger, mfeLogger } from "../logger";
+
+const perfLogger = createPrefixedLogger("perf");
 
 interface PerformanceMetrics {
   mfeId: string;
@@ -35,7 +37,7 @@ class PerformanceMonitor {
       resourceObserver.observe({ entryTypes: ["resource"] });
       this.observers.push(resourceObserver);
     } catch (error) {
-      console.warn("Resource observer not supported", error);
+      perfLogger.warn("Resource observer not supported", error);
     }
 
     // Monitor long tasks
@@ -43,7 +45,7 @@ class PerformanceMonitor {
       const longTaskObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
           if (entry.duration > 50) {
-            console.warn(`⚠️ Long task detected: ${entry.duration}ms`);
+            perfLogger.warn(`Long task detected: ${entry.duration}ms`);
           }
         }
       });
@@ -51,7 +53,7 @@ class PerformanceMonitor {
       this.observers.push(longTaskObserver);
     } catch (error) {
       // longtask not supported in all browsers
-      console.warn("Long task observer not supported", error);
+      perfLogger.debug("Long task observer not supported", error);
     }
   }
 
@@ -102,7 +104,7 @@ class PerformanceMonitor {
         });
       }
     } catch (e) {
-      console.warn("Performance measurement failed:", e);
+      perfLogger.warn("Performance measurement failed:", e);
     }
   }
 
@@ -146,6 +148,8 @@ class PerformanceMonitor {
       navigation: this.getNavigationTiming(),
     };
 
+    // Intentional: this is a devtools helper (window.__MFE_PERF__.export()).
+    // eslint-disable-next-line no-console
     console.table(this.getAllMetrics());
     return data;
   }
@@ -185,7 +189,7 @@ export const perfMonitor = new PerformanceMonitor();
 
 // Add to window for debugging
 if (typeof window !== "undefined") {
-  (window as any).__MFE_PERF__ = {
+  window.__MFE_PERF__ = {
     getMetrics: () => perfMonitor.getAllMetrics(),
     export: () => perfMonitor.exportMetrics(),
   };

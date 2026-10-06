@@ -1,27 +1,34 @@
-import type { MicroApp, MicroAppProps } from "../types";
+import type { MicroApp, MicroAppProps, MfeRegistry } from "../types";
+
+/** The part of a Vue app instance (`createApp(...)`) this factory uses. */
+export interface VueAppLike {
+  mount(container: HTMLElement): unknown;
+  unmount(): void;
+}
 
 /**
  * Factory for creating Vue-based MFE entry modules
  */
-export function createVueMfeEntry(options: {
-  AppComponent: any;
+export function createVueMfeEntry<TComponent>(options: {
+  AppComponent: TComponent;
   appId: string;
-  registry: any;
-  createApp: (component: any, props?: any) => any;
+  registry: MfeRegistry;
+  createApp: (component: TComponent, props?: MicroAppProps) => VueAppLike;
 }) {
   const { AppComponent, appId, registry, createApp } = options;
+  const apps = new WeakMap<HTMLElement, VueAppLike>();
 
   const mount = (container: HTMLElement, props: MicroAppProps) => {
     const app = createApp(AppComponent, props);
     app.mount(container);
-    (container as any)._vueApp = app;
+    apps.set(container, app);
   };
 
   const unmount = (container: HTMLElement) => {
-    const app = (container as any)._vueApp;
+    const app = apps.get(container);
     if (app) {
       app.unmount();
-      delete (container as any)._vueApp;
+      apps.delete(container);
     }
   };
 

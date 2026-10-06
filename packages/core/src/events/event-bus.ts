@@ -1,4 +1,8 @@
+import { createPrefixedLogger } from "../logger";
+
 export type EventCallback<T = unknown> = (data: T) => void;
+
+const busLogger = createPrefixedLogger("EventBus");
 
 /**
  * Singleton EventBus for cross-application communication.
@@ -6,7 +10,7 @@ export type EventCallback<T = unknown> = (data: T) => void;
  */
 export class EventBus {
   private static instance: EventBus;
-  private listeners: Record<string, EventCallback<any>[]> = {};
+  private listeners: Record<string, EventCallback<unknown>[]> = {};
 
   private constructor() {}
 
@@ -35,7 +39,7 @@ export class EventBus {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
-    this.listeners[event].push(callback as EventCallback<any>);
+    this.listeners[event].push(callback as EventCallback<unknown>);
     return () => this.off(event, callback);
   }
 
@@ -45,7 +49,7 @@ export class EventBus {
   public off<T = unknown>(event: string, callback: EventCallback<T>): void {
     if (!this.listeners[event]) return;
     this.listeners[event] = this.listeners[event].filter(
-      (cb) => cb !== (callback as EventCallback<any>),
+      (cb) => cb !== (callback as EventCallback<unknown>),
     );
   }
 
@@ -58,10 +62,7 @@ export class EventBus {
       try {
         callback(data);
       } catch (error) {
-        console.error(
-          `[EventBus] Error in callback for event "${event}":`,
-          error,
-        );
+        busLogger.error(`Error in callback for event "${event}":`, error);
       }
     });
   }

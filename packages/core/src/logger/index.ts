@@ -383,13 +383,17 @@ export function createPrefixedLogger(prefix: string) {
 // MFE-specific debug utilities
 export const mfeLogger = {
   /** Track MFE lifecycle */
-  lifecycle(mfeId: string, event: "mount" | "unmount" | "error", data?: any) {
+  lifecycle(
+    mfeId: string,
+    event: "mount" | "unmount" | "error",
+    data?: unknown,
+  ) {
     const emoji = event === "mount" ? "🚀" : event === "unmount" ? "📴" : "❌";
     console.log(`${emoji} [MFE:${mfeId}] ${event.toUpperCase()}`, data || "");
   },
 
   /** Track state changes */
-  state(store: string, action: string, data?: any) {
+  state(store: string, action: string, data?: unknown) {
     if (import.meta.env?.DEV) {
       console.log(`🔄 [State:${store}] ${action}`, data || "");
     }
@@ -441,7 +445,7 @@ export const mfeLogger = {
 
 // Global debug helpers for browser console
 if (typeof window !== "undefined") {
-  (window as any).__MFE_DEBUG__ = {
+  window.__MFE_DEBUG__ = {
     enableDebug: mfeLogger.enableDebug,
     disableDebug: mfeLogger.disableDebug,
     logs: [],

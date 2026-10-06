@@ -13,7 +13,7 @@ export enum LogLevel {
 export interface LogEntry {
   level: LogLevel;
   message: string;
-  data?: any;
+  data?: unknown;
   timestamp: Date;
   source?: string;
   stack?: string;
@@ -38,35 +38,35 @@ class Logger {
   /**
    * Log at DEBUG level
    */
-  debug(message: string, data?: any): void {
+  debug(message: string, data?: unknown): void {
     this.log(LogLevel.DEBUG, message, data);
   }
 
   /**
    * Log at INFO level
    */
-  info(message: string, data?: any): void {
+  info(message: string, data?: unknown): void {
     this.log(LogLevel.INFO, message, data);
   }
 
   /**
    * Log at WARN level
    */
-  warn(message: string, data?: any): void {
+  warn(message: string, data?: unknown): void {
     this.log(LogLevel.WARN, message, data);
   }
 
   /**
    * Log at ERROR level
    */
-  error(message: string, error?: any): void {
+  error(message: string, error?: unknown): void {
     this.log(LogLevel.ERROR, message, error, (error as Error)?.stack);
   }
 
   /**
    * Log at CRITICAL level
    */
-  critical(message: string, data?: any): void {
+  critical(message: string, data?: unknown): void {
     this.log(LogLevel.CRITICAL, message, data);
   }
 
@@ -116,7 +116,7 @@ class Logger {
   private log(
     level: LogLevel,
     message: string,
-    data?: any,
+    data?: unknown,
     stack?: string,
   ): void {
     // Check minimum log level

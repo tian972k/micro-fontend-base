@@ -3,6 +3,9 @@ import { localeStore, type LocaleState } from "../state/common/locale-store";
 
 import commonEn from "./locales/en/common.json";
 import commonVi from "./locales/vi/common.json";
+import { createPrefixedLogger } from "../logger";
+
+const i18nLogger = createPrefixedLogger("i18n");
 
 // Shared i18n configuration for all frameworks
 export const i18nConfig = {
@@ -35,18 +38,18 @@ function setupLocaleSync(): void {
   if (isSubscribed) return;
   isSubscribed = true;
 
-  console.log("[i18n] Setting up locale sync");
+  i18nLogger.debug("Setting up locale sync");
 
   // Sync from locale store to i18n
   localeStore.subscribe((state: LocaleState) => {
-    console.log(
+    i18nLogger.debug(
       "[i18n] localeStore changed:",
       state.locale,
       "i18n.language:",
       i18n.language,
     );
     if (state.locale !== i18n.language) {
-      console.log("[i18n] Changing i18n language to:", state.locale);
+      i18nLogger.debug("Changing i18n language to:", state.locale);
       i18n.changeLanguage(state.locale);
     }
   });
@@ -66,13 +69,13 @@ export async function initI18n(
   resources: Resource = {},
   defaultNamespace = "common",
 ): Promise<I18nInstance> {
-  console.log("[i18n] initI18n called. Initialized:", i18n.isInitialized);
+  i18nLogger.debug("initI18n called. Initialized:", i18n.isInitialized);
 
   if (i18n.isInitialized) {
     // If already initialized, just add the new resources
     Object.keys(resources).forEach((lng) => {
       Object.keys(resources[lng]).forEach((ns) => {
-        console.log(
+        i18nLogger.debug(
           `[i18n] Adding resource bundle for ${lng}/${ns}`,
           resources[lng][ns],
         );
@@ -86,7 +89,7 @@ export async function initI18n(
 
   // Get initial locale from store
   const currentLocale = localeStore.getState().locale;
-  console.log("[i18n] Initializing new instance with locale:", currentLocale);
+  i18nLogger.debug("Initializing new instance with locale:", currentLocale);
 
   // Merge shared translations with app-specific resources
   const mergedResources: Resource = { ...sharedTranslations };
@@ -98,7 +101,7 @@ export async function initI18n(
     Object.assign(mergedResources[lng], resources[lng]);
   });
 
-  console.log("[i18n] Merged resources:", mergedResources);
+  i18nLogger.debug("Merged resources:", mergedResources);
 
   await i18n.init({
     ...i18nConfig,

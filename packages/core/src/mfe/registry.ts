@@ -1,4 +1,7 @@
 import type { MicroApp } from "../types";
+import { createPrefixedLogger } from "../logger";
+
+const registryLogger = createPrefixedLogger("AppRegistry");
 
 /**
  * Name of the DOM event dispatched on `window` whenever a Micro-App
@@ -26,14 +29,14 @@ export class AppRegistry {
 
       // Warn if overwriting an existing registration
       if (window.MFE[name]) {
-        console.warn(
-          `[AppRegistry] ⚠️ WARNING: MicroApp "${name}" is already registered and will be OVERWRITTEN.\n` +
+        registryLogger.warn(
+          `MicroApp "${name}" is already registered and will be OVERWRITTEN.\n` +
             `This may cause unexpected behavior. Ensure each app has a unique APP_ID in @repo/config.`,
         );
       }
 
       window.MFE[name] = app;
-      console.debug(`[AppRegistry] MicroApp "${name}" registered.`);
+      registryLogger.debug(`MicroApp "${name}" registered.`);
 
       // Notify any listeners (e.g. MfeHost) that this app is ready,
       // so they don't have to poll window.MFE on an interval.
