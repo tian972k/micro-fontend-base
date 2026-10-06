@@ -18,6 +18,7 @@
     "type-check": "turbo run type-check",
     "test": "turbo run test",
     "test:e2e": "playwright test",
+    "lhci": "lhci autorun --config=lighthouserc.cjs",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json,css}\"",
     "clean": "turbo run clean && rm -rf node_modules",
     "clean:cache": "rm -rf node_modules/.cache .turbo apps/*/.turbo packages/*/.turbo apps/*/.vite packages/*/.vite",
@@ -46,6 +47,7 @@
     ]
   },
   "devDependencies": {
+    "@lhci/cli": "0.15",
     "@playwright/test": "~1.56.0",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
