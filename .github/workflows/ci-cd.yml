@@ -214,6 +214,7 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: shell
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
@@ -232,6 +233,7 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-react
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
@@ -252,6 +254,7 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-nextjs
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
@@ -270,6 +273,7 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-vue
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
@@ -288,6 +292,7 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-svelte
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
@@ -306,6 +311,7 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       app: app-solidjs
+      is_production: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
