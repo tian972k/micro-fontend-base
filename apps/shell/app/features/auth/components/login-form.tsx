@@ -1,12 +1,19 @@
-import { useState } from "react";
-import { Form, useNavigation } from "@remix-run/react";
+import {
+  Form,
+  useActionData,
+  useNavigation,
+  useSearchParams,
+} from "@remix-run/react";
 import { Button, Input } from "@repo/ui";
 import { LogIn, Loader2, Lock, User, ShieldCheck } from "lucide-react";
 
 export function LoginForm() {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
-  const [error] = useState("");
+  const actionData = useActionData<{ error?: string }>();
+  const error = actionData?.error ?? "";
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") ?? "";
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 overflow-hidden bg-background">
@@ -45,6 +52,9 @@ export function LoginForm() {
           </div>
 
           <Form method="post" className="space-y-5">
+            {redirectTo && (
+              <input type="hidden" name="redirectTo" value={redirectTo} />
+            )}
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-sm text-red-500 flex items-center justify-center">
                 {error}
