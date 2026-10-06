@@ -113,7 +113,9 @@ export const commonMfeBuildOptions = {
   modulePreload: false,
   target: "esnext" as const,
   manifest: true,
-  cssCodeSplit: false,
+  // Keep CSS attached to the chunks that import it, so mf-manifest.json
+  // lists the expose's stylesheet and the host can load it with the JS.
+  cssCodeSplit: true,
 };
 
 /**

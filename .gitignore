@@ -145,6 +145,10 @@ apps/*/public/.vite/
 apps/*/public/.well-known/
 apps/*/public/manifest.json
 apps/*/public/health.json
+apps/*/public/remoteEntry.js
+apps/*/public/mf-manifest.json
+apps/*/public/mf-stats.json
+apps/*/.mf/
 
 
 # Turborepo

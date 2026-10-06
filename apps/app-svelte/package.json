@@ -27,7 +27,6 @@
     "svelte": "catalog:"
   },
   "devDependencies": {
-    "@originjs/vite-plugin-federation": "catalog:",
     "@sveltejs/vite-plugin-svelte": "^3.0.2",
     "@tsconfig/svelte": "^5.0.2",
     "@types/node": "catalog:",

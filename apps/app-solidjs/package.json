@@ -24,7 +24,6 @@
     "solid-js": "catalog:"
   },
   "devDependencies": {
-    "@originjs/vite-plugin-federation": "catalog:",
     "@repo/config": "workspace:*",
     "@types/node": "catalog:",
     "autoprefixer": "catalog:",

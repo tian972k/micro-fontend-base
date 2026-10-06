@@ -1,5 +1,5 @@
 import solid from "vite-plugin-solid";
-import { createMfeConfig, nonReactShared, APP_IDS } from "@repo/config/vite";
+import { createMfeConfig, solidShared, APP_IDS } from "@repo/config/vite";
 import { resolve } from "path";
 
 const appRoot = resolve(__dirname, "src");
@@ -11,7 +11,7 @@ export default createMfeConfig({
     include: [`${appRoot}/**/*.tsx`, `${appRoot}/**/*.jsx`],
     exclude: ["**/node_modules/**", "**/packages/**"],
   }),
-  federationShared: nonReactShared,
+  federationShared: solidShared,
   entryFile: "./src/entry-mfe.tsx",
   mainFile: "./src/main.tsx",
   // Only externalize frameworks NOT used by this app
@@ -26,7 +26,4 @@ export default createMfeConfig({
     "svelte",
     /^svelte\/.*/,
   ],
-  customBaseUrl: (isDev, isMfeMode, url) => {
-    return process.env.VERCEL === "1" ? "/" : url;
-  },
 });

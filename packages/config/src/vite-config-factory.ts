@@ -1,6 +1,6 @@
 import { defineConfig, type UserConfig, mergeConfig } from "vite";
 import type { Plugin } from "vite";
-import federation from "@originjs/vite-plugin-federation";
+import { federation } from "@module-federation/vite";
 import path from "path";
 import {
   createVirtualManifestPlugin,
@@ -11,14 +11,19 @@ import {
   createCommonOnWarn,
 } from "./vite-plugins";
 import { PORTS } from "./env/ports";
+import { toFederationName } from "./constants/apps";
 
 export interface MfeConfigOptions {
   /** App ID from APP_IDS */
   appId: string;
   /** Vite plugin for framework (react, vue, solid, svelte) */
   frameworkPlugin: Plugin | Plugin[];
-  /** Federation shared dependencies */
-  federationShared: string[];
+  /**
+   * Framework singletons shared with the host and other remotes (e.g.
+   * ["react", "react-dom"]). Only list packages that must be a single
+   * instance per page; everything else is bundled per MFE.
+   */
+  federationShared: readonly string[];
   /** Entry file path (e.g., "./src/entry-mfe.tsx") */
   entryFile: string;
   /** Main file path for standalone mode (e.g., "./src/main.tsx") */
@@ -82,31 +87,33 @@ export function createMfeConfig(options: MfeConfigOptions) {
     if (customBaseUrl) {
       baseUrl = customBaseUrl(isDev, isMfeMode, url);
     } else {
-      baseUrl = url;
+      // Dev: absolute dev-server URL (HMR, served cross-origin to the shell).
+      // Build: relative, so Module Federation resolves assets next to
+      // remoteEntry.js ("auto" publicPath) whether the MFE is served from
+      // its own domain, a CDN path or behind the shell's /api/proxy/<slug>/.
+      baseUrl = isDev ? url : "./";
     }
 
     const plugins: Plugin[] = [
       ...(Array.isArray(frameworkPlugin) ? frameworkPlugin : [frameworkPlugin]),
-      federation({
-        name: appId.replace(/-/g, "_"),
+      // Module Federation 2.0: emits remoteEntry.js plus mf-manifest.json
+      // (exposes, shared deps and their JS/CSS assets) for the runtime.
+      // The plugin returns several Vite plugins.
+      ...(federation({
+        name: toFederationName(appId),
         filename: "remoteEntry.js",
+        manifest: true,
+        dts: false,
         exposes: {
           "./Mfe": entryFile,
         },
-        // Share libs with proper singletons to avoid conflicts
-        shared: federationShared.reduce(
-          (acc, lib) => {
-            acc[lib] = {
-              singleton: true,
-              requiredVersion: false,
-              strictVersion: false,
-              eager: lib === "@repo/utils" || lib === "dayjs", // Load these eagerly
-            };
-            return acc;
-          },
-          {} as Record<string, any>,
+        shared: Object.fromEntries(
+          federationShared.map((lib) => [
+            lib,
+            { singleton: true, requiredVersion: false as const },
+          ]),
         ),
-      }),
+      }) as Plugin[]),
       createVirtualManifestPlugin(entryFile),
       createHealthPlugin(appId),
     ];

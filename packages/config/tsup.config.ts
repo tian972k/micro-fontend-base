@@ -12,7 +12,7 @@ export default defineConfig({
   outDir: "dist",
   external: [
     "vite",
-    "@originjs/vite-plugin-federation",
+    "@module-federation/vite",
     "tailwindcss",
     "tailwindcss-animate",
   ],

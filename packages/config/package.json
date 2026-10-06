@@ -34,7 +34,6 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@originjs/vite-plugin-federation": "catalog:",
     "@types/node": "catalog:",
     "autoprefixer": "catalog:",
     "eslint": "catalog:",
@@ -51,6 +50,7 @@
     "vitest": "^3"
   },
   "dependencies": {
+    "@module-federation/vite": "catalog:",
     "tailwindcss-animate": "catalog:"
   }
 }

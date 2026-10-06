@@ -12,7 +12,9 @@ export default createMfeConfig({
   mainFile: "./src/main.tsx",
   customBaseUrl: (isDev, _isMfeMode, url) => {
     if (isDev) return url;
-    return process.env.VERCEL === "1" ? "/" : process.env.PUBLIC_BASE_PATH || "/";
+    // Relative base: MF resolves assets next to remoteEntry.js, so the
+    // same build works from its own domain or behind the shell proxy.
+    return process.env.PUBLIC_BASE_PATH || "./";
   },
   viteConfigOverride: {
     plugins: [

@@ -26,7 +26,6 @@
     "vue": "catalog:"
   },
   "devDependencies": {
-    "@originjs/vite-plugin-federation": "catalog:",
     "@types/node": "catalog:",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/tsconfig": "^0.5.1",
