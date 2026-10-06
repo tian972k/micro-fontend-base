@@ -122,6 +122,21 @@ function formatLog(
   return parts.join(" ");
 }
 
+/**
+ * Whether debug logs should be printed. This logger runs in both Node and
+ * the browser, so `process` may not exist (referencing it directly throws
+ * a ReferenceError in Vite-served browser code).
+ */
+function isDebugEnabled(): boolean {
+  const env = (
+    globalThis as { process?: { env?: Record<string, string | undefined> } }
+  ).process?.env;
+  if (env) {
+    return env.NODE_ENV === "development" || Boolean(env.DEBUG);
+  }
+  return Boolean(import.meta.env?.DEV);
+}
+
 function createLogger(defaultOptions: LoggerOptions = {}) {
   return {
     // Standard log methods
@@ -142,7 +157,7 @@ function createLogger(defaultOptions: LoggerOptions = {}) {
     },
 
     debug(message: string, ...args: unknown[]) {
-      if (process.env.NODE_ENV === "development" || process.env.DEBUG) {
+      if (isDebugEnabled()) {
         console.log(formatLog("debug", message, defaultOptions), ...args);
       }
     },

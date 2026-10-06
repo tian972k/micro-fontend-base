@@ -44,8 +44,13 @@ export function syncStore<T, K extends string = string>(
   const unsubscribeBus = globalEventBus.on(key, (newState: unknown) => {
     // Avoid circular updates: if we just emitted this state, don't set it back
     isInternalChange = true;
-    adapter.setState(newState as T);
-    isInternalChange = false;
+    try {
+      adapter.setState(newState as T);
+    } finally {
+      // Reset even if setState throws, otherwise local changes would
+      // silently stop being broadcast from then on.
+      isInternalChange = false;
+    }
   });
 
   // 2. Listen for local changes and broadcast to other apps
