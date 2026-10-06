@@ -1,8 +1,4 @@
-import {
-  json,
-  type LoaderFunctionArgs,
-  type MetaFunction,
-} from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { MFE_APPS, type MfeApp } from "@repo/config";
 import { MicroAppType } from "@repo/core/react";
@@ -14,6 +10,7 @@ import {
   CardTitle,
 } from "@repo/ui";
 import { MfeContainer } from "@/components/mfe/mfe-container";
+import { mergeMeta } from "@/lib/meta";
 import { getAppUrl } from "../../../server/config";
 
 /**
@@ -28,19 +25,10 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   return json({ app, appHost: getAppUrl(app.id) });
 };
 
-export const meta: MetaFunction<typeof loader> = ({ data, matches }) => {
-  // Keep parent tags (route meta replaces parent meta in Remix v2).
-  const parent = matches
-    .flatMap((match) => match.meta ?? [])
-    .filter(
-      (d) => !("title" in d) && !("name" in d && d.name === "description"),
-    );
-  return [
-    ...parent,
-    { title: `${data?.app.title ?? "Micro-frontend"} | MFE Platform` },
-    ...(data ? [{ name: "description", content: data.app.description }] : []),
-  ];
-};
+export const meta = mergeMeta<typeof loader>(({ data }) => [
+  { title: `${data?.app.title ?? "Micro-frontend"} | MFE Platform` },
+  ...(data ? [{ name: "description", content: data.app.description }] : []),
+]);
 
 // Literal class names so Tailwind's scanner picks them up.
 const ACCENTS: Record<
