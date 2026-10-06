@@ -4,3 +4,4 @@
  */
 
 export * from "./runtime-events";
+export * from "./typed-event-bus";
