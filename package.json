@@ -24,10 +24,8 @@
     "prepare": "husky install",
     "storybook": "pnpm --filter @repo/ui storybook",
     "mfe:add": "node scripts/add-mfe.mjs",
-    "generate-ui": "node scripts/generate-ui.mjs",
     "validate:mfe-config": "node scripts/mfe.config.mjs",
     "docker:build": "docker-compose build",
-    "docker:build:smart": "node scripts/smart-docker-build.js",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f"
