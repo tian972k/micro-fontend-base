@@ -13,7 +13,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      {/* Matches the Tailwind scope used when mounted inside the shell. */}
+      <body data-mfe="app-nextjs">{children}</body>
     </html>
   );
 }

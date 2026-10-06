@@ -480,6 +480,8 @@ export function MfeHost({
       <div
         ref={containerRef}
         id={`mfe-host-${name}`}
+        // Scope root for the MFE's Tailwind utilities (createMfeTailwindConfig).
+        data-mfe={name}
         className="w-full h-full"
       />
     </div>
