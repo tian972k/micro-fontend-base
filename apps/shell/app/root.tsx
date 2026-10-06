@@ -11,6 +11,7 @@ import localStyles from "./tailwind.css?url";
 import { ThemeProvider } from "./components/providers/theme-provider";
 import { ThemeScript } from "@repo/ui";
 import { useNonce } from "./components/providers/nonce-provider";
+import { startTelemetry } from "./components/providers/telemetry-setup";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -58,21 +59,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [storeLocale, i18n]);
 
   useEffect(() => {
-    // Basic Web Vitals monitoring
-    if (typeof window !== "undefined") {
-      // @ts-ignore
-      import("web-vitals")
-        .then(({ onCLS, onFID, onLCP, onFCP, onTTFB }) => {
-          onCLS(console.log);
-          onFID(console.log);
-          onLCP(console.log);
-          onFCP(console.log);
-          onTTFB(console.log);
-        })
-        .catch(() => {
-          console.warn("web-vitals not installed");
-        });
-    }
+    // Error reporting + Core Web Vitals for the whole page (shell + MFEs).
+    startTelemetry();
   }, []);
 
   return (
