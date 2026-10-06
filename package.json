@@ -27,6 +27,7 @@
     "prepare": "husky install",
     "storybook": "pnpm --filter @repo/ui storybook",
     "mfe:add": "node scripts/add-mfe.mjs",
+    "orbit:init": "node scripts/orbit-init.mjs",
     "validate:mfe-config": "node scripts/mfe.config.mjs",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d",

@@ -71,20 +71,24 @@ docs/             documentation
 
 ```bash
 pnpm dev | build | type-check | lint | test | test:e2e | lhci
+pnpm orbit:init --name <project> [--keep react,vue]
 pnpm mfe:add <name> <react|vue|svelte|solidjs>
 pnpm storybook
 ```
 
-## Using Orbit for a client project
+## Start a new project from Orbit
 
-1. Fork, rename the apps in `MFE_APPS`, and delete the demo MFEs you don't
-   need.
-2. Replace `verifyCredentials()` with the client's identity provider.
-3. Set `SESSION_SECRET`, the MFE URLs and `CSP_EXTRA_ORIGINS` per
-   environment ([configuration.md](./docs/configuration.md)).
-4. Point telemetry at the client's monitoring
-   ([observability.md](./docs/observability.md)).
-5. Keep the CI gates; tune the Lighthouse budgets to the client's targets.
+```bash
+# GitHub: "Use this template", or clone, then:
+pnpm install
+pnpm orbit:init --name acme-portal --title "Acme Portal" --keep react,vue
+```
+
+`orbit:init` names the project, removes the MFEs you don't need from every
+place they're wired (apps, registry, CI, docker, nav), generates a local
+`SESSION_SECRET` and resets the changelog. Then plug in the client's
+identity provider and add their MFEs with `pnpm mfe:add`. Full guide:
+[docs/starting-a-new-project.md](./docs/starting-a-new-project.md).
 
 ## Contributing & security
 
