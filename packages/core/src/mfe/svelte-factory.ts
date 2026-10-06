@@ -1,14 +1,26 @@
-import type { MicroApp, MicroAppProps } from "../types";
+import type { MicroApp, MicroAppProps, MfeRegistry } from "../types";
+
+/** A Svelte 4 component instance (the part this factory uses). */
+export interface SvelteComponentLike {
+  $destroy(): void;
+}
+
+/** A Svelte 4 component constructor. */
+export type SvelteComponentConstructor = new (options: {
+  target: HTMLElement;
+  props?: MicroAppProps;
+}) => SvelteComponentLike;
 
 /**
  * Factory for creating Svelte-based MFE entry modules
  */
 export function createSvelteMfeEntry(options: {
-  AppComponent: any;
+  AppComponent: SvelteComponentConstructor;
   appId: string;
-  registry: any;
+  registry: MfeRegistry;
 }) {
   const { AppComponent, appId, registry } = options;
+  const instances = new WeakMap<HTMLElement, SvelteComponentLike>();
 
   const mount = (container: HTMLElement, props: MicroAppProps) => {
     const app = new AppComponent({
@@ -17,14 +29,14 @@ export function createSvelteMfeEntry(options: {
         ...props,
       },
     });
-    (container as any)._svelteApp = app;
+    instances.set(container, app);
   };
 
   const unmount = (container: HTMLElement) => {
-    const app = (container as any)._svelteApp;
+    const app = instances.get(container);
     if (app) {
       app.$destroy();
-      delete (container as any)._svelteApp;
+      instances.delete(container);
     }
   };
 

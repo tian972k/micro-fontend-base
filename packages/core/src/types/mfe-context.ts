@@ -47,7 +47,7 @@ export interface MfeNavigationContext {
 
 export interface NavigateOptions {
   replace?: boolean;
-  state?: Record<string, any>;
+  state?: Record<string, unknown>;
 }
 
 /**
@@ -60,7 +60,7 @@ export interface MfeError {
   severity: "info" | "warning" | "error" | "critical";
   timestamp: Date;
   stack?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   recoverable: boolean;
 }
 
@@ -110,7 +110,7 @@ export interface MfeContextProps {
   version?: string;
 
   /** Custom metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -128,12 +128,14 @@ export interface MfeLifecycleHooks {
 /**
  * Validation helper - ensure required props are present
  */
-export function validateMfeContextProps(props: any): props is MfeContextProps {
+export function validateMfeContextProps(
+  props: unknown,
+): props is MfeContextProps {
+  if (typeof props !== "object" || props === null) return false;
+  const candidate = props as Partial<MfeContextProps>;
   return (
-    typeof props === "object" &&
-    props !== null &&
-    typeof props.appId === "string" &&
-    props.eventBus !== undefined &&
-    props.storeManager !== undefined
+    typeof candidate.appId === "string" &&
+    candidate.eventBus !== undefined &&
+    candidate.storeManager !== undefined
   );
 }

@@ -9,7 +9,7 @@ import { logger } from "../logger/logger";
  * Individual app store with get/set/watch pattern
  */
 export class AppStore {
-  private state = new Map<string, any>();
+  private state = new Map<string, unknown>();
   private watchers = new Map<string, Set<Function>>();
   private appId: string;
 
@@ -20,14 +20,14 @@ export class AppStore {
   /**
    * Get value from store
    */
-  get<T = any>(key: string, defaultValue?: T): T | undefined {
+  get<T = unknown>(key: string, defaultValue?: T): T | undefined {
     return (this.state.get(key) ?? defaultValue) as T | undefined;
   }
 
   /**
    * Set value in store and notify watchers
    */
-  set<T = any>(key: string, value: T): void {
+  set<T = unknown>(key: string, value: T): void {
     const oldValue = this.state.get(key);
 
     if (oldValue === value) return; // No change
@@ -40,7 +40,7 @@ export class AppStore {
   /**
    * Watch for changes to a key
    */
-  watch<T = any>(
+  watch<T = unknown>(
     key: string,
     callback: (newValue: T, oldValue?: T) => void,
   ): () => void {
@@ -79,7 +79,7 @@ export class AppStore {
   /**
    * Get all store data
    */
-  getAll(): Record<string, any> {
+  getAll(): Record<string, unknown> {
     return Object.fromEntries(this.state);
   }
 
@@ -193,9 +193,9 @@ export class StoreManager {
  * Can be replaced with Zustand, Pinia, etc. per app
  */
 export interface IStore {
-  get<T = any>(key: string): T | undefined;
-  set<T = any>(key: string, value: T): void;
-  watch<T = any>(
+  get<T = unknown>(key: string): T | undefined;
+  set<T = unknown>(key: string, value: T): void;
+  watch<T = unknown>(
     key: string,
     callback: (newValue: T, oldValue?: T) => void,
   ): () => void;

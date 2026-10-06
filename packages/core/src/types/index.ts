@@ -71,6 +71,22 @@ export interface MfeManifest {
   [key: string]: unknown;
 }
 
+/**
+ * The subset of AppRegistry the framework factories need. Typed
+ * structurally so apps can pass `AppRegistry` or a test double.
+ */
+export interface MfeRegistry {
+  register(name: string, app: MicroApp): void;
+  isRegistered(name: string): boolean;
+}
+
+/** Entry shape of a Vite build manifest (manifest.json). */
+export interface MfeManifestEntry {
+  file: string;
+  css?: string[];
+  assets?: string[];
+}
+
 declare global {
   interface Window {
     /**
@@ -81,5 +97,13 @@ declare global {
      * Shared event bus instance across MFEs.
      */
     __MFE_EVENT_BUS__?: unknown;
+    /** Debug helpers exposed by the logger (dev tooling). */
+    __MFE_DEBUG__?: Record<string, unknown>;
+    /** Performance helpers exposed by the performance monitor. */
+    __MFE_PERF__?: Record<string, unknown>;
+    /** Present when the host app has initialised Sentry. */
+    Sentry?: {
+      captureException(error: unknown, context?: Record<string, unknown>): void;
+    };
   }
 }

@@ -52,8 +52,8 @@ export class MfeErrorBoundary extends Component<Props, State> {
 
   private sendToMonitoring(error: Error, errorInfo: ErrorInfo) {
     // Send to Sentry, Datadog, etc.
-    if ((window as any).Sentry) {
-      (window as any).Sentry.captureException(error, {
+    if (window.Sentry) {
+      window.Sentry.captureException(error, {
         tags: {
           mfe: this.props.mfeId || "unknown",
           component: "ErrorBoundary",
@@ -75,7 +75,12 @@ export class MfeErrorBoundary extends Component<Props, State> {
         componentStack: errorInfo.componentStack,
         timestamp: new Date().toISOString(),
       }),
-    }).catch(console.error);
+    }).catch((err: unknown) =>
+      mfeLogger.errorWithStack(
+        "ErrorBoundary",
+        err instanceof Error ? err : new Error(String(err)),
+      ),
+    );
   }
 
   private handleReset = () => {
