@@ -65,7 +65,7 @@ export function LoginForm() {
               <div className="space-y-2">
                 <label
                   htmlFor="email"
-                  className="text-xs font-semibold uppercase tracking-wider text-zinc-500"
+                  className="text-xs font-semibold uppercase tracking-wider text-zinc-400"
                 >
                   Email
                 </label>
@@ -80,7 +80,7 @@ export function LoginForm() {
                     placeholder="name@example.com"
                     required
                     disabled={isSubmitting}
-                    className="pl-10 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:bg-zinc-900 focus:border-primary/50 transition-all h-9 text-sm"
+                    className="pl-10 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:bg-zinc-900 focus:border-primary/50 transition-all h-9 text-sm"
                   />
                 </div>
               </div>
@@ -89,7 +89,7 @@ export function LoginForm() {
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="password"
-                    className="text-xs font-semibold uppercase tracking-wider text-zinc-500"
+                    className="text-xs font-semibold uppercase tracking-wider text-zinc-400"
                   >
                     Password
                   </label>
@@ -105,7 +105,7 @@ export function LoginForm() {
                     placeholder="••••••••"
                     required
                     disabled={isSubmitting}
-                    className="pl-10 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:bg-zinc-900 focus:border-primary/50 transition-all h-9 text-sm"
+                    className="pl-10 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:bg-zinc-900 focus:border-primary/50 transition-all h-9 text-sm"
                   />
                 </div>
               </div>
@@ -125,7 +125,7 @@ export function LoginForm() {
             </Button>
           </Form>
 
-          <p className="text-center text-xs text-zinc-600">
+          <p className="text-center text-xs text-zinc-400">
             Use any credentials to login (mock auth)
           </p>
         </div>

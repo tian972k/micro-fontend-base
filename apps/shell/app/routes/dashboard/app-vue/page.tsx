@@ -1,4 +1,4 @@
-import { json, type MetaFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { APP_IDS } from "@repo/config";
 import { MicroAppType } from "@repo/core/react";
@@ -11,9 +11,10 @@ import {
   CardContent,
 } from "@repo/ui";
 import { getAppConfig } from "../../../server/config";
-export const meta: MetaFunction = () => {
+import { mergeMeta } from "@/lib/meta";
+export const meta = mergeMeta(() => {
   return [{ title: "Vue App | MFE Platform" }];
-};
+});
 
 export const loader = async () => {
   try {
