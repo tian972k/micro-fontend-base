@@ -34,3 +34,4 @@ export * from "./logger";
 export * from "./mfe/registry";
 export * from "./mfe/strategy";
 export { createSingletonStore } from "./state/create-singleton-store";
+export * from "./telemetry";
