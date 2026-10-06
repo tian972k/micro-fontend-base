@@ -101,6 +101,32 @@ Platform state isn't shared through federation at all (see below).
 hosts that don't use federation: it reads Vite's `manifest.json`, injects
 the entry `<script type="module">` and CSS, then waits for registration.
 
+## Next.js: two delivery modes
+
+The Next.js app is delivered two ways from the same code:
+
+```mermaid
+flowchart LR
+  subgraph Next["apps/app-nextjs"]
+    Pages["src/app/* (App Router)"]
+    Entry["src/entry-mfe.tsx"]
+  end
+  Pages -- "next build / next start<br/>(SSR, own Vercel project)" --> Standalone["Standalone site<br/>server-rendered"]
+  Entry -- "vite build -> public/<br/>(remoteEntry.js + mf-manifest.json)" --> Embedded["Embedded in the shell<br/>client-rendered MFE"]
+```
+
+- **Standalone**: a normal Next.js deployment with SSR (CI job
+  _Deploy app-nextjs SSR to Vercel_).
+- **Embedded**: the shell loads `entry-mfe.tsx` through Module Federation
+  and mounts it with `createRoot`. This part renders **on the client only**.
+  The shell's SSR covers the layout around it, not the MFE's content. Next.js
+  server features (server components, `getServerSideProps`, server actions)
+  are therefore not available inside the embedded MFE. Fetch data from
+  APIs, or keep server-rendered pages on the standalone site.
+
+There is no Vite-based Next.js runtime (e.g. vinext) in this repo. The
+Vite build only produces the federation bundle.
+
 ## The MFE contract
 
 An MFE's `./Mfe` expose must, when evaluated, register:
@@ -187,7 +213,7 @@ Every failure mode and how it's handled is listed in
 apps/
   shell/            Remix host (SSR) - auth, routing, CSP, proxy, telemetry
   app-react/        React 18 MFE (Vite)
-  app-nextjs/       Next.js app; its MFE bundle is built with Vite into public/
+  app-nextjs/       Next.js app (SSR when standalone); its MFE bundle is built with Vite into public/
   app-vue/          Vue 3 MFE
   app-svelte/       Svelte 4 MFE
   app-solidjs/      SolidJS MFE
