@@ -18,21 +18,21 @@
     "@repo/config": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/ui": "workspace:*",
-    "@repo/utils": "workspace:^",
-    "dayjs": "^1.11.19",
-    "i18next": "^25.7.4",
-    "i18next-browser-languagedetector": "^8.2.0",
-    "i18next-http-backend": "^3.0.2",
-    "lodash": "^4.17.21",
-    "svelte": "^4.2.12"
+    "@repo/utils": "workspace:*",
+    "dayjs": "catalog:",
+    "i18next": "catalog:",
+    "i18next-browser-languagedetector": "catalog:",
+    "i18next-http-backend": "catalog:",
+    "lodash": "catalog:",
+    "svelte": "catalog:"
   },
   "devDependencies": {
-    "@originjs/vite-plugin-federation": "^1.4.1",
+    "@originjs/vite-plugin-federation": "catalog:",
     "@sveltejs/vite-plugin-svelte": "^3.0.2",
     "@tsconfig/svelte": "^5.0.2",
-    "@types/node": "^20.0.0",
+    "@types/node": "catalog:",
     "svelte-check": "^3.6.7",
-    "typescript": "^5.2.2",
-    "vite": "^5.2.0"
+    "typescript": "catalog:",
+    "vite": "catalog:"
   }
 }
