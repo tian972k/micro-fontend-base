@@ -69,13 +69,16 @@ SESSION_SECRET=dev pnpm lhci
 
 `.github/workflows/ci-cd.yml` orchestrates reusable workflows:
 
-```text
-check-secrets, detect-changes
-  └─ lint (reusable-lint.yml)
-       ├─ Lint & Type Check + unit tests (affected)
-       ├─ E2E (Playwright)
-       └─ Lighthouse CI
-  └─ build-packages ─► build-<app> ─► deploy-<app> (Vercel preview / production)
+```mermaid
+flowchart LR
+  T([push / pull_request]) --> CS[check-secrets] & DC[detect-changes]
+  DC --> L["Lint & Type Check<br/>+ unit tests (affected)"]
+  DC --> E2E[E2E Playwright]
+  DC --> LH[Lighthouse CI]
+  DC --> BP[build-packages]
+  BP --> BA["build-&lt;app&gt;"]
+  BA --> DA["deploy-&lt;app&gt;<br/>Vercel preview / production"]
+  CS -. "secrets present?" .-> DA
 ```
 
 Deploy jobs run only when Vercel secrets and project ids are configured.

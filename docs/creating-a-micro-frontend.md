@@ -162,6 +162,11 @@ Next.js renders its own pages, and a Vite build produces the MFE bundle
 into `public/` (see `apps/app-nextjs/vite.config.mts`: `outDir: "public"`,
 `skipHtmlInput: true`). Use `createReactMfeEntry` in `src/entry-mfe.tsx`.
 
+The standalone Next.js site keeps full SSR. The embedded MFE is
+client-rendered, so don't rely on server components or server actions
+inside `entry-mfe.tsx`. See
+[architecture.md](./architecture.md#nextjs-two-delivery-modes).
+
 **Async work before mounting** (i18n, feature flags): wrap the factory's
 `mount` in an `async` function. `MfeHost` awaits it. See
 `apps/app-react/src/entry-mfe.tsx`.

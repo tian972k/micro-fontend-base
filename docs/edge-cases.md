@@ -33,14 +33,36 @@ covered by a test.
 
 The load sequence in `MfeHost` (`packages/core/src/mfe/react/mfe-host.tsx`):
 
-```text
-validate host ─► health.json ─► (maintenance? stop) ─► load remote code
-      │               │                                      │
-   invalid ─► ERROR   │ unreachable / 404 / 5xx ─► ERROR      ▼
-                      ▼                              wait for registration (5s)
-                  MAINTENANCE                                │
-                                                            mount ─► MOUNTED
+```mermaid
+flowchart TD
+  A([MfeHost mounts]) --> B{"normalizeMfeHost(host)<br/>http(s) or same-origin?"}
+  B -- invalid --> E1[["ERROR<br/>Invalid MFE host configuration"]]
+  B -- ok --> C["GET health.json"]
+  C -- "network error" --> E2[["ERROR<br/>Connection Failed + Retry"]]
+  C -- "404 / 5xx" --> E3[["ERROR<br/>App Not Found / Server Error"]]
+  C -- "status: maintenance" --> M[["MAINTENANCE<br/>no code is loaded"]]
+  C -- available --> U1{Still mounted?}
+  U1 -- no --> X1([stop - nothing downloaded])
+  U1 -- yes --> D["load remote code<br/>loadRemote via mf-manifest.json + CSS"]
+  D -- fails --> E4[["ERROR + Retry"]]
+  D -- ok --> W["wait for AppRegistry.register()<br/>(mfe:registered event, 5s)"]
+  W -- timeout --> E5[["ERROR<br/>Timeout waiting for MicroApp"]]
+  W -- registered --> U2{Still mounted?}
+  U2 -- no --> X2([stop - never mount into a detached node])
+  U2 -- yes --> MO["strategy.mount(app, container, props)"]
+  MO -- throws --> E6[["ERROR<br/>Failed to mount application"]]
+  MO -- ok --> OK[["MOUNTED<br/>metric mfe.load_to_mount"]]
+
+  classDef err fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+  classDef warn fill:#fef3c7,stroke:#d97706,color:#78350f
+  classDef ok fill:#dcfce7,stroke:#16a34a,color:#14532d
+  class E1,E2,E3,E4,E5,E6 err
+  class M warn
+  class OK ok
 ```
+
+Every red box is also reported through telemetry (see each section below);
+Retry re-runs this flow without reloading the page.
 
 ### 1.1 Invalid or malicious host URL
 
@@ -431,6 +453,10 @@ Request hygiene:
 - **Hydration**: the CSP nonce is hidden by browsers after load, so the
   client renders `nonce=""` and `ThemeScript` suppresses the warning.
 - **Streaming timeout**: SSR aborts after **5 s** (`ABORT_DELAY`).
+- **MFEs are not server-rendered inside the shell**: the shell SSRs its
+  layout and the host container. MFE content (including the Next.js MFE)
+  mounts on the client, after hydration. For SEO-critical content, render it
+  in the shell or on the standalone Next.js site.
 
 ---
 
