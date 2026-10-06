@@ -1,11 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
+import { E2E_MFE } from "./e2e/target";
 
 const SHELL_URL = "http://localhost:8000";
-const REACT_URL = "http://localhost:8001";
+const MFE_URL = `http://localhost:${E2E_MFE.port}`;
 
 /**
- * End-to-end tests run against the real dev servers: the shell plus the
- * React MFE (the other MFEs are covered by the same MfeHost code path).
+ * End-to-end tests run against the real dev servers: the shell plus one
+ * MFE from the registry (see e2e/target.ts; the others use the same
+ * MfeHost / federation code path).
  */
 export default defineConfig({
   testDir: "./e2e",
@@ -20,8 +22,8 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: [
     {
-      command: "pnpm --filter app-react dev",
-      url: REACT_URL,
+      command: `pnpm --filter ${E2E_MFE.id} dev`,
+      url: MFE_URL,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

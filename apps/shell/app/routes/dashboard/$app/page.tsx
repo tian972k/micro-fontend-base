@@ -1,6 +1,6 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { MFE_APPS, type MfeApp } from "@repo/config";
+import { MFE_APPS, type MfeAccent } from "@repo/config";
 import { MicroAppType } from "@repo/core/react";
 import {
   Card,
@@ -31,8 +31,10 @@ export const meta = mergeMeta<typeof loader>(({ data }) => [
 ]);
 
 // Literal class names so Tailwind's scanner picks them up.
+// Keyed by every supported accent (not just the ones registered apps use
+// today), so removing apps from the registry never breaks this map.
 const ACCENTS: Record<
-  MfeApp["accent"],
+  MfeAccent,
   { heading: string; card: string; header: string }
 > = {
   primary: {
