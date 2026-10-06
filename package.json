@@ -16,6 +16,8 @@
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"!node_modules\" \"!**/node_modules\"",
     "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"!node_modules\" \"!**/node_modules\"",
     "type-check": "turbo run type-check",
+    "test": "turbo run test",
+    "test:e2e": "playwright test",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json,css}\"",
     "clean": "turbo run clean && rm -rf node_modules",
     "clean:cache": "rm -rf node_modules/.cache .turbo apps/*/.turbo packages/*/.turbo apps/*/.vite packages/*/.vite",
@@ -44,6 +46,7 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "~1.56.0",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
     "eslint": "catalog:",

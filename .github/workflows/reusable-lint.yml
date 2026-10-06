@@ -38,3 +38,41 @@ jobs:
 
       - name: Type check (affected only)
         run: pnpm turbo run type-check --affected
+
+      - name: Unit tests (affected only)
+        run: pnpm turbo run test --affected
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    if: ${{ inputs.needs_run }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Generate dev manifests
+        run: node scripts/generate-dev-manifest.mjs
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
