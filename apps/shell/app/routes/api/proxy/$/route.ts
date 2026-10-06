@@ -3,6 +3,7 @@ import {
   type ActionFunction,
   json,
 } from "@remix-run/node";
+import { MFE_APPS } from "@repo/config";
 
 /**
  * Load MFE hosts from environment variables
@@ -11,9 +12,8 @@ import {
  */
 function getMfeHosts(): Record<string, string> {
   const hosts: Record<string, string> = {};
-  const appNames = ["react", "vue", "svelte", "solid", "nextjs"];
 
-  for (const app of appNames) {
+  for (const { slug: app } of MFE_APPS) {
     const envKey = `VITE_APP_${app.toUpperCase()}_HOST`;
     const url = process.env[envKey];
 

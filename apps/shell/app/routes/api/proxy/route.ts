@@ -1,14 +1,14 @@
 import { type LoaderFunction, json } from "@remix-run/node";
+import { MFE_APPS } from "@repo/config";
 
 /**
  * Get client-facing proxy URLs for MFE apps
  * Used by frontend to load MFE via shell proxy
  */
 function getMfeProxyUrls(): Record<string, string> {
-  const appNames = ["react", "vue", "svelte", "solid", "nextjs"];
   const proxyUrls: Record<string, string> = {};
 
-  for (const app of appNames) {
+  for (const { slug: app } of MFE_APPS) {
     proxyUrls[app] = `/api/proxy/${app}`;
   }
 

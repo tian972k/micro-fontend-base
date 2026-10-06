@@ -30,7 +30,8 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf node_modules dist .turbo",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@originjs/vite-plugin-federation": "catalog:",
@@ -46,7 +47,8 @@
     "tailwindcss": "catalog:",
     "tsup": "^8.5.1",
     "typescript": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "vitest": "^3"
   },
   "dependencies": {
     "tailwindcss-animate": "catalog:"
