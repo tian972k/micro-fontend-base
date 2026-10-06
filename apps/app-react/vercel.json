@@ -2,8 +2,8 @@
   "git": {
     "deploymentEnabled": false
   },
-  "installCommand": "npm i -g pnpm@9",
-  "buildCommand": "cd ../.. && pnpm install && VERCEL=1 pnpm turbo run build --filter=app-react",
+  "installCommand": "npm i -g pnpm@9 && cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && VERCEL=1 pnpm turbo run build --filter=app-react",
   "outputDirectory": "dist",
   "headers": [
     {
@@ -13,12 +13,18 @@
           "key": "Access-Control-Allow-Origin",
           "value": "https://micro-fontend-base-shell.vercel.app"
         },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,POST" },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET,OPTIONS,POST"
+        },
         {
           "key": "Access-Control-Allow-Headers",
           "value": "Content-Type,Authorization"
         },
-        { "key": "Access-Control-Allow-Credentials", "value": "true" }
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        }
       ]
     }
   ]
