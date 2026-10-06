@@ -1,0 +1,4 @@
+User-agent: *
+# Everything behind /dashboard requires a session.
+Disallow: /dashboard
+Disallow: /api/

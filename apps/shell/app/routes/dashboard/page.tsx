@@ -8,10 +8,11 @@ import {
 } from "@repo/ui";
 import { Overview } from "@/components/dashboard/overview";
 import { RecentSales } from "@/components/dashboard/recent-sales";
+import { mergeMeta } from "@/lib/meta";
 
-export const meta: MetaFunction = () => {
+export const meta = mergeMeta(() => {
   return [{ title: "Dashboard - Orbit Platform" }];
-};
+});
 
 export default function DashboardIndex() {
   return (

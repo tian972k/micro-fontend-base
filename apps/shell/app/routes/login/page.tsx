@@ -3,7 +3,6 @@ import {
   redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
-  type MetaFunction,
 } from "@remix-run/node";
 import { LoginForm } from "@/features/auth/components/login-form";
 import {
@@ -12,10 +11,11 @@ import {
   safeRedirect,
   verifyCredentials,
 } from "../../server/auth.server";
+import { mergeMeta } from "@/lib/meta";
 
-export const meta: MetaFunction = () => {
+export const meta = mergeMeta(() => {
   return [{ title: "Login - MFE Platform" }];
-};
+});
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   if (await getUser(request)) {
