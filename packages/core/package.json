@@ -60,16 +60,23 @@
     "build": "tsc",
     "lint": "eslint \"**/*.ts*\"",
     "clean": "rm -rf node_modules dist .turbo",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
+    "@testing-library/dom": "^10",
+    "@testing-library/react": "^16",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "eslint": "catalog:",
+    "jsdom": "^26",
     "react": "catalog:",
-    "typescript": "catalog:"
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "^3"
   },
   "peerDependencies": {
     "react": "^18.2.0",
