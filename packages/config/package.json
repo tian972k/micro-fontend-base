@@ -29,7 +29,8 @@
   },
   "scripts": {
     "build": "tsup",
-    "clean": "rm -rf node_modules dist .turbo"
+    "clean": "rm -rf node_modules dist .turbo",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@originjs/vite-plugin-federation": "^1.4.1",

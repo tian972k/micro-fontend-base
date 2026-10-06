@@ -60,7 +60,8 @@
     "build-storybook:svelte": "storybook build --config-dir .storybook-svelte -o storybook-static/svelte",
     "build-storybook:all": "pnpm build-storybook:react && pnpm build-storybook:vue && pnpm build-storybook:solid && pnpm build-storybook:svelte",
     "generate": "node cli/generate-component.js",
-    "g": "node cli/generate-component.js"
+    "g": "node cli/generate-component.js",
+    "type-check": "tsc --noEmit"
   },
   "bin": {
     "ui-generate": "./cli/generate-component.js"
