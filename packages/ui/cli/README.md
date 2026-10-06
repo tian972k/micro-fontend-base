@@ -2,7 +2,8 @@
 
 Generate UI components with Storybook stories for React, Vue, or Svelte frameworks.
 
-See full documentation: [docs/tools/UI_GENERATOR.md](../../docs/tools/UI_GENERATOR.md)
+It scaffolds the component, its variants and a Storybook story. See
+[packages/ui/README.md](../README.md#generate-components).
 
 ## Quick Usage
 

@@ -1,45 +1,28 @@
 # @repo/config
 
-Shared configuration presets for tooling and platform behavior.
+Shared configuration for the Orbit platform: the **MFE registry**, build
+factories and tooling presets.
 
-## Features
+**Full API reference → [docs/api/config.md](../../docs/api/config.md)**
 
-### 1. Shared Dependencies (`baseShared`)
+| Export                            | What                                                                                         |
+| --------------------------------- | -------------------------------------------------------------------------------------------- |
+| `@repo/config`                    | `MFE_APPS` (single source of truth), `APP_IDS`, `PORTS`, `toFederationName`, shared lists    |
+| `@repo/config/vite`               | `createMfeConfig()` (Module Federation 2.0 remote config), Vite plugins. **Build-time only** |
+| `@repo/config/tailwind.config`    | `sharedConfig`, `createMfeTailwindConfig(appId, content)` (scoped utilities)                 |
+| `@repo/config/tsconfig.base.json` | TypeScript base                                                                              |
+| `@repo/config/eslint-preset.cjs`  | ESLint preset                                                                                |
 
-A definitive list of dependencies that should be shared via Module Federation to ensure singleton instances across the application.
-
-**Usage in `vite.config.ts`:**
-
-```typescript
-import { baseShared } from "@repo/config";
-
-export default defineConfig({
-  plugins: [
-    federation({
-      shared: [...baseShared, "additional-lib"],
-    }),
-  ],
+```ts
+// apps/<app>/vite.config.mts
+export default createMfeConfig({
+  appId: APP_IDS.REACT,
+  frameworkPlugin: react(),
+  federationShared: reactShared,
+  entryFile: "./src/entry-mfe.tsx",
+  mainFile: "./src/main.tsx",
 });
 ```
 
-**Includes**: `react`, `react-dom`, `lodash`, `dayjs`, `@repo/core`, `@repo/ui`, `@repo/utils`.
-
-### 2. Environment Constants
-
-Shared constants for port numbers to avoid collisions during local development.
-
-```typescript
-import { Ports } from "@repo/config";
-
-// Ports.SHELL -> 8000
-// Ports.APP_A -> 8001
-// ...
-```
-
-### 3. ESLint Presets
-
-Standardized linting rules for React, Next.js, and Library packages.
-
-### 4. TypeScript Configurations
-
-Base `tsconfig` files (`base.json`, `react-library.json`, `nextjs.json`) to ensure consistent compilation settings.
+`pnpm --filter @repo/config test` checks the registry, including drift
+against `scripts/mfe.config.mjs`.

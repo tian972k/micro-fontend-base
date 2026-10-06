@@ -33,3 +33,4 @@ export * from "./logger";
 // MFE Registry & Strategy
 export * from "./mfe/registry";
 export * from "./mfe/strategy";
+export { createSingletonStore } from "./state/create-singleton-store";
