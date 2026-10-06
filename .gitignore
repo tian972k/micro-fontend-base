@@ -256,3 +256,8 @@ coverage/
 .vercel
 .netlify
 .env*.local
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
