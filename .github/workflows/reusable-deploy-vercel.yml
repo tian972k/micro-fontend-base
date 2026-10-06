@@ -42,13 +42,16 @@ jobs:
           # directory's contents (its "least common ancestor"), so what
           # was uploaded from apps/${app}/.vercel/output needs to be
           # downloaded back into that same directory to reconstruct it.
-          path: apps/${{ inputs.app }}/.vercel/output
+          # The Vercel projects use Root Directory = apps/<app>, so the CLI
+          # must run from the repo root (running it inside apps/<app>
+          # resolves to apps/<app>/apps/<app>). Prebuilt output therefore
+          # lives at the repo root too.
+          path: .vercel/output
 
       - name: Install Vercel CLI
         run: npm install -g vercel@59.1.3
 
       - name: Pull Vercel Environment
-        working-directory: apps/${{ inputs.app }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -61,7 +64,6 @@ jobs:
           fi
 
       - name: Deploy to Vercel
-        working-directory: apps/${{ inputs.app }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
