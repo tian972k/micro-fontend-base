@@ -25,6 +25,30 @@ function getMfeHosts(): Record<string, string> {
   return hosts;
 }
 
+/**
+ * Request headers that must not be forwarded to MFE origins: the shell's
+ * session cookie / credentials belong to the shell only, and hop-by-hop or
+ * host headers would be wrong for the upstream request anyway.
+ */
+const STRIPPED_REQUEST_HEADERS = [
+  "cookie",
+  "authorization",
+  "host",
+  "connection",
+  "content-length",
+  "x-forwarded-for",
+  "x-forwarded-host",
+  "x-real-ip",
+];
+
+function buildUpstreamHeaders(incoming: Headers): Headers {
+  const headers = new Headers(incoming);
+  for (const name of STRIPPED_REQUEST_HEADERS) {
+    headers.delete(name);
+  }
+  return headers;
+}
+
 // Health check cache: { app: { timestamp, isHealthy } }
 const healthCache = new Map<
   string,
@@ -133,7 +157,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     const timeout = isStaticAsset ? 5000 : 10000;
     const response = await fetch(targetUrl.toString(), {
       method: request.method,
-      headers: new Headers(request.headers),
+      headers: buildUpstreamHeaders(request.headers),
       body: ["GET", "HEAD"].includes(request.method)
         ? undefined
         : await request.text(),
@@ -177,7 +201,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       if (
         lowerKey === "content-encoding" ||
         lowerKey === "content-length" ||
-        lowerKey === "transfer-encoding"
+        lowerKey === "transfer-encoding" ||
+        // Don't let an MFE origin set cookies on the shell's domain.
+        lowerKey === "set-cookie"
       ) {
         continue;
       }
@@ -185,10 +211,10 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     }
 
     // Add CORS and proxy headers
-    cleanHeaders.set(
-      "Access-Control-Allow-Origin",
-      "https://micro-fontend-base-shell.vercel.app",
-    );
+    // Responses are consumed by the shell itself, so only its own origin
+    // (whatever domain it's deployed on) needs to be allowed.
+    cleanHeaders.set("Access-Control-Allow-Origin", url.origin);
+    cleanHeaders.set("Vary", "Origin");
     cleanHeaders.set("Access-Control-Allow-Methods", "GET,HEAD,POST,OPTIONS");
     cleanHeaders.set(
       "Access-Control-Allow-Headers",
