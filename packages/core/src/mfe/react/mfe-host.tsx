@@ -282,10 +282,22 @@ export function MfeHost({
             cachedVersion &&
             health.version !== cachedVersion
           ) {
+            setStoredVersionCache(name, health.version, Date.now());
+            if (remoteLoader) {
+              // Federation keeps the evaluated module for the page's
+              // lifetime (ES modules can't be re-executed), so a new remote
+              // version only takes effect on the next full page load. Keep
+              // the running version instead of waiting for a registration
+              // that will never come.
+              hostLogger.warn(
+                `${name} has a new version (${cachedVersion} → ${health.version}); it will load on the next page reload.`,
+              );
+              if (mounted) await mountMicroApp();
+              return;
+            }
             hostLogger.debug(
               `${name} version changed: ${cachedVersion} → ${health.version}, reloading...`,
             );
-            setStoredVersionCache(name, health.version, Date.now());
             delete window.MFE[name];
             delete manifestCache[name];
             // Fall through to full load
@@ -311,7 +323,20 @@ export function MfeHost({
       try {
         // 0. Federation / Direct Import Mode
         if (remoteLoader) {
-          if (mounted) setStatus(MfeStatus.LOADING);
+          // Same availability contract as manifest mode: honour maintenance
+          // and surface "host down"/404 as a clear error before loading code.
+          const health = await fetchHealth();
+          // Unmounted while checking: don't download code nobody will show.
+          if (!mounted) return;
+          if (health.status === "maintenance") {
+            setStatus(MfeStatus.MAINTENANCE);
+            return;
+          }
+          if (health.version) {
+            versionCache[name] = health.version;
+            setStoredVersionCache(name, health.version, Date.now());
+          }
+          setStatus(MfeStatus.LOADING);
           await remoteLoader();
           if (mounted) await mountMicroApp();
           return;
