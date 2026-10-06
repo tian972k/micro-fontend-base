@@ -1,8 +1,12 @@
 import * as React from "react";
 
-export function ThemeScript() {
+export function ThemeScript({ nonce }: { nonce?: string } = {}) {
   return (
     <script
+      nonce={nonce}
+      // The browser hides the nonce attribute after load, so the client
+      // value never matches the server-rendered one.
+      suppressHydrationWarning
       dangerouslySetInnerHTML={{
         __html: `
           (function() {
