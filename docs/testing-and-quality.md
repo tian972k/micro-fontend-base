@@ -81,6 +81,10 @@ flowchart LR
   CS -. "secrets present?" .-> DA
 ```
 
+`detect-changes` builds and deploys only the apps whose folders changed. A
+change to `packages/**`, root config (`package.json`, `pnpm-lock.yaml`,
+`turbo.json`, `tsconfig.json`) or `.github/workflows/**` rebuilds and
+redeploys everything, so CI changes are always exercised end to end.
 Deploy jobs run only when Vercel secrets and project ids are configured.
 More detail in [deployment.md](./deployment.md).
 
