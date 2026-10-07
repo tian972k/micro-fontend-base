@@ -101,6 +101,7 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'turbo.json'
               - 'tsconfig.json'
+              - '.github/workflows/**'
             shell:
               - 'apps/shell/**'
             app_react:
