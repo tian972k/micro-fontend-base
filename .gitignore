@@ -268,3 +268,7 @@ blob-report/
 
 # Lighthouse CI
 .lighthouseci/
+
+# Bundle analysis output (ANALYZE=true pnpm build)
+stats.html
+stats.json

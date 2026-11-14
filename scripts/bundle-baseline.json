@@ -1,0 +1,32 @@
+{
+  "app-nextjs": {
+    "jsGzip": 89792,
+    "cssGzip": 7242,
+    "totalGzip": 97034
+  },
+  "app-react": {
+    "jsGzip": 112938,
+    "cssGzip": 6928,
+    "totalGzip": 119866
+  },
+  "app-solidjs": {
+    "jsGzip": 51097,
+    "cssGzip": 6910,
+    "totalGzip": 58007
+  },
+  "app-svelte": {
+    "jsGzip": 35887,
+    "cssGzip": 464,
+    "totalGzip": 36351
+  },
+  "app-vue": {
+    "jsGzip": 79762,
+    "cssGzip": 464,
+    "totalGzip": 80226
+  },
+  "shell": {
+    "jsGzip": 208845,
+    "cssGzip": 33389,
+    "totalGzip": 242234
+  }
+}

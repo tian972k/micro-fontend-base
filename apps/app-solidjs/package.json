@@ -16,11 +16,6 @@
   "dependencies": {
     "@repo/config": "workspace:*",
     "@repo/core": "workspace:*",
-    "@repo/utils": "workspace:*",
-    "dayjs": "catalog:",
-    "i18next": "catalog:",
-    "i18next-browser-languagedetector": "catalog:",
-    "i18next-http-backend": "catalog:",
     "solid-js": "catalog:"
   },
   "devDependencies": {

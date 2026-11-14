@@ -1,6 +1,7 @@
 import { defineConfig, type UserConfig, mergeConfig } from "vite";
 import type { Plugin } from "vite";
 import { federation } from "@module-federation/vite";
+import { visualizer } from "rollup-plugin-visualizer";
 import path from "path";
 import {
   createVirtualManifestPlugin,
@@ -118,6 +119,21 @@ export function createMfeConfig(options: MfeConfigOptions) {
       createHealthPlugin(appId),
     ];
 
+    // ANALYZE=true writes stats.html (treemap of what ended up in the
+    // bundle, with gzip/brotli sizes); ANALYZE=json writes stats.json.
+    // Off by default so normal builds don't pay for it.
+    const analyze = process.env.ANALYZE;
+    if (analyze === "true" || analyze === "json") {
+      plugins.push(
+        visualizer({
+          filename: analyze === "json" ? "stats.json" : "stats.html",
+          template: analyze === "json" ? "raw-data" : "treemap",
+          gzipSize: true,
+          brotliSize: true,
+        }) as Plugin,
+      );
+    }
+
     // Add dev entry redirect plugin if not skipped
     if (!skipDevEntryRedirect) {
       plugins.push(createDevEntryRedirectPlugin(entryFile));
@@ -181,7 +197,6 @@ export function createMfeConfig(options: MfeConfigOptions) {
       config.publicDir = publicDir;
     }
 
-    // Merge with viteConfigOverride
     // Merge with viteConfigOverride
     return mergeConfig(config, viteConfigOverride);
   });

@@ -9,10 +9,16 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+/**
+ * UI component generator.
+ *
+ *   pnpm g ui <name> [--fw react,vue,svelte,solid | all] [--no-story]
+ *   pnpm --filter @repo/ui generate            # interactive prompts
+ *
+ * Creates the component (+ Storybook story) and registers its export in
+ * the framework's entry point, so it is importable right away from
+ * "@repo/ui/react" | "@repo/ui/vue" | "@repo/ui/svelte" | "@repo/ui/solid".
+ */
 
 const FRAMEWORKS = {
   react: {
@@ -39,18 +45,22 @@ const FRAMEWORKS = {
 
 const UI_PACKAGE_PATH = path.join(__dirname, "..", "src");
 const UI_INDEX_PATH = path.join(__dirname, "..", "src", "index.ts");
-
-const toPascalCase = (str) => {
-  return str
-    .replace(/(\w)(\w*)/g, (g0, g1, g2) => g1.toUpperCase() + g2.toLowerCase())
-    .replace(/-/g, "");
-};
+const UI_REACT_PATH = path.join(__dirname, "..", "src", "react.ts");
 
 const toKebabCase = (str) => {
   return str
     .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
     .replace(/[\s_]+/g, "-")
     .toLowerCase();
+};
+
+// my-button, MyButton and "my button" all become MyButton.
+const toPascalCase = (str) => {
+  return toKebabCase(str)
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part[0].toUpperCase() + part.slice(1))
+    .join("");
 };
 
 // Templates
@@ -85,7 +95,7 @@ export { ${pascalName} }
 const getReactStoryTemplate = (
   pascalName,
   componentName,
-) => `import type { Meta, StoryObj } from "@storybook/react";
+) => `import type { Meta, StoryObj } from "@storybook/react-vite";
 import { ${pascalName} } from "./${componentName}";
 
 const meta: Meta<typeof ${pascalName}> = {
@@ -159,7 +169,7 @@ const classes = computed(() => {
 const getVueStoryTemplate = (
   pascalName,
   componentName,
-) => `import type { Meta, StoryObj } from "@storybook/vue3";
+) => `import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import ${pascalName} from "./${pascalName}.vue";
 
 const meta: Meta<typeof ${pascalName}> = {
@@ -285,7 +295,7 @@ const getSvelteTemplate = (pascalName, componentName) => `<script lang="ts">
 const getSvelteStoryTemplate = (
   pascalName,
   componentName,
-) => `import type { Meta, StoryObj } from "@storybook/svelte";
+) => `import type { Meta, StoryObj } from "@storybook/svelte-vite";
 import ${pascalName} from "./${pascalName}.svelte";
 
 const meta: Meta<typeof ${pascalName}> = {
@@ -320,22 +330,29 @@ export const Outline: Story = {
 };
 `;
 
-const createComponent = (componentName, framework) => {
+const appendOnce = (file, line) => {
+  const content = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+  if (content.includes(line)) return;
+  const separator = content === "" || content.endsWith("\n") ? "" : "\n";
+  fs.writeFileSync(file, `${content}${separator}${line}\n`);
+};
+
+const createComponent = (componentName, framework, { story = true } = {}) => {
   const fw = FRAMEWORKS[framework];
-  const componentDir = path.join(UI_PACKAGE_PATH, fw.path, componentName);
   const pascalName = toPascalCase(componentName);
   const kebabName = toKebabCase(componentName);
+  const componentDir = path.join(UI_PACKAGE_PATH, fw.path, kebabName);
+  const frameworkIndex = path.join(UI_PACKAGE_PATH, fw.path, "index.ts");
 
   if (fs.existsSync(componentDir)) {
-    console.error(
-      `❌ Component '${componentName}' already exists in ${fw.name}.`,
-    );
-    process.exit(1);
+    console.error(`❌ Component '${kebabName}' already exists in ${fw.name}.`);
+    return false;
   }
 
   fs.mkdirSync(componentDir, { recursive: true });
 
   let componentContent, storyContent, componentFile, storyFile;
+  const updated = [];
 
   switch (framework) {
     case "react":
@@ -364,73 +381,127 @@ const createComponent = (componentName, framework) => {
       break;
   }
 
-  // Write component file
   fs.writeFileSync(path.join(componentDir, componentFile), componentContent);
-
-  // Write story file
-  fs.writeFileSync(path.join(componentDir, storyFile), storyContent);
-
-  // Update index.ts for React
-  if (framework === "react") {
-    const exportStatement = `export * from "./${fw.path}/${kebabName}/${kebabName}";`;
-    const indexContent = fs.readFileSync(UI_INDEX_PATH, "utf8");
-    if (!indexContent.includes(exportStatement)) {
-      fs.appendFileSync(UI_INDEX_PATH, `\n${exportStatement}`);
-    }
+  if (story) {
+    fs.writeFileSync(path.join(componentDir, storyFile), storyContent);
   }
 
-  console.log(
-    `\n✅ Successfully created ${fw.name} component '${componentName}'!`,
-  );
-  console.log(`📁 Location: ${componentDir}`);
-  console.log(`📄 Files created:`);
-  console.log(`   - ${componentFile}`);
-  console.log(`   - ${storyFile}`);
-  if (framework === "react") {
-    console.log(`📝 Updated: ${UI_INDEX_PATH}\n`);
-  }
-};
-
-const askFramework = (callback) => {
-  console.log("\n🎨 Select a framework:");
-  console.log("1. React");
-  console.log("2. Vue");
-  console.log("3. SolidJS");
-  console.log("4. Svelte");
-
-  rl.question("\nEnter your choice (1-4): ", (choice) => {
-    const frameworks = ["react", "vue", "solid", "svelte"];
-    const selectedFramework = frameworks[parseInt(choice) - 1];
-
-    if (!selectedFramework) {
-      console.error("❌ Invalid choice. Please select 1, 2, 3, or 4.");
-      process.exit(1);
-    }
-
-    callback(selectedFramework);
-  });
-};
-
-const askComponentName = (framework, callback) => {
-  rl.question(
-    `\n📝 Enter component name (e.g., my-button or MyButton): `,
-    (name) => {
-      if (!name) {
-        console.error("❌ Component name is required.");
-        process.exit(1);
+  // Register the export in the framework's entry point.
+  switch (framework) {
+    case "react": {
+      const line = `export * from "./${fw.path}/${kebabName}/${kebabName}";`;
+      for (const entry of [UI_INDEX_PATH, UI_REACT_PATH]) {
+        appendOnce(entry, line);
+        updated.push(entry);
       }
-      callback(name.trim());
-    },
-  );
+      break;
+    }
+    case "vue":
+      fs.writeFileSync(
+        path.join(componentDir, "index.ts"),
+        `export { default as ${pascalName} } from "./${pascalName}.vue";\n`,
+      );
+      appendOnce(frameworkIndex, `export * from "./${kebabName}";`);
+      updated.push(frameworkIndex);
+      break;
+    case "svelte":
+      appendOnce(
+        frameworkIndex,
+        `export { default as ${pascalName} } from "./${kebabName}/${pascalName}.svelte";`,
+      );
+      updated.push(frameworkIndex);
+      break;
+    case "solid":
+      appendOnce(
+        frameworkIndex,
+        `export * from "./${kebabName}/${kebabName}";`,
+      );
+      updated.push(frameworkIndex);
+      break;
+  }
+
+  const rel = (file) => path.relative(process.cwd(), file);
+  console.log(`\n✅ Created ${fw.name} component '${pascalName}'`);
+  console.log(`   ${rel(path.join(componentDir, componentFile))}`);
+  if (story) console.log(`   ${rel(path.join(componentDir, storyFile))}`);
+  for (const file of updated) console.log(`   updated ${rel(file)}`);
+  console.log(`   import { ${pascalName} } from "@repo/ui/${framework}";`);
+  return true;
 };
 
-// Main execution
-console.log("\n🚀 UI Component Generator");
-console.log("========================\n");
+const parseArgs = (argv) => {
+  const out = { _: [] };
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (!arg.startsWith("--")) {
+      out._.push(arg);
+      continue;
+    }
+    const [key, inline] = arg.slice(2).split("=");
+    if (inline !== undefined) out[key] = inline;
+    else if (argv[i + 1] && !argv[i + 1].startsWith("--")) out[key] = argv[++i];
+    else out[key] = true;
+  }
+  return out;
+};
 
-askFramework((framework) => {
-  askComponentName(framework, (name) => {
-    createComponent(name, framework);
+const resolveFrameworks = (value) => {
+  const aliases = { solidjs: "solid" };
+  const list =
+    value === "all"
+      ? Object.keys(FRAMEWORKS)
+      : String(value)
+          .split(",")
+          .map((name) => name.trim().toLowerCase())
+          .map((name) => aliases[name] ?? name);
+  const unknown = list.filter((name) => !FRAMEWORKS[name]);
+  if (unknown.length > 0) {
+    console.error(
+      `❌ Unknown framework: ${unknown.join(", ")}. Use ${Object.keys(FRAMEWORKS).join(", ")} or all.`,
+    );
+    process.exit(1);
+  }
+  return list;
+};
+
+const main = async () => {
+  const args = parseArgs(process.argv.slice(2));
+  let name = args._[0];
+  let frameworks = args.fw ?? args.framework;
+
+  // Anything missing is asked for, so `pnpm generate` alone still works.
+  if (!name || !frameworks) {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    const ask = (question) =>
+      new Promise((resolve) => rl.question(question, resolve));
+    console.log("\n🚀 UI Component Generator");
+    if (!frameworks) {
+      frameworks =
+        (
+          await ask("Framework (react, vue, solid, svelte, all) [react]: ")
+        ).trim() || "react";
+    }
+    if (!name) {
+      name = (
+        await ask("Component name (e.g. my-button or MyButton): ")
+      ).trim();
+    }
     rl.close();
-  });
-});
+  }
+
+  if (!name || !/^[A-Za-z][A-Za-z0-9-_ ]*$/.test(name)) {
+    console.error("❌ A component name is required (letters, digits, dashes).");
+    process.exit(1);
+  }
+
+  const results = resolveFrameworks(frameworks).map((framework) =>
+    createComponent(name, framework, { story: !args["no-story"] }),
+  );
+  if (results.includes(false)) process.exit(1);
+  console.log("");
+};
+
+main();
