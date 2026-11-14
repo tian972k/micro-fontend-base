@@ -43,6 +43,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "postcss": "catalog:",
     "prettier": "^3.0.0",
+    "rollup-plugin-visualizer": "^5.12.0",
     "tailwindcss": "catalog:",
     "tsup": "^8.5.1",
     "typescript": "catalog:",
@@ -53,5 +54,6 @@
   "dependencies": {
     "@module-federation/vite": "catalog:",
     "tailwindcss-animate": "catalog:"
-  }
+  },
+  "sideEffects": false
 }

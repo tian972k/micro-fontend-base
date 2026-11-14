@@ -13,6 +13,7 @@ export default defineConfig({
   external: [
     "vite",
     "@module-federation/vite",
+    "rollup-plugin-visualizer",
     "tailwindcss",
     "tailwindcss-animate",
   ],

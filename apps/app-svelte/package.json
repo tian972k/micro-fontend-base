@@ -18,12 +18,6 @@
     "@repo/config": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/ui": "workspace:*",
-    "@repo/utils": "workspace:*",
-    "dayjs": "catalog:",
-    "i18next": "catalog:",
-    "i18next-browser-languagedetector": "catalog:",
-    "i18next-http-backend": "catalog:",
-    "lodash": "catalog:",
     "svelte": "catalog:"
   },
   "devDependencies": {

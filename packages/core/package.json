@@ -92,10 +92,9 @@
   "dependencies": {
     "@repo/config": "workspace:*",
     "@repo/ui": "workspace:*",
-    "clsx": "catalog:",
     "i18next": "catalog:",
     "lucide-react": "^0.300.0",
-    "tailwind-merge": "catalog:",
     "zustand": "catalog:"
-  }
+  },
+  "sideEffects": false
 }

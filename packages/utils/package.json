@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "clsx": "catalog:",
-    "dayjs": "catalog:",
     "tailwind-merge": "catalog:"
   },
   "sideEffects": false
