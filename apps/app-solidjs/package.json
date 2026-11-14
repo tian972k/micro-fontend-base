@@ -25,6 +25,6 @@
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-solid": "^2.8.2"
+    "vite-plugin-solid": "^2.11.16"
   }
 }
