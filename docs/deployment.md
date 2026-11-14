@@ -47,8 +47,16 @@ returns for a non-Vercel production build. Set `MFE_URL_<ID>` when the
 public URLs differ, e.g. behind a reverse proxy.
 
 ```bash
+export SESSION_SECRET="$(openssl rand -base64 32)"
+export AUTH_DEMO_EMAIL=demo@example.com AUTH_DEMO_PASSWORD=change-me
 pnpm docker:build && pnpm docker:up
 ```
+
+`SESSION_SECRET` is required (compose refuses to start without it). The
+`AUTH_DEMO_*` pair is the only account that can sign in until
+`verifyCredentials()` is connected to your identity provider. The shell
+image is built with `pnpm deploy`, so it contains only the shell's
+production dependencies.
 
 ## Any other platform
 
