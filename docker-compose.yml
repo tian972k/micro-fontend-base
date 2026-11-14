@@ -9,9 +9,15 @@ services:
       - "8000:3000"
     environment:
       - NODE_ENV=production
-      # Optional: Override MFE URLs for cloud deployment
-      # - MFE_APP_REACT_PUBLIC_URL=https://app-react.example.com
-      # - MFE_APP_NEXTJS_PUBLIC_URL=https://app-nextjs.example.com
+      # Required: signs the session cookie (openssl rand -base64 32).
+      # Put it in a .env file next to this one or export it before `up`.
+      - SESSION_SECRET=${SESSION_SECRET:?Set SESSION_SECRET, e.g. openssl rand -base64 32}
+      # Login account until verifyCredentials() is wired to your identity
+      # provider. Nothing can sign in while these are empty.
+      - AUTH_DEMO_EMAIL=${AUTH_DEMO_EMAIL:-}
+      - AUTH_DEMO_PASSWORD=${AUTH_DEMO_PASSWORD:-}
+      # Optional: public URL of an MFE when it isn't http://localhost:<port>
+      # - MFE_URL_APP_REACT=https://app-react.example.com
     depends_on:
       - app-react
       - app-nextjs

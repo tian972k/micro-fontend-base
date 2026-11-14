@@ -4,6 +4,12 @@ import {
   json,
 } from "@remix-run/node";
 import { MFE_APPS } from "@repo/config";
+import {
+  buildDownstreamHeaders,
+  buildUpstreamHeaders,
+  createHealthCache,
+  isStaticAsset as isStaticAssetPath,
+} from "../../../../server/proxy.server";
 
 /**
  * Load MFE hosts from environment variables
@@ -25,48 +31,14 @@ function getMfeHosts(): Record<string, string> {
   return hosts;
 }
 
-/**
- * Request headers that must not be forwarded to MFE origins: the shell's
- * session cookie / credentials belong to the shell only, and hop-by-hop or
- * host headers would be wrong for the upstream request anyway.
- */
-const STRIPPED_REQUEST_HEADERS = [
-  "cookie",
-  "authorization",
-  "host",
-  "connection",
-  "content-length",
-  "x-forwarded-for",
-  "x-forwarded-host",
-  "x-real-ip",
-];
-
-function buildUpstreamHeaders(incoming: Headers): Headers {
-  const headers = new Headers(incoming);
-  for (const name of STRIPPED_REQUEST_HEADERS) {
-    headers.delete(name);
-  }
-  return headers;
-}
-
-// Health check cache: { app: { timestamp, isHealthy } }
-const healthCache = new Map<
-  string,
-  { timestamp: number; isHealthy: boolean }
->();
-const HEALTH_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const healthCache = createHealthCache();
 
 /**
  * Check if MFE app is available (cached)
  */
 async function checkMfeHealth(app: string, hostUrl: string): Promise<boolean> {
   const cached = healthCache.get(app);
-  const now = Date.now();
-
-  // Return cached result if fresh
-  if (cached && now - cached.timestamp < HEALTH_CACHE_TTL) {
-    return cached.isHealthy;
-  }
+  if (cached !== undefined) return cached;
 
   try {
     const response = await fetch(hostUrl, {
@@ -75,10 +47,10 @@ async function checkMfeHealth(app: string, hostUrl: string): Promise<boolean> {
     });
 
     const isHealthy = response.ok || response.status === 404; // 404 means app exists but route not found
-    healthCache.set(app, { timestamp: now, isHealthy });
+    healthCache.set(app, isHealthy);
     return isHealthy;
-  } catch (err) {
-    healthCache.set(app, { timestamp: now, isHealthy: false });
+  } catch {
+    healthCache.set(app, false);
     return false;
   }
 }
@@ -128,10 +100,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const hostUrl = MFE_HOSTS[app as keyof typeof MFE_HOSTS];
 
   // Skip health check for static assets (JS, CSS, fonts, images) to improve performance
-  const isStaticAsset =
-    /\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|ico|json)(\?.*)?$/i.test(
-      path,
-    );
+  const isStaticAsset = isStaticAssetPath(path);
 
   if (!isStaticAsset) {
     // Only check health for non-static requests
@@ -160,7 +129,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       headers: buildUpstreamHeaders(request.headers),
       body: ["GET", "HEAD"].includes(request.method)
         ? undefined
-        : await request.text(),
+        : await request.arrayBuffer(),
       signal: AbortSignal.timeout(timeout),
       redirect: "follow",
     });
@@ -190,77 +159,16 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       }
     }
 
-    // Get content type to handle binary vs text responses
-    const contentType = response.headers.get("content-type") || "";
-
-    // Build clean headers - remove encoding headers since fetch already decoded
-    const cleanHeaders = new Headers();
-    for (const [key, value] of response.headers.entries()) {
-      // Skip encoding-related headers that cause issues after decoding
-      const lowerKey = key.toLowerCase();
-      if (
-        lowerKey === "content-encoding" ||
-        lowerKey === "content-length" ||
-        lowerKey === "transfer-encoding" ||
-        // Don't let an MFE origin set cookies on the shell's domain.
-        lowerKey === "set-cookie"
-      ) {
-        continue;
-      }
-      cleanHeaders.set(key, value);
-    }
-
-    // Add CORS and proxy headers
-    // Responses are consumed by the shell itself, so only its own origin
-    // (whatever domain it's deployed on) needs to be allowed.
-    cleanHeaders.set("Access-Control-Allow-Origin", url.origin);
-    cleanHeaders.set("Vary", "Origin");
-    cleanHeaders.set("Access-Control-Allow-Methods", "GET,HEAD,POST,OPTIONS");
-    cleanHeaders.set(
-      "Access-Control-Allow-Headers",
-      "Content-Type,Authorization",
-    );
-    cleanHeaders.set("X-Proxy-For", app);
-
-    // Add aggressive caching for static assets (JS, CSS with hashes are immutable)
-    if (isStaticAsset) {
-      // Check if filename has hash (e.g., entry-mfe-abc123.js)
-      const hasHash =
-        /\.[a-f0-9]{8,}\.(js|css)$/i.test(path) ||
-        /-([\w]{8,})\.(js|css)$/i.test(path);
-      if (hasHash) {
-        // Immutable files with hash - cache for 1 year
-        cleanHeaders.set(
-          "Cache-Control",
-          "public, max-age=31536000, immutable",
-        );
-      } else {
-        // Other static files - cache for 1 hour
-        cleanHeaders.set("Cache-Control", "public, max-age=3600");
-      }
-    }
-
-    // For binary content (images, fonts, etc.), pass through as-is
-    if (
-      contentType.includes("image/") ||
-      contentType.includes("font/") ||
-      contentType.includes("application/octet-stream") ||
-      contentType.includes("application/wasm")
-    ) {
-      const responseBody = await response.arrayBuffer();
-      return new Response(responseBody, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: cleanHeaders,
-      });
-    }
-
-    // For text content (JS, CSS, JSON, HTML, etc.)
-    const responseBody = await response.text();
-    return new Response(responseBody, {
+    // Stream the (already decoded) body through instead of buffering it,
+    // so large bundles don't sit in the shell's memory.
+    return new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
-      headers: cleanHeaders,
+      headers: buildDownstreamHeaders(response.headers, {
+        origin: url.origin,
+        app,
+        path,
+      }),
     });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);

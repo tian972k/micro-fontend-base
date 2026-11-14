@@ -1,4 +1,8 @@
 import { json, type ActionFunctionArgs } from "@remix-run/node";
+import {
+  getClientIp,
+  telemetryRateLimiter,
+} from "../../../server/rate-limit.server";
 
 const MAX_BODY_BYTES = 64 * 1024;
 const MAX_RECORDS = 50;
@@ -13,6 +17,19 @@ const MAX_RECORDS = 50;
 export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, { status: 405 });
+  }
+
+  // The endpoint is public (errors happen before login too), so cap how
+  // much one client can write into the logs.
+  const quota = telemetryRateLimiter.consume(getClientIp(request));
+  if (!quota.allowed) {
+    return json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(quota.retryAfterSeconds) },
+      },
+    );
   }
 
   const declared = Number(request.headers.get("content-length") ?? 0);

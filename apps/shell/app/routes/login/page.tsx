@@ -11,6 +11,7 @@ import {
   safeRedirect,
   verifyCredentials,
 } from "../../server/auth.server";
+import { getClientIp, loginRateLimiter } from "../../server/rate-limit.server";
 import { mergeMeta } from "@/lib/meta";
 
 export const meta = mergeMeta(() => {
@@ -38,10 +39,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ error: "Email and password are required." }, { status: 400 });
   }
 
+  // Only failed attempts count: the window is cleared on success.
+  const clientKey = getClientIp(request);
+  const attempt = loginRateLimiter.consume(clientKey);
+  if (!attempt.allowed) {
+    return json(
+      { error: "Too many sign-in attempts. Please try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(attempt.retryAfterSeconds) },
+      },
+    );
+  }
+
   const user = await verifyCredentials(email, password);
   if (!user) {
     return json({ error: "Invalid email or password." }, { status: 401 });
   }
+  loginRateLimiter.reset(clientKey);
 
   return createUserSession(request, user, redirectTo);
 };
