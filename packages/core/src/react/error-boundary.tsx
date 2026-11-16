@@ -1,4 +1,5 @@
 import React, { Component, type ReactNode, type ErrorInfo } from "react";
+import { Button } from "@repo/ui";
 import { mfeLogger } from "../logger";
 import { telemetry } from "../telemetry";
 
@@ -131,18 +132,15 @@ function DefaultErrorFallback({
           )}
 
           <div className="mt-4 flex gap-2">
-            <button
-              onClick={onReset}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
-            >
+            <Button variant="destructive" onClick={onReset}>
               Try Again
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm font-medium transition-colors"
             >
               Reload Page
-            </button>
+            </Button>
           </div>
         </div>
       </div>

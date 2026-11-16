@@ -1,4 +1,14 @@
-import { Button, Card, CardHeader, CardTitle, CardContent } from "@repo/ui";
+import {
+  Avatar,
+  AvatarFallback,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui";
 import {
   useUserStore,
   useCounterStore,
@@ -7,12 +17,22 @@ import {
   decrementCounter,
 } from "../react";
 
+export interface UserProfileFeatureProps {
+  /** Label of the app rendering the feature, shown as a badge. */
+  framework?: string;
+  /** Where the component comes from, shown under the title. */
+  source?: string;
+}
+
 /**
  * Shared User Profile Feature component
  * Demonstrates cross-framework state sync with counter and locale
  * Usage: Import from @repo/core in any React-based MFE
  */
-export function UserProfileFeature() {
+export function UserProfileFeature({
+  framework = "React",
+  source = "@repo/core",
+}: UserProfileFeatureProps = {}) {
   const count = useCounterStore((state) => state.count);
   const user = useUserStore((state) => state.user);
   const { locale, setLocale } = useLocaleStore();
@@ -30,11 +50,11 @@ export function UserProfileFeature() {
               <CardTitle className="text-xl">
                 {locale === "en" ? "User Profile" : "Hồ sơ Người dùng"}
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <CardDescription>
                 {locale === "en"
-                  ? "Shared Component from @repo/core"
-                  : "Component chia sẻ từ @repo/core"}
-              </p>
+                  ? `Shared Component from ${source}`
+                  : `Component chia sẻ từ ${source}`}
+              </CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={toggleLocale}>
               {locale === "en" ? "🇻🇳 Tiếng Việt" : "🇺🇸 English"}
@@ -52,23 +72,23 @@ export function UserProfileFeature() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                  {locale.toUpperCase()}
-                </span>
-                <span className="px-2 py-1 text-xs font-medium rounded bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300">
-                  React
-                </span>
+                <Badge variant="success">{locale.toUpperCase()}</Badge>
+                <Badge variant="outline">{framework}</Badge>
               </div>
             </div>
           </div>
 
           <div className="flex items-center space-x-4 p-3 rounded-lg bg-muted/30 border border-border/50">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
-              {user?.name.charAt(0)}
-            </div>
+            <Avatar className="h-12 w-12">
+              <AvatarFallback className="bg-primary/10 text-lg font-bold text-primary">
+                {user?.name?.charAt(0) || "U"}
+              </AvatarFallback>
+            </Avatar>
             <div>
-              <h3 className="font-semibold text-lg">{user?.name}</h3>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <h3 className="font-semibold text-lg">{user?.name || "Guest"}</h3>
+              <p className="text-sm text-muted-foreground">
+                {user?.email || "No email"}
+              </p>
             </div>
           </div>
 

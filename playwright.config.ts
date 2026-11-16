@@ -19,7 +19,19 @@ export default defineConfig({
     baseURL: SHELL_URL,
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        // Use an already-installed Chromium instead of Playwright's own
+        // download, e.g. PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium.
+        launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
+          ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
+          : {},
+      },
+    },
+  ],
   webServer: [
     {
       command: `pnpm --filter ${E2E_MFE.id} dev`,

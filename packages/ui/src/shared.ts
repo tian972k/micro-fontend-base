@@ -10,6 +10,7 @@ export {
   type ButtonVariant,
   type ButtonSize,
 } from "./shared/variants/button";
+export { badgeVariants, type BadgeVariant } from "./shared/variants/badge";
 export { cardClasses } from "./shared/variants/card";
 export { inputClasses } from "./shared/variants/input";
 export {

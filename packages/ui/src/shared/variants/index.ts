@@ -11,3 +11,4 @@ export * from "./separator";
 export * from "./skeleton";
 export * from "./tooltip";
 export * from "./avatar";
+export * from "./badge";
