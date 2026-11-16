@@ -6,3 +6,4 @@ export { default as CardDescription } from "./card/CardDescription.svelte";
 export { default as CardContent } from "./card/CardContent.svelte";
 export { default as CardFooter } from "./card/CardFooter.svelte";
 export { default as Input } from "./input/Input.svelte";
+export { default as Badge } from "./badge/Badge.svelte";

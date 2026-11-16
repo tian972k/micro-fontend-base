@@ -22,18 +22,18 @@
     },
     "./vue": {
       "types": "./src/vue.ts",
-      "development": "./src/vue.ts",
-      "import": "./dist/vue.js"
+      "import": "./src/vue.ts",
+      "default": "./src/vue.ts"
     },
     "./solid": {
       "types": "./src/solid.ts",
-      "development": "./src/solid.ts",
-      "import": "./dist/solid.js"
+      "import": "./src/solid.ts",
+      "default": "./src/solid.ts"
     },
     "./svelte": {
       "types": "./src/svelte.ts",
-      "development": "./src/svelte.ts",
-      "import": "./dist/svelte.js"
+      "import": "./src/svelte.ts",
+      "default": "./src/svelte.ts"
     },
     "./shared": {
       "types": "./src/shared.ts",

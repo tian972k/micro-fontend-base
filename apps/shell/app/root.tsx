@@ -33,10 +33,8 @@ export const meta: MetaFunction = () => {
 import { useEffect } from "react";
 
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { useChangeLanguage } from "remix-i18next/react";
 import { useLoaderData } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
-import { useLocaleStore } from "@repo/core/react";
 import i18next from "./i18next.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -48,15 +46,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { locale } = useLoaderData<typeof loader>();
   const nonce = useNonce();
   const { i18n } = useTranslation();
-  const { locale: storeLocale } = useLocaleStore();
-  useChangeLanguage(locale);
-
-  // Sync i18next with locale store changes (from other MFEs)
-  useEffect(() => {
-    if (i18n.language !== storeLocale) {
-      i18n.changeLanguage(storeLocale);
-    }
-  }, [storeLocale, i18n]);
+  // In the browser the shared locale store is the source of truth (the
+  // shell and every MFE write to it) and i18next.client.ts keeps i18next in
+  // sync with it. Don't sync from here: during hydration useLocaleStore()
+  // returns the store's *initial* state, which would undo the user's choice.
 
   useEffect(() => {
     // Error reporting + Core Web Vitals for the whole page (shell + MFEs).
@@ -64,7 +57,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <html lang={locale} dir={i18n.dir(locale)} suppressHydrationWarning>
+    <html
+      lang={i18n.language || locale}
+      dir={i18n.dir(i18n.language || locale)}
+      suppressHydrationWarning
+    >
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

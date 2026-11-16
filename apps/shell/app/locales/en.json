@@ -20,5 +20,18 @@
   "common": {
     "guest": "Guest",
     "no_email": "No email"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your platform preferences.",
+    "appearance": "Appearance",
+    "appearance_description": "Choose how the platform looks. System follows your OS setting.",
+    "language": "Language",
+    "language_description": "Language used by the shell and every micro-frontend."
+  },
+  "search": {
+    "placeholder": "Search apps and pages...",
+    "label": "Search apps and pages",
+    "no_results": "No matching page"
   }
 }

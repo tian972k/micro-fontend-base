@@ -7,6 +7,15 @@ import {
   localeStore,
   type Locale,
 } from "@repo/core/solid";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/solid";
 
 /**
  * SolidJS User Profile Feature Component
@@ -49,41 +58,30 @@ export function UserProfileFeature() {
 
   return (
     <div class="p-4 bg-background">
-      <div class="border border-primary/20 shadow-sm overflow-hidden rounded-lg bg-card">
-        <div class="bg-primary/[0.03] p-4 space-y-1">
+      <Card class="border-primary/20 overflow-hidden">
+        <CardHeader class="bg-primary/[0.03]">
           <div class="flex justify-between items-center">
             <div>
-              <h2 class="text-xl font-semibold">User Profile</h2>
-              <p class="text-sm text-muted-foreground">
-                Shared Component from SolidJS
-              </p>
+              <CardTitle class="text-xl">User Profile</CardTitle>
+              <CardDescription>Shared Component from SolidJS</CardDescription>
             </div>
-            <button
-              class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-              onClick={toggleLocale}
-            >
+            <Button variant="outline" size="sm" onClick={toggleLocale}>
               {locale() === "en" ? "🇻🇳 Tiếng Việt" : "🇺🇸 English"}
-            </button>
+            </Button>
           </div>
-        </div>
-        <div class="p-6 space-y-4">
+        </CardHeader>
+        <CardContent class="pt-6 space-y-4">
           {/* Locale Sync Indicator */}
-          <div class="p-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                <span class="text-sm font-medium text-green-700 dark:text-green-300">
-                  {locale() === "en" ? "Locale Synced" : "Đồng bộ Ngôn ngữ"}
-                </span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                  {locale().toUpperCase()}
-                </span>
-                <span class="px-2 py-1 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                  SolidJS
-                </span>
-              </div>
+          <div class="p-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+              <span class="text-sm font-medium text-green-700 dark:text-green-300">
+                {locale() === "en" ? "Locale Synced" : "Đồng bộ Ngôn ngữ"}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <Badge variant="success">{locale().toUpperCase()}</Badge>
+              <Badge variant="outline">SolidJS</Badge>
             </div>
           </div>
 
@@ -107,22 +105,24 @@ export function UserProfileFeature() {
               {count()}
             </div>
             <div class="flex justify-center gap-2">
-              <button
-                class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => decrementCounter()}
               >
                 -
-              </button>
-              <button
-                class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => incrementCounter()}
               >
                 +
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

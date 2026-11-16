@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { perfMonitor } from "@repo/core/performance/monitor";
 import { mfeLogger } from "@repo/core/logger";
+import { Button } from "@repo/ui";
+import { cn } from "@repo/utils";
 
 export function DebugPanel() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,13 +27,13 @@ export function DebugPanel() {
 
   if (!isOpen) {
     return (
-      <button
+      <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-50 px-4 py-2 bg-gray-900 text-white rounded-lg shadow-lg hover:bg-gray-800 text-sm font-medium"
+        className="fixed bottom-4 right-4 z-50 bg-gray-900 text-white shadow-lg hover:bg-gray-800"
         title="Open Debug Panel"
       >
         🔍 Debug
-      </button>
+      </Button>
     );
   }
 
@@ -40,12 +42,15 @@ export function DebugPanel() {
       {/* Header */}
       <div className="flex items-center justify-between p-3 bg-gray-800 border-b border-gray-700">
         <h3 className="font-semibold">🔍 MFE Debug Panel</h3>
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setIsOpen(false)}
-          className="text-gray-400 hover:text-white"
+          className="h-7 w-7 text-gray-400 hover:bg-gray-700 hover:text-white"
+          aria-label="Close debug panel"
         >
           ✕
-        </button>
+        </Button>
       </div>
 
       {/* Content */}
@@ -53,16 +58,19 @@ export function DebugPanel() {
         {/* Debug Mode Toggle */}
         <div className="flex items-center justify-between p-2 bg-gray-800 rounded">
           <span className="text-sm">Debug Logging</span>
-          <button
+          <Button
+            size="sm"
             onClick={toggleDebug}
-            className={`px-3 py-1 rounded text-xs font-medium ${
+            aria-pressed={debugMode}
+            className={cn(
+              "h-7 px-3 text-xs text-white",
               debugMode
                 ? "bg-green-600 hover:bg-green-700"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
+                : "bg-gray-700 hover:bg-gray-600",
+            )}
           >
             {debugMode ? "ON" : "OFF"}
-          </button>
+          </Button>
         </div>
 
         {/* Performance Metrics */}
@@ -99,20 +107,20 @@ export function DebugPanel() {
 
         {/* Actions */}
         <div className="flex gap-2">
-          <button
+          <Button
+            size="sm"
             onClick={() => setMetrics(perfMonitor.getAllMetrics())}
-            className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded text-xs font-medium"
+            className="flex-1 bg-blue-600 text-xs text-white hover:bg-blue-700"
           >
             Refresh
-          </button>
-          <button
-            onClick={() => {
-              perfMonitor.exportMetrics();
-            }}
-            className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-xs font-medium"
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => perfMonitor.exportMetrics()}
+            className="flex-1 bg-gray-700 text-xs text-white hover:bg-gray-600"
           >
             Export
-          </button>
+          </Button>
         </div>
 
         {/* Console Commands */}

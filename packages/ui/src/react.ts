@@ -12,3 +12,4 @@ export * from "./components/react/skeleton/skeleton";
 export * from "./components/react/dropdown-menu/dropdown-menu";
 export * from "./components/react/sidebar/sidebar";
 export * from "./components/providers/theme-script";
+export * from "./components/react/badge/badge";

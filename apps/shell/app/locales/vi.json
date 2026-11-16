@@ -20,5 +20,18 @@
   "common": {
     "guest": "Khách",
     "no_email": "Chưa có email"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "description": "Quản lý tùy chọn của nền tảng.",
+    "appearance": "Giao diện",
+    "appearance_description": "Chọn giao diện hiển thị. Hệ thống sẽ theo cài đặt của máy.",
+    "language": "Ngôn ngữ",
+    "language_description": "Ngôn ngữ dùng cho shell và mọi micro-frontend."
+  },
+  "search": {
+    "placeholder": "Tìm ứng dụng và trang...",
+    "label": "Tìm ứng dụng và trang",
+    "no_results": "Không có trang phù hợp"
   }
 }
