@@ -71,7 +71,9 @@ onUnmounted(() => {
         >
           <div class="flex items-center gap-3">
             <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-            <span class="text-sm font-medium text-green-700 dark:text-green-300">
+            <span
+              class="text-sm font-medium text-green-700 dark:text-green-300"
+            >
               {{ locale === "en" ? "Locale Synced" : "Đồng bộ Ngôn ngữ" }}
             </span>
           </div>
@@ -81,7 +83,9 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <div class="flex items-center space-x-4 p-3 rounded-lg bg-muted/30 border border-border/50">
+        <div
+          class="flex items-center space-x-4 p-3 rounded-lg bg-muted/30 border border-border/50"
+        >
           <div
             class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg"
           >
@@ -89,16 +93,36 @@ onUnmounted(() => {
           </div>
           <div>
             <h3 class="font-semibold text-lg">{{ user?.name || "Guest" }}</h3>
-            <p class="text-sm text-muted-foreground">{{ user?.email || "No email" }}</p>
+            <p class="text-sm text-muted-foreground">
+              {{ user?.email || "No email" }}
+            </p>
           </div>
         </div>
 
-        <div class="p-4 rounded-lg bg-accent/20 border border-accent/30 text-center space-y-3">
-          <p class="text-sm font-medium text-accent-foreground">Shared State Sync</p>
-          <div class="text-4xl font-bold tracking-tighter text-primary">{{ count }}</div>
+        <div
+          class="p-4 rounded-lg bg-accent/20 border border-accent/30 text-center space-y-3"
+        >
+          <p class="text-sm font-medium text-accent-foreground">
+            Shared State Sync
+          </p>
+          <div class="text-4xl font-bold tracking-tighter text-primary">
+            {{ count }}
+          </div>
           <div class="flex justify-center gap-2">
-            <Button variant="outline" size="sm" aria-label="Decrement" @click="decrementCounter()">-</Button>
-            <Button variant="outline" size="sm" aria-label="Increment" @click="incrementCounter()">+</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Decrement"
+              @click="decrementCounter()"
+              >-</Button
+            >
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Increment"
+              @click="incrementCounter()"
+              >+</Button
+            >
           </div>
         </div>
       </CardContent>

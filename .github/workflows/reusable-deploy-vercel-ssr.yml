@@ -9,7 +9,7 @@ on:
       app:
         required: true
         type: string
-        description: 'App name (shell or app-nextjs)'
+        description: "App name (shell or app-nextjs)"
       vercel_has_secrets:
         required: true
         type: boolean
@@ -20,12 +20,12 @@ on:
         required: false
         type: boolean
         default: false
-        description: 'Deploy to production (true) or preview (false)'
+        description: "Deploy to production (true) or preview (false)"
       root_directory:
         required: false
         type: string
-        default: ''
-        description: 'Root directory for Vercel project (e.g., apps/shell)'
+        default: ""
+        description: "Root directory for Vercel project (e.g., apps/shell)"
     secrets:
       VERCEL_TOKEN:
         required: true

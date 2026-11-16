@@ -6,7 +6,7 @@ on:
       app:
         required: true
         type: string
-        description: 'App name'
+        description: "App name"
       vercel_has_secrets:
         required: true
         type: boolean
@@ -17,7 +17,7 @@ on:
         required: false
         type: boolean
         default: false
-        description: 'Deploy to production (true) or preview (false)'
+        description: "Deploy to production (true) or preview (false)"
     secrets:
       VERCEL_TOKEN:
         required: true

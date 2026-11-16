@@ -8,7 +8,9 @@
  */
 import { createRequire } from "node:module";
 
-const require = createRequire(new URL("../apps/shell/package.json", import.meta.url));
+const require = createRequire(
+  new URL("../apps/shell/package.json", import.meta.url),
+);
 const { createCookieSessionStorage } = require("@remix-run/node");
 
 const secret = process.env.SESSION_SECRET;

@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { cn } from "@repo/utils";
-import { buttonVariants, type ButtonVariant, type ButtonSize } from "../../../shared/variants/button";
+import {
+  buttonVariants,
+  type ButtonVariant,
+  type ButtonSize,
+} from "../../../shared/variants/button";
 
 interface ButtonProps {
   variant?: ButtonVariant;
@@ -21,16 +25,12 @@ const props = withDefaults(defineProps<ButtonProps>(), {
 });
 
 const classes = computed(() =>
-  cn(buttonVariants({ variant: props.variant, size: props.size }), props.class)
+  cn(buttonVariants({ variant: props.variant, size: props.size }), props.class),
 );
 </script>
 
 <template>
-  <button
-    :type="type"
-    :class="classes"
-    :disabled="disabled"
-  >
+  <button :type="type" :class="classes" :disabled="disabled">
     <slot />
   </button>
 </template>

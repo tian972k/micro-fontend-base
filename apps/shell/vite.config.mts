@@ -4,7 +4,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
 import * as fs from "fs";
 import { getRouteManifest } from "remix-custom-routes";
-import { vercelPreset } from '@vercel/remix/vite';
+import { vercelPreset } from "@vercel/remix/vite";
 import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig(({ mode, isSsrBuild }) => {

@@ -2,7 +2,7 @@ import react from "@vitejs/plugin-react";
 import { createMfeConfig, reactShared, APP_IDS } from "@repo/config/vite";
 
 // Next.js MFE uses special config:
-// - Output to public/ (not dist/)  
+// - Output to public/ (not dist/)
 // - publicDir: false to avoid conflicts
 // - No main entry (Next.js handles that separately)
 

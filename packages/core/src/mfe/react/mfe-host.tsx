@@ -384,8 +384,7 @@ export function MfeHost({
 
         const entryKey = mfeEntryKey || "index.html";
         const entryData = (manifest[entryKey] ?? manifest["index.html"]) as
-          | MfeManifestEntry
-          | undefined;
+          MfeManifestEntry | undefined;
 
         if (!entryData) throw new Error("Entry file not found in manifest");
 

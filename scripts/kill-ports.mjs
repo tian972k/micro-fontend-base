@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { exec } from "child_process";
+import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
@@ -10,8 +10,8 @@ const PORTS = [8000, 8001, 8002, 8003, 8004, 8005];
 async function killPort(port) {
   try {
     const { stdout } = await execAsync(`lsof -ti:${port}`);
-    const pids = stdout.trim().split('\n').filter(Boolean);
-    
+    const pids = stdout.trim().split("\n").filter(Boolean);
+
     if (pids.length === 0) {
       return;
     }
@@ -30,13 +30,13 @@ async function killPort(port) {
 }
 
 async function main() {
-  console.log('🔍 Checking ports 8000-8005...\n');
-  
+  console.log("🔍 Checking ports 8000-8005...\n");
+
   for (const port of PORTS) {
     await killPort(port);
   }
-  
-  console.log('\n✅ All ports cleared!');
+
+  console.log("\n✅ All ports cleared!");
 }
 
 main().catch(console.error);

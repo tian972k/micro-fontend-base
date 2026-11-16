@@ -1,7 +1,7 @@
 /**
  * Shared Storybook configuration utilities - Factory Pattern
  * Used across all framework-specific Storybook configs
- * 
+ *
  * @example
  * // In .storybook-react/main.mts
  * const factory = createStorybookConfigFactory({ dirname: __dirname, framework: 'react' });
@@ -50,7 +50,10 @@ export interface PreviewConfigOverrides {
     values?: Array<{ name: string; value: string }>;
   };
   /** Override viewports */
-  viewports?: Record<string, { name: string; styles: { width: string; height: string } }>;
+  viewports?: Record<
+    string,
+    { name: string; styles: { width: string; height: string } }
+  >;
   /** Override layout */
   layout?: "centered" | "fullscreen" | "padded";
 }
@@ -70,10 +73,7 @@ export function getAbsolutePath(value: string): string {
 // Default Configurations
 // ============================================================================
 
-const DEFAULT_ADDONS = [
-  "@storybook/addon-links",
-  "@storybook/addon-a11y",
-];
+const DEFAULT_ADDONS = ["@storybook/addon-links", "@storybook/addon-a11y"];
 
 const DEFAULT_BACKGROUNDS = {
   default: "dark",
@@ -84,9 +84,18 @@ const DEFAULT_BACKGROUNDS = {
 };
 
 const DEFAULT_VIEWPORTS = {
-  mobile: { name: "Mobile (iPhone 14)", styles: { width: "390px", height: "844px" } },
-  tablet: { name: "Tablet (iPad Pro)", styles: { width: "1024px", height: "1366px" } },
-  desktop: { name: "Desktop (1440p)", styles: { width: "1440px", height: "900px" } },
+  mobile: {
+    name: "Mobile (iPhone 14)",
+    styles: { width: "390px", height: "844px" },
+  },
+  tablet: {
+    name: "Tablet (iPad Pro)",
+    styles: { width: "1024px", height: "1366px" },
+  },
+  desktop: {
+    name: "Desktop (1440p)",
+    styles: { width: "1440px", height: "900px" },
+  },
 };
 
 const DEFAULT_PARAMETERS = {
@@ -107,10 +116,13 @@ const DEFAULT_PARAMETERS = {
   layout: "centered" as const,
 };
 
-const FRAMEWORK_CONFIG: Record<Framework, {
-  name: string;
-  typescript?: Record<string, unknown>;
-}> = {
+const FRAMEWORK_CONFIG: Record<
+  Framework,
+  {
+    name: string;
+    typescript?: Record<string, unknown>;
+  }
+> = {
   react: {
     name: "@storybook/react-vite",
     typescript: { reactDocgen: "react-docgen-typescript" },
@@ -158,7 +170,9 @@ export class StorybookConfigFactory {
       stories: [...baseStories, ...(overrides.stories || [])],
       addons: [...baseAddons, ...(overrides.addons || [])],
       framework: {
-        name: isCustomFramework ? (frameworkName as "storybook-solidjs-vite") : getAbsolutePath(frameworkName),
+        name: isCustomFramework
+          ? (frameworkName as "storybook-solidjs-vite")
+          : getAbsolutePath(frameworkName),
         options: {},
       },
       docs: overrides.docs || {},
@@ -178,7 +192,11 @@ export class StorybookConfigFactory {
     let parameters = cloneDeep(DEFAULT_PARAMETERS);
 
     if (overrides.backgrounds) {
-      parameters.backgrounds = merge({}, DEFAULT_BACKGROUNDS, overrides.backgrounds);
+      parameters.backgrounds = merge(
+        {},
+        DEFAULT_BACKGROUNDS,
+        overrides.backgrounds,
+      );
     }
 
     if (overrides.viewports) {
@@ -224,17 +242,19 @@ export class StorybookConfigFactory {
 
 /**
  * Create a Storybook configuration factory
- * 
+ *
  * @example
  * const factory = createStorybookConfigFactory({ dirname: __dirname, framework: 'react' });
- * 
+ *
  * // main.mts
  * export default factory.createMainConfig();
- * 
+ *
  * // preview.mts  
  * export default { parameters: factory.createPreviewConfig().parameters };
  */
-export function createStorybookConfigFactory(options: StorybookFactoryOptions): StorybookConfigFactory {
+export function createStorybookConfigFactory(
+  options: StorybookFactoryOptions,
+): StorybookConfigFactory {
   return new StorybookConfigFactory(options);
 }
 

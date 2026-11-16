@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<CardProps>(), {
 });
 
 const classes = computed(() =>
-  cn(cardClasses.root, props.gradient && cardClasses.rootGradient, props.class)
+  cn(cardClasses.root, props.gradient && cardClasses.rootGradient, props.class),
 );
 </script>
 
