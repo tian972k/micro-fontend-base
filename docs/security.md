@@ -23,6 +23,14 @@ Security is layered. Each layer assumes the others may fail.
   `sameSite=lax`, `secure` in production and last 7 days.
 - `SESSION_SECRET` is mandatory in production. The server won't start
   without it. Rotate with `SESSION_SECRET=new,old`.
+- Failed sign-ins are rate limited per client address (5 per 15 minutes,
+  HTTP 429 with `Retry-After`), and so is the public `/api/telemetry`
+  endpoint (60 batches per minute). See `app/server/rate-limit.server.ts`.
+  The counters live in the process: with several instances or on
+  serverless, back `createRateLimiter` with a shared store (Redis,
+  Upstash) or enforce limits at the edge. The client address comes from
+  the first `X-Forwarded-For` entry, so your proxy must overwrite that
+  header rather than append to a client-supplied one.
 - Logout is POST-only and destroys the session. The shared user store is
   cleared so MFEs drop the identity too.
 - **MFEs never see credentials.** They read the identity from `userStore`
@@ -80,8 +88,8 @@ See [`.github/SECURITY.md`](../.github/SECURITY.md).
 ## Hardening checklist for a new deployment
 
 - [ ] `SESSION_SECRET` set (32+ random bytes), demo account disabled
-- [ ] Real `verifyCredentials()` (and rate limiting on `/login`, e.g. at
-      the edge/WAF)
+- [ ] Real `verifyCredentials()`; with more than one shell instance, a
+      shared store for the rate limiter (or limits at the edge/WAF)
 - [ ] `CSP_MODE=enforce`, with only the required `CSP_EXTRA_ORIGINS`
 - [ ] MFE hosts are HTTPS
 - [ ] `VITE_APP_*_HOST` point to deployments you control

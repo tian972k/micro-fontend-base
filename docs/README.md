@@ -6,6 +6,7 @@
 1. [Getting started](./getting-started.md): install, run, demo login, commands
 2. [Architecture](./architecture.md): shell, remotes, registry, MF 2.0 loading, state, isolation
 3. [Creating a micro-frontend](./creating-a-micro-frontend.md): scaffold, registry fields, entries per framework, styling
+   - [Generators & bundle size](./generators-and-bundle-size.md): `pnpm g`, `pnpm size`, `pnpm analyze`, `pnpm deps:unused`
 4. [Configuration](./configuration.md): every environment variable, catalog, Turborepo
 5. [Edge cases & failure handling](./edge-cases.md): what happens when anything goes wrong (start here when debugging)
 6. [Security](./security.md): auth, sessions, CSP, proxy, hardening checklist
