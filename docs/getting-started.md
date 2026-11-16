@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Node.js **20+** (CI uses 20; `engines` allows 18+)
+- Node.js **20+** (`.nvmrc`; Node 18 is end-of-life)
 - pnpm **9** (`corepack enable` picks up the pinned `packageManager`)
 
 ## Install & run

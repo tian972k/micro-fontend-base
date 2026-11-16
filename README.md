@@ -43,14 +43,14 @@ Open <http://localhost:8000> and sign in with `demo@example.com` /
 
 ## Documentation
 
-|                       |                                                                                                                                                                        |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Start here**        | [Getting started](./docs/getting-started.md) · [Architecture](./docs/architecture.md)                                                                                  |
-| **Build**             | [Creating a micro-frontend](./docs/creating-a-micro-frontend.md) · [Configuration](./docs/configuration.md)                                                            |
-| **API reference**     | [`@repo/core`](./docs/api/core.md) · [`@repo/config`](./docs/api/config.md) · [Shell](./docs/api/shell.md) · [`@repo/ui`](./packages/ui/README.md)                     |
-| **Run in production** | [Edge cases & failure handling](./docs/edge-cases.md) · [Security](./docs/security.md) · [Observability](./docs/observability.md) · [Deployment](./docs/deployment.md) |
-| **Quality**           | [Testing & quality gates](./docs/testing-and-quality.md) · [Troubleshooting](./docs/troubleshooting.md)                                                                |
-| **Appendix**          | [Enterprise patterns & interview guide](./docs/appendix/enterprise-patterns-interview-guide.md) · [Changelog](./CHANGELOG.md)                                          |
+|                       |                                                                                                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Start here**        | [Getting started](./docs/getting-started.md) · [Architecture](./docs/architecture.md)                                                                                          |
+| **Build**             | [Creating a micro-frontend](./docs/creating-a-micro-frontend.md) · [Generators & bundle size](./docs/generators-and-bundle-size.md) · [Configuration](./docs/configuration.md) |
+| **API reference**     | [`@repo/core`](./docs/api/core.md) · [`@repo/config`](./docs/api/config.md) · [Shell](./docs/api/shell.md) · [`@repo/ui`](./packages/ui/README.md)                             |
+| **Run in production** | [Edge cases & failure handling](./docs/edge-cases.md) · [Security](./docs/security.md) · [Observability](./docs/observability.md) · [Deployment](./docs/deployment.md)         |
+| **Quality**           | [Testing & quality gates](./docs/testing-and-quality.md) · [Troubleshooting](./docs/troubleshooting.md)                                                                        |
+| **Appendix**          | [Enterprise patterns & interview guide](./docs/appendix/enterprise-patterns-interview-guide.md) · [Changelog](./CHANGELOG.md)                                                  |
 
 Full index: [docs/README.md](./docs/README.md).
 
@@ -71,10 +71,17 @@ docs/             documentation
 
 ```bash
 pnpm dev | build | type-check | lint | test | test:e2e | lhci
-pnpm orbit:init --name <project> [--keep react,vue]
-pnpm mfe:add <name> <react|vue|svelte|solidjs>
+pnpm g ui <name> --fw all          # design-system component (+ story)
+pnpm g component <app> <name>      # component inside an app
+pnpm g feature <app> <name>        # feature folder inside an app
+pnpm g page dashboard/<route>      # shell page
+pnpm g mfe <name> <react|vue|svelte|solidjs>
+pnpm g project --name <project> [--keep react,vue]
+pnpm size | analyze | deps:unused  # bundle report, treemap, unused deps
 pnpm storybook
 ```
+
+See [generators & bundle size](./docs/generators-and-bundle-size.md).
 
 ## Start a new project from Orbit
 

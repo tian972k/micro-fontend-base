@@ -25,9 +25,50 @@ All notable changes to this project are documented in this file.
   budgets in CI; `type-check` in every workspace; pnpm catalog for
   versions.
 - `createSingletonStore` is exported from `@repo/core/shared`.
+- **Generators**: `pnpm g ui|component|feature|page|mfe|project`. The UI
+  generator is scriptable (`--fw all`) and registers exports for every
+  framework.
+- **Bundle tooling**: `pnpm size` (per-app report with a baseline and a
+  growth budget, enforced in CI), `pnpm analyze` / `ANALYZE=true` treemaps,
+  `pnpm deps:unused`.
+- **Design system**: `Badge` for React, Vue, Svelte and Solid. The Vue,
+  Svelte and Solid MFEs and the shell are built on `Card`, `Button` and
+  `Badge` instead of hand-copied markup.
+- **Shell**: working Settings (theme, language) and header search; rate
+  limiting on sign-in and `/api/telemetry`; a Vitest suite for the
+  server code (42 tests).
+- CI: Prettier check, unused-dependency check, production `pnpm audit`
+  (critical) and a bundle-size budget; Dependabot; `.editorconfig`,
+  `.nvmrc`.
+
+### Changed
+
+- `@repo/core` and `@repo/config` are `sideEffects: false`: the Next.js,
+  Vue, Svelte and Solid bundles shrank 12–27% before the design-system
+  work, and stay at or below their original size with it.
+- Next.js 14 → 15.5 (14.x has unpatched critical advisories); Remix
+  2.17.5, Vue 3.5.45, solid-js 1.9.19; overrides for transitive postcss,
+  undici and react-router advisories. `pnpm audit --prod`: 139 → 19, no
+  critical.
+- Node.js 20+ is required.
+- The proxy streams responses and caches a failed health check for 15 s
+  instead of 5 min.
+- Removed dependencies no workspace used (lodash, dayjs, the i18next HTTP
+  backend and others).
 
 ### Fixed
 
+- A language picked in the browser was reverted immediately and lost on
+  reload; it is now kept and sent to the server in the `i18n` cookie.
+- `@repo/ui/vue`, `/svelte` and `/solid` pointed at build files that were
+  never emitted.
+- Vue and Svelte MFEs never ran Tailwind, so classes used only inside
+  them were missing.
+- Docker: the shell image had no `remix-serve` (pnpm keeps it in the
+  workspace's own `node_modules`), listened on the wrong port and was
+  started without `SESSION_SECRET`.
+- Next.js MFE: the federation files in `public/` were served without a
+  CORS header, so the shell could not load them from `next start`.
 - `pnpm dev` crashed (missing `scripts/mfe.config.mjs`); `pnpm mfe:add`
   crashed (`require` in an ES module).
 - `MfeHost`: relative hosts rejected on Vercel; mounting after unmount;

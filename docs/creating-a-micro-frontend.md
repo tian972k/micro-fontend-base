@@ -205,6 +205,17 @@ export default createMfeTailwindConfig("app-analytics", [
 ]);
 ```
 
+Vue and Svelte apps list their own file types, e.g.
+`"./src/**/*.{vue,js,ts}"` and
+`"../../packages/ui/src/components/vue/**/*.{vue,ts}"`.
+
+Build the UI from the design system: `@repo/ui/react`, `@repo/ui/vue`,
+`@repo/ui/svelte` or `@repo/ui/solid` (`Button`, `Card`, `Badge`, `Input`,
+...). Missing a component? `pnpm g ui <name> --fw all` (see
+[generators](./generators-and-bundle-size.md)). A SolidJS app must also
+let `vite-plugin-solid` compile `packages/ui/src/components/solid` (see
+`apps/app-solidjs/vite.config.mts`).
+
 Add `postcss.config.js` (`tailwindcss` + `autoprefixer`) and set
 `data-mfe="app-analytics"` on the standalone root element (`index.html`).
 Utilities are scoped to `[data-mfe="app-analytics"]` and can't leak into

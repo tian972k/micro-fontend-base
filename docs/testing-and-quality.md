@@ -1,13 +1,16 @@
 # Testing & Quality Gates
 
-| Gate                     | Tool                                                            | Command           | Runs in CI           |
-| ------------------------ | --------------------------------------------------------------- | ----------------- | -------------------- |
-| Types                    | TypeScript (`tsc --noEmit`, `vue-tsc`)                          | `pnpm type-check` | ✅ affected packages |
-| Lint                     | ESLint (stricter rules in `@repo/core`: no `any`, no `console`) | `pnpm lint`       | ✅ affected          |
-| Unit                     | Vitest (+ Testing Library, jsdom)                               | `pnpm test`       | ✅ affected          |
-| End-to-end               | Playwright                                                      | `pnpm test:e2e`   | ✅                   |
-| Performance / a11y / SEO | Lighthouse CI                                                   | `pnpm lhci`       | ✅                   |
-| Formatting               | Prettier + lint-staged                                          | pre-commit hook   | —                    |
+| Gate                     | Tool                                                            | Command                        | Runs in CI           |
+| ------------------------ | --------------------------------------------------------------- | ------------------------------ | -------------------- |
+| Types                    | TypeScript (`tsc --noEmit`, `vue-tsc`)                          | `pnpm type-check`              | ✅ affected packages |
+| Lint                     | ESLint (stricter rules in `@repo/core`: no `any`, no `console`) | `pnpm lint`                    | ✅ affected          |
+| Unit                     | Vitest (+ Testing Library, jsdom)                               | `pnpm test`                    | ✅ affected          |
+| End-to-end               | Playwright                                                      | `pnpm test:e2e`                | ✅                   |
+| Performance / a11y / SEO | Lighthouse CI                                                   | `pnpm lhci`                    | ✅                   |
+| Formatting               | Prettier + lint-staged                                          | `pnpm exec prettier --check .` | ✅                   |
+| Bundle size              | `scripts/bundle-report.mjs` (+10% budget per app)               | `pnpm size --check`            | ✅                   |
+| Unused dependencies      | `scripts/check-unused-deps.mjs`                                 | `pnpm deps:unused`             | ✅                   |
+| Vulnerabilities          | `pnpm audit` (production dependencies, critical)                | `pnpm audit --prod`            | ✅                   |
 
 ## Unit tests
 
@@ -17,6 +20,10 @@
   unreachable host, unmount races and version changes.
 - `packages/config/test/*`: registry integrity and drift between
   `MFE_APPS` and `scripts/mfe.config.mjs`.
+- `apps/shell/test/*`: the shell's server code: `safeRedirect`,
+  credentials, signed sessions (tampering, logout), `requireUser`,
+  per-app URLs, CSP, the proxy's header filtering and caching, rate
+  limiting, `/api/telemetry` and the header search.
 
 ```bash
 pnpm --filter @repo/core test          # once
@@ -31,10 +38,20 @@ and runs `e2e/*.spec.ts`:
 - unauthenticated users are redirected to `/login`;
 - login with the demo account lands on `/dashboard`;
 - the React MFE mounts inside the shell through Module Federation with no
-  page errors.
+  page errors;
+- the header search jumps to a page;
+- Settings switches the theme and the language, and the language survives
+  a reload.
 
 The first navigation compiles routes on demand, so those waits allow 30 s.
 `e2e/helpers.ts` exposes `login(page)`.
+
+To run against an already-installed Chromium instead of Playwright's own
+download, set `PLAYWRIGHT_CHROMIUM_PATH`:
+
+```bash
+PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium pnpm test:e2e
+```
 
 Adding a spec for another MFE: add its dev server to `webServer`, then
 assert on `#mfe-host-<id>`.

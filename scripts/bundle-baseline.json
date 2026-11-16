@@ -1,32 +1,32 @@
 {
   "app-nextjs": {
-    "jsGzip": 89792,
-    "cssGzip": 7242,
-    "totalGzip": 97034
+    "jsGzip": 92472,
+    "cssGzip": 6907,
+    "totalGzip": 99379
   },
   "app-react": {
-    "jsGzip": 112938,
-    "cssGzip": 6928,
-    "totalGzip": 119866
+    "jsGzip": 115268,
+    "cssGzip": 7013,
+    "totalGzip": 122281
   },
   "app-solidjs": {
-    "jsGzip": 51097,
-    "cssGzip": 6910,
-    "totalGzip": 58007
+    "jsGzip": 59252,
+    "cssGzip": 6841,
+    "totalGzip": 66093
   },
   "app-svelte": {
-    "jsGzip": 35887,
-    "cssGzip": 464,
-    "totalGzip": 36351
+    "jsGzip": 44998,
+    "cssGzip": 4801,
+    "totalGzip": 49799
   },
   "app-vue": {
-    "jsGzip": 79762,
-    "cssGzip": 464,
-    "totalGzip": 80226
+    "jsGzip": 91316,
+    "cssGzip": 4617,
+    "totalGzip": 95933
   },
   "shell": {
-    "jsGzip": 208845,
-    "cssGzip": 33389,
-    "totalGzip": 242234
+    "jsGzip": 216523,
+    "cssGzip": 33712,
+    "totalGzip": 250235
   }
 }

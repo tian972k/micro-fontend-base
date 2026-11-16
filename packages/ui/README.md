@@ -326,6 +326,18 @@ pnpm storybook:build
 
 Use the CLI to generate new components:
 
+### From the repository root
+
+```bash
+pnpm g ui my-component --fw react        # one framework
+pnpm g ui my-component --fw react,vue    # several
+pnpm g ui my-component --fw all          # React, Vue, Svelte and Solid
+pnpm g ui my-component --fw all --no-story
+```
+
+The export is added to the framework's entry point, so the component is
+importable right away from `@repo/ui/<framework>`.
+
 ### Interactive Mode
 
 ```bash
