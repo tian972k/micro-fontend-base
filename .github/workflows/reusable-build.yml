@@ -6,12 +6,12 @@ on:
       app:
         required: true
         type: string
-        description: 'App name (shell, app-react, app-nextjs, app-vue, app-svelte, app-solidjs)'
+        description: "App name (shell, app-react, app-nextjs, app-vue, app-svelte, app-solidjs)"
       is_production:
         required: false
         type: boolean
         default: false
-        description: 'Build for the production target (must match the deploy job, or `vercel deploy --prebuilt --prod` rejects the output)'
+        description: "Build for the production target (must match the deploy job, or `vercel deploy --prebuilt --prod` rejects the output)"
     secrets:
       TURBO_TOKEN:
         required: false
@@ -35,7 +35,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 

@@ -5,7 +5,10 @@ import { resolve } from "path";
 const appRoot = resolve(__dirname, "src");
 // Solid components from the design system are compiled with this app's
 // Solid JSX transform (the rest of packages/ is React or framework-free).
-const uiSolidRoot = resolve(__dirname, "../../packages/ui/src/components/solid");
+const uiSolidRoot = resolve(
+  __dirname,
+  "../../packages/ui/src/components/solid",
+);
 
 export default createMfeConfig({
   appId: APP_IDS.SOLIDJS,

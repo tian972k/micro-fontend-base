@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
   TURBO_REMOTE_ONLY: ${{ vars.TURBO_REMOTE_ONLY || 'false' }}
@@ -151,11 +151,11 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      
+
       - name: Check Turbo remote cache availability
         id: turbo-env
         run: |
@@ -197,7 +197,7 @@ jobs:
   # BUILD JOBS
   # ============================================
   # Static apps: Always build (artifacts used by deploy)
-  # SSR apps (shell, nextjs): 
+  # SSR apps (shell, nextjs):
   #   - IS_VERCEL_CLOUD=true: Skip build (Vercel builds in cloud)
   #   - IS_VERCEL_CLOUD=false: Build normally (for Docker/other platforms)
   # ============================================
@@ -371,7 +371,8 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT }}
 
   deploy-app-nextjs:
-    needs: [check-secrets, detect-changes, lint, build-packages, build-app-nextjs]
+    needs:
+      [check-secrets, detect-changes, lint, build-packages, build-app-nextjs]
     if: |
       always() &&
       (needs.lint.result == 'success') &&

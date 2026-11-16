@@ -37,9 +37,7 @@ export class MountManager {
     // error while the mount kept running in the background.
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(() => {
-        reject(
-          new Error(`Mount timeout for "${appId}" after ${timeout}ms`),
-        );
+        reject(new Error(`Mount timeout for "${appId}" after ${timeout}ms`));
       }, timeout);
     });
 

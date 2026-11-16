@@ -5,7 +5,7 @@ const sveltePlugin = svelte({
   preprocess: vitePreprocess(),
   onwarn: (warning, handler) => {
     // Suppress unused export warnings for MFE props
-    if (warning.code === 'unused-export-let') return;
+    if (warning.code === "unused-export-let") return;
     handler?.(warning);
   },
 });
@@ -19,7 +19,7 @@ export default createMfeConfig({
   additionalInputs: { index: "./index.html" },
   viteConfigOverride: {
     resolve: {
-      conditions: ['import', 'module', 'browser', 'default'],
+      conditions: ["import", "module", "browser", "default"],
     },
   },
 });

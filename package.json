@@ -50,6 +50,9 @@
     ],
     "*.{json,css}": [
       "prettier --write"
+    ],
+    "*.{mjs,cjs,mts,vue,yml,yaml,html}": [
+      "prettier --write"
     ]
   },
   "devDependencies": {

@@ -10,7 +10,7 @@ export default createMfeConfig({
   additionalInputs: { index: "./index.html" },
   viteConfigOverride: {
     resolve: {
-      conditions: ['import', 'module', 'browser', 'default'],
+      conditions: ["import", "module", "browser", "default"],
     },
   },
 });
