@@ -105,7 +105,7 @@
     "@radix-ui/react-separator": "^1.2.0",
     "@radix-ui/react-slot": "^1.5.0",
     "@radix-ui/react-tooltip": "^1.4.1",
-    "lucide-react": "^0.300.0"
+    "lucide-react": "^1.72.0"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "^10.6.7",

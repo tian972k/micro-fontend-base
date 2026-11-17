@@ -93,7 +93,7 @@
     "@repo/config": "workspace:*",
     "@repo/ui": "workspace:*",
     "i18next": "catalog:",
-    "lucide-react": "^0.300.0",
+    "lucide-react": "^1.72.0",
     "zustand": "catalog:"
   },
   "sideEffects": false
