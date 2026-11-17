@@ -26,7 +26,7 @@ catalog:
   dayjs: "^1.11.19"
   lodash: "^4.17.21"
   clsx: "^2.0.0"
-  tailwind-merge: "^2.0.0"
+  tailwind-merge: "^3.7.0"
   tailwindcss: "^3.3.0"
   tailwindcss-animate: "^1.0.7"
   autoprefixer: "^10.4.0"
