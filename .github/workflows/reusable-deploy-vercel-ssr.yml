@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.vercel_has_secrets && inputs.vercel_has_project_id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Vercel CLI
         run: npm install -g vercel@59.1.3
