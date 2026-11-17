@@ -32,10 +32,10 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.vercel_has_secrets && inputs.vercel_has_project_id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download app build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ inputs.app }}-build
           # upload-artifact flattens a single upload path down to that
