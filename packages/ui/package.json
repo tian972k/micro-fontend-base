@@ -124,7 +124,7 @@
     "solid-js": "catalog:",
     "storybook": "^10.6.7",
     "storybook-solidjs": "1.0.0-beta.7",
-    "storybook-solidjs-vite": "1.0.0-beta.7",
+    "storybook-solidjs-vite": "10.7.4",
     "svelte": "catalog:",
     "typescript": "catalog:",
     "vite": "^7.3.8",
