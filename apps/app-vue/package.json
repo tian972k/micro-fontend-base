@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitejs/plugin-vue": "^6.0.11",
     "@vue/tsconfig": "^0.5.1",
     "autoprefixer": "catalog:",
     "tailwindcss": "catalog:",
