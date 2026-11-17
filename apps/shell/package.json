@@ -33,7 +33,7 @@
     "i18next": "catalog:",
     "i18next-browser-languagedetector": "catalog:",
     "isbot": "^4.4.0",
-    "lucide-react": "^0.300.0",
+    "lucide-react": "^1.72.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-i18next": "catalog:",
